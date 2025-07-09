@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Fermento para Acuicultura</title>
+    
+    <!-- Google Fonts: Inter para un look moderno y legible -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos CSS integrados en el HTML -->
+    <style>
+        /* --- Definición de Variables de Color y Estilos Base --- */
+        :root {
+            --primary-color: #0d47a1; /* Azul oscuro profesional */
+            --secondary-color: #1976d2; /* Azul medio */
+            --accent-color: #42a5f5; /* Azul claro para acentos */
+            --background-color: #f4f6f8; /* Gris muy claro para el fondo */
+            --card-background: #ffffff;
+            --text-primary: #212121; /* Negro suave */
+            --text-secondary: #5f6368; /* Gris para texto secundario */
+            --border-color: #e0e0e0;
+            --success-color: #2e7d32; /* Verde para 'listo' */
+            --warning-color: #ed6c02; /* Naranja para 'condicional' */
+            --danger-color: #c62828; /* Rojo para 'vencimiento' */
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Estilos Generales del Cuerpo y Tipografía --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* --- Contenedor Principal --- */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* --- Encabezado --- */
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        header h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0 0 8px 0;
+        }
+        header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* --- Estilo de Tarjetas (Cards) --- */
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+        .card-header .icon {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border-radius: 8px;
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* --- Diseño de Grid Principal (Responsivo) --- */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        @media (min-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 400px 1fr;
+            }
+        }
+
+        /* --- Panel de Configuración y Parámetros --- */
+        .config-panel .input-group {
+            margin-bottom: 16px;
+        }
+        .config-panel label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .config-panel input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .config-panel input[type="number"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+        }
+        #volumenAgua {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .base-params-header {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        /* --- Panel de Resultados --- */
+        .results-panel {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        @media (min-width: 640px) {
+            .results-panel {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--background-color);
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item .label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+        .result-item .value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            background-color: #e3f2fd;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .conditional-step {
+            border: 2px dashed var(--warning-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            background-color: #fff8e1;
+        }
+        .conditional-step .info-text {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            text-align: center;
+            color: var(--warning-color);
+            font-weight: 500;
+        }
+
+        /* --- Cronograma (Timeline) --- */
+        .timeline-card {
+            margin-top: 24px;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            background-color: var(--border-color);
+            border-radius: 2px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -8px;
+            top: 4px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            border: 4px solid var(--card-background);
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 600;
+        }
+        .timeline-content h3 {
+            margin: 0 0 4px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .timeline-content p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        .timeline-item.ready .timeline-dot { background-color: var(--success-color); }
+        .timeline-item.ready h3 { color: var(--success-color); }
+        .timeline-item.expiry .timeline-dot { background-color: var(--danger-color); }
+        .timeline-item.expiry h3 { color: var(--danger-color); }
+        
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 24px;
+            margin-top: 32px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Calculadora de Protocolo de Fermentación</h1>
+            <p>Herramienta para el cálculo preciso de componentes según el volumen de agua y parámetros base ajustables.</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- Columna de Configuración -->
+            <aside class="config-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon">
+                            <!-- Icono SVG para Configuración -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </div>
+                        <h2>Parámetros y Configuración</h2>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="volumenAgua">Volumen Total de Agua (Litros)</label>
+                        <input type="number" id="volumenAgua" value="1000" step="100" min="0">
+                    </div>
+                    
+                    <h3 class="base-params-header">Cantidades Base (por 100 L)</h3>
+                    
+                    <div class="input-group">
+                        <label for="salvadoBase">Salvado de Arroz (kg)</label>
+                        <input type="number" id="salvadoBase" value="1.0" step="0.1" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="cloroBase">Hipoclorito Sodio 13% (ml)</label>
+                        <input type="number" id="cloroBase" value="2.8" step="0.1" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="tiosulfatoBase">Tiosulfato de Sodio (g)</label>
+                        <input type="number" id="tiosulfatoBase" value="8.0" step="0.5" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="sanolifeBase">Sanolife Pro W (g)</label>
+                        <input type="number" id="sanolifeBase" value="3.5" step="0.1" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="melazaBase">Melaza (g)</label>
+                        <input type="number" id="melazaBase" value="0.27" step="0.01" min="0">
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Columna de Resultados y Cronograma -->
+            <main class="results-column">
+                <div class="results-panel">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="icon">1</div>
+                            <h2>Día 1: Mezcla y Desinfección</h2>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">🌾 Salvado de Arroz</span>
+                            <strong class="value" id="resultadoSalvado">10.00 kg</strong>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">🧪 Hipoclorito (13%)</span>
+                            <strong class="value" id="resultadoCloro">28.00 ml</strong>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="icon">2</div>
+                            <h2>Día 2: Neutralización e Inoculación</h2>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">🦠 Sanolife Pro W</span>
+                            <strong class="value" id="resultadoSanolife">35.00 g</strong>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">🍯 Melaza</span>
+                            <strong class="value" id="resultadoMelaza">2.70 g</strong>
+                        </div>
+                        <div class="conditional-step">
+                            <p class="info-text">Aplicar solo si hay residuo de cloro</p>
+                            <div class="result-item">
+                                <span class="label">⚪ Tiosulfato de Sodio</span>
+                                <strong class="value" id="resultadoTiosulfato">80.00 g</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card timeline-card">
+                    <div class="card-header">
+                        <div class="icon">
+                            <!-- Icono SVG para Calendario -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </div>
+                        <h2>Cronograma del Proceso</h2>
+                    </div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot">1</div>
+                            <div class="timeline-content">
+                                <h3>Día 1</h3>
+                                <p>Mezclar agua y salvado. Desinfectar con Hipoclorito.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">2</div>
+                            <div class="timeline-content">
+                                <h3>Día 2</h3>
+                                <p>Verificar cloro. Aplicar Tiosulfato (si es necesario), Sanolife y Melaza.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">3</div>
+                            <div class="timeline-content">
+                                <h3>Día 3</h3>
+                                <p>Periodo de reposo y activación del fermento.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item ready">
+                            <div class="timeline-dot">
+                                <!-- Icono SVG Check -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <div class="timeline-content">
+                                <h3>Día 4: Inicio de Uso</h3>
+                                <p>El fermento está listo para ser aplicado en los estanques.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item expiry">
+                            <div class="timeline-dot">
+                                <!-- Icono SVG Alerta -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            </div>
+                            <div class="timeline-content">
+                                <h3>Día 8: Fin del Periodo de Uso</h3>
+                                <p>Se recomienda desechar la mezcla y preparar un nuevo lote.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <footer>
+            <p>&copy; 2024 Herramientas para Acuicultura. Diseño optimizado para uso técnico.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- SELECCIÓN DE ELEMENTOS DEL DOM ---
+            // Un objeto para mantener todos los elementos organizados
+            const DOMElements = {
+                inputs: {
+                    volumenAgua: document.getElementById('volumenAgua'),
+                    salvadoBase: document.getElementById('salvadoBase'),
+                    cloroBase: document.getElementById('cloroBase'),
+                    tiosulfatoBase: document.getElementById('tiosulfatoBase'),
+                    sanolifeBase: document.getElementById('sanolifeBase'),
+                    melazaBase: document.getElementById('melazaBase'),
+                },
+                outputs: {
+                    salvado: document.getElementById('resultadoSalvado'),
+                    cloro: document.getElementById('resultadoCloro'),
+                    tiosulfato: document.getElementById('resultadoTiosulfato'),
+                    sanolife: document.getElementById('resultadoSanolife'),
+                    melaza: document.getElementById('resultadoMelaza'),
+                }
+            };
+
+            // --- FUNCIÓN PRINCIPAL DE CÁLCULO ---
+            function calcularFermento() {
+                // Obtener valores de entrada y convertirlos a números, con fallback a 0 si están vacíos
+                const volumenAgua = parseFloat(DOMElements.inputs.volumenAgua.value) || 0;
+                const salvadoBase = parseFloat(DOMElements.inputs.salvadoBase.value) || 0;
+                const cloroBase = parseFloat(DOMElements.inputs.cloroBase.value) || 0;
+                const tiosulfatoBase = parseFloat(DOMElements.inputs.tiosulfatoBase.value) || 0;
+                const sanolifeBase = parseFloat(DOMElements.inputs.sanolifeBase.value) || 0;
+                const melazaBase = parseFloat(DOMElements.inputs.melazaBase.value) || 0;
+
+                // El volumen de referencia es siempre 100 L
+                const volumenReferencia = 100.0;
+                
+                // Calcular el factor de multiplicación. Evitar división por cero.
+                const factor = volumenReferencia > 0 ? volumenAgua / volumenReferencia : 0;
+
+                // --- Realizar los cálculos ---
+                const salvadoTotal = salvadoBase * factor;
+                const cloroTotal = cloroBase * factor;
+                const tiosulfatoTotal = tiosulfatoBase * factor;
+                const sanolifeTotal = sanolifeBase * factor;
+                const melazaTotal = melazaBase * factor;
+
+                // --- Actualizar la interfaz con los resultados formateados ---
+                // toFixed(2) redondea a 2 decimales para una visualización consistente
+                DOMElements.outputs.salvado.textContent = `${salvadoTotal.toFixed(2)} kg`;
+                DOMElements.outputs.cloro.textContent = `${cloroTotal.toFixed(2)} ml`;
+                DOMElements.outputs.tiosulfato.textContent = `${tiosulfatoTotal.toFixed(2)} g`;
+                DOMElements.outputs.sanolife.textContent = `${sanolifeTotal.toFixed(2)} g`;
+                DOMElements.outputs.melaza.textContent = `${melazaTotal.toFixed(2)} g`;
+            }
+
+            // --- EVENT LISTENERS ---
+            // Agregar un listener a cada input para que recalcule automáticamente al cambiar cualquier valor
+            Object.values(DOMElements.inputs).forEach(input => {
+                input.addEventListener('input', calcularFermento);
+            });
+
+            // --- INICIALIZACIÓN ---
+            // Ejecutar la función de cálculo una vez al cargar la página para mostrar los valores iniciales
+            calcularFermento();
+        });
+    </script>
+
+</body>
+</html>
