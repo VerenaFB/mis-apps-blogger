@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Alimentación de Tilapia</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a8edea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            height: fit-content;
+        }
+
+        .results-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-size: 1rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e8f4f8;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .slider-container {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .slider-value {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 100%);
+            outline: none;
+            -webkit-appearance: none;
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-label {
+            font-size: 1rem;
+            color: #555;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            position: relative;
+            height: 400px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .info-card p {
+            line-height: 1.6;
+            opacity: 0.95;
+            text-align: center;
+        }
+
+        .period-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .period-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            border: 2px solid #dee2e6;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .period-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .control-panel, .results-panel, .info-section {
+                padding: 20px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-value {
+                font-size: 1.8rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+                padding: 15px;
+            }
+            
+            .period-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.4rem;
+            }
+            
+            .control-panel, .results-panel, .info-section {
+                padding: 15px;
+            }
+            
+            .chart-container {
+                height: 250px;
+                padding: 10px;
+            }
+        }
+
+        .animate-in {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header animate-in">
+            <h1>🐟 Simulador de Alimentación de Tilapia</h1>
+            <p>Optimiza las tasas de suministro y analiza el impacto en costos y conversión</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="control-panel animate-in">
+                <h2 class="section-title">⚙️ Parámetros de Cultivo</h2>
+                
+                <div class="input-group">
+                    <label class="input-label" for="fishCount">🐠 Número de Peces</label>
+                    <input type="number" id="fishCount" class="input-field" value="1000" min="1">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label" for="initialWeight">⚖️ Peso Promedio Inicial (g)</label>
+                    <input type="number" id="initialWeight" class="input-field" value="50" min="1" step="0.1">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label" for="feedCost">💰 Costo del Alimento ($/kg)</label>
+                    <input type="number" id="feedCost" class="input-field" value="2000" min="0" step="1">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>📈 Tasa de Crecimiento Semanal (%)</span>
+                        <span class="slider-value" id="growthValue">6.0%</span>
+                    </div>
+                    <input type="range" id="growthRate" class="slider" min="0.1" max="12.0" step="0.1" value="6.0">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>🍽️ Tasa de Suministro (% peso corporal/día)</span>
+                        <span class="slider-value" id="feedingValue">3.0%</span>
+                    </div>
+                    <input type="range" id="feedingRate" class="slider" min="0.8" max="8.0" step="0.1" value="3.0">
+                </div>
+
+                <div class="period-selector">
+                    <button class="period-btn active" data-weeks="1">1 Semana</button>
+                    <button class="period-btn" data-weeks="4">1 Mes</button>
+                    <button class="period-btn" data-weeks="12">3 Meses</button>
+                    <button class="period-btn" data-weeks="24">6 Meses</button>
+                </div>
+            </div>
+
+            <div class="results-panel animate-in">
+                <h2 class="section-title">📊 Resultados del Análisis</h2>
+                
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-value" id="feedAmount">0 kg</div>
+                        <div class="result-label">Alimento a Suministrar</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-value" id="conversionRate">0.00</div>
+                        <div class="result-label">Factor de Conversión</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-value" id="costPerKg">$0</div>
+                        <div class="result-label">Costo por kg de Biomasa</div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-value" id="totalBiomass">0 kg</div>
+                        <div class="result-label">Biomasa Total Ganada</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section animate-in">
+            <h2 class="section-title">📚 Información y Recomendaciones</h2>
+            <div class="info-cards">
+                <div class="info-card">
+                    <h3>🎯 Tasa de Crecimiento</h3>
+                    <p>La tasa de crecimiento semanal óptima para tilapia varía entre 4-8% dependiendo de la temperatura, calidad del agua y densidad de siembra.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🍽️ Tasa de Alimentación</h3>
+                    <p>La tasa de suministro debe ajustarse según el peso: juveniles (4-6%), adultos (2-3%). Una tasa muy alta desperdicia alimento y contamina el agua.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>⚖️ Factor de Conversión</h3>
+                    <p>Un FCR óptimo está entre 1.2-1.8. Valores más altos indican ineficiencia alimentaria que aumenta costos y reduce rentabilidad.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>💡 Optimización</h3>
+                    <p>Monitorea constantemente y ajusta las tasas según el comportamiento de los peces, temperatura del agua y calidad del alimento.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let growthChart, costChart;
+        let currentPeriod = 1; // semanas
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSliders();
+            initializePeriodButtons();
+            initializeCharts();
+            calculateAndUpdate();
+        });
+
+        function initializeSliders() {
+            const growthSlider = document.getElementById('growthRate');
+            const feedingSlider = document.getElementById('feedingRate');
+            const growthValue = document.getElementById('growthValue');
+            const feedingValue = document.getElementById('feedingValue');
+
+            growthSlider.addEventListener('input', function() {
+                growthValue.textContent = parseFloat(this.value).toFixed(1) + '%';
+                calculateAndUpdate();
+            });
+
+            feedingSlider.addEventListener('input', function() {
+                feedingValue.textContent = parseFloat(this.value).toFixed(1) + '%';
+                calculateAndUpdate();
+            });
+
+            // Eventos para inputs numéricos con validación
+            ['fishCount', 'initialWeight', 'feedCost'].forEach(id => {
+                const element = document.getElementById(id);
+                element.addEventListener('input', function() {
+                    // Validar que el valor sea positivo
+                    if (this.value < 0) this.value = 0;
+                    calculateAndUpdate();
+                });
+                element.addEventListener('blur', function() {
+                    // Asegurar valores mínimos al perder el foco
+                    if (id === 'fishCount' && this.value < 1) this.value = 1;
+                    if (id === 'initialWeight' && this.value < 0.1) this.value = 0.1;
+                    if (id === 'feedCost' && this.value < 0) this.value = 0;
+                    calculateAndUpdate();
+                });
+            });
+        }
+
+        function initializePeriodButtons() {
+            const buttons = document.querySelectorAll('.period-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPeriod = parseInt(this.dataset.weeks);
+                    calculateAndUpdate();
+                });
+            });
+        }
+
+        function calculateAndUpdate() {
+            const fishCount = parseInt(document.getElementById('fishCount').value) || 0;
+            const initialWeight = parseFloat(document.getElementById('initialWeight').value) || 0;
+            const feedCost = parseFloat(document.getElementById('feedCost').value) || 0;
+            const growthRate = parseFloat(document.getElementById('growthRate').value) || 0;
+            const feedingRate = parseFloat(document.getElementById('feedingRate').value) || 0;
+
+            if (fishCount === 0 || initialWeight === 0) return;
+
+            // Calcular datos semana por semana
+            const weeklyData = [];
+            let currentWeight = initialWeight;
+            let totalFeed = 0;
+            let totalBiomassGain = 0;
+
+            // Agregar semana 0 (inicial)
+            const initialBiomass = (fishCount * initialWeight) / 1000;
+            weeklyData.push({
+                week: 0,
+                weight: currentWeight,
+                biomass: initialBiomass,
+                weeklyFeed: 0,
+                cumulativeFeed: 0
+            });
+
+            // Calcular semanas 1 a currentPeriod
+            for (let week = 1; week <= currentPeriod; week++) {
+                const biomass = (fishCount * currentWeight) / 1000; // kg
+                const weeklyFeed = biomass * (feedingRate / 100) * 7; // kg por semana
+                totalFeed += weeklyFeed;
+                
+                // Calcular ganancia de peso para esta semana
+                const weightGain = currentWeight * (growthRate / 100);
+                const nextWeight = currentWeight + weightGain;
+                totalBiomassGain += (fishCount * weightGain) / 1000;
+                
+                weeklyData.push({
+                    week: week,
+                    weight: nextWeight,
+                    biomass: (fishCount * nextWeight) / 1000,
+                    weeklyFeed: weeklyFeed,
+                    cumulativeFeed: totalFeed
+                });
+
+                currentWeight = nextWeight;
+            }
+
+            // Calcular métricas finales
+            const conversionRate = totalBiomassGain > 0 ? totalFeed / totalBiomassGain : 0;
+            const costPerKgBiomass = conversionRate * feedCost;
+
+            // Actualizar UI
+            updateResults(totalFeed, conversionRate, costPerKgBiomass, totalBiomassGain);
+            updateCharts(weeklyData, feedCost);
+        }
+
+        function updateResults(feedAmount, conversionRate, costPerKg, totalBiomass) {
+            document.getElementById('feedAmount').textContent = feedAmount.toFixed(1) + ' kg';
+            document.getElementById('conversionRate').textContent = conversionRate.toFixed(2);
+            
+            // Formatear correctamente el costo en pesos colombianos
+            const formattedCost = new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(Math.round(costPerKg));
+            
+            document.getElementById('costPerKg').textContent = formattedCost;
+            document.getElementById('totalBiomass').textContent = totalBiomass.toFixed(1) + ' kg';
+        }
+
+        function initializeCharts() {
+            const ctx1 = document.getElementById('growthChart').getContext('2d');
+            const ctx2 = document.getElementById('costChart').getContext('2d');
+
+            // Destruir gráficos existentes si existen
+            if (growthChart) {
+                growthChart.destroy();
+            }
+            if (costChart) {
+                costChart.destroy();
+            }
+
+            growthChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Semana 0'],
+                    datasets: [{
+                        label: 'Peso Promedio (g)',
+                        data: [50],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Biomasa Total (kg)',
+                        data: [50],
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Evolución del Crecimiento',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Período'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Peso (g)'
+                            },
+                            beginAtZero: false
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Biomasa (kg)'
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+
+            costChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Semana 1'],
+                    datasets: [{
+                        label: 'Alimento Semanal (kg)',
+                        data: [0],
+                        backgroundColor: 'rgba(168, 237, 234, 0.8)',
+                        borderColor: '#a8edea',
+                        borderWidth: 2
+                    }, {
+                        label: 'Costo Semanal ($)',
+                        data: [0],
+                        backgroundColor: 'rgba(254, 214, 227, 0.8)',
+                        borderColor: '#fed6e3',
+                        borderWidth: 2,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Consumo y Costo Semanal',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Período'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Alimento (kg)'
+                            },
+                            beginAtZero: true
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Costo ($)'
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false,
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts(weeklyData, feedCost) {
+            // Verificar que los gráficos estén inicializados
+            if (!growthChart || !costChart) {
+                console.warn('Charts not initialized yet');
+                return;
+            }
+
+            try {
+                const labels = weeklyData.map(d => `Semana ${d.week}`);
+                const weights = weeklyData.map(d => d.weight);
+                const biomass = weeklyData.map(d => d.biomass);
+                
+                // Para el gráfico de costos, excluir la semana 0 (sin alimentación)
+                const feedData = weeklyData.slice(1);
+                const weeklyFeed = feedData.map(d => d.weeklyFeed);
+                const weeklyCost = weeklyFeed.map(feed => feed * feedCost);
+                const feedLabels = feedData.map(d => `Semana ${d.week}`);
+
+                // Actualizar gráfico de crecimiento
+                growthChart.data.labels = labels;
+                growthChart.data.datasets[0].data = weights;
+                growthChart.data.datasets[1].data = biomass;
+                growthChart.update('none');
+
+                // Actualizar gráfico de costos
+                costChart.data.labels = feedLabels;
+                costChart.data.datasets[0].data = weeklyFeed;
+                costChart.data.datasets[1].data = weeklyCost;
+                costChart.update('none');
+            } catch (error) {
+                console.error('Error updating charts:', error);
+            }
+        }
+
+        // Animaciones y efectos visuales
+        function addPulseEffect(element) {
+            element.classList.add('pulse');
+            setTimeout(() => element.classList.remove('pulse'), 2000);
+        }
+
+        // Observador para animaciones al hacer scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        });
+
+        document.querySelectorAll('.result-card, .info-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
