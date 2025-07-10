@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Impacto de Suministro de Alimento en Acuicultura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* Tailwind sky-50 */
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+        }
+        .slider-container span {
+            min-width: 70px; /* Adjust as needed for value display */
+            text-align: right;
+        }
+        /* Custom styles for Chart.js responsive container */
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 60vh; /* Default height for larger screens */
+            width: 90vw;  /* Default width for larger screens */
+            max-width: 800px; /* Max width for the chart */
+        }
+
+        @media (max-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 50vh;
+                width: 95vw;
+            }
+        }
+        @media (max-width: 480px) { /* sm breakpoint */
+            .chart-container {
+                height: 40vh;
+                width: 100vw;
+            }
+        }
+
+        /* Input number arrows for Webkit browsers */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-sky-700">Calculadora Acuícola Interactiva</h1>
+            <p class="text-slate-600 mt-2">Analiza el impacto de la tasa de suministro en costos y conversión.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold mb-6 text-sky-600">Parámetros del Cultivo</h2>
+
+                <div class="space-y-5">
+                    <div>
+                        <label for="numPeces" class="block text-sm font-medium text-slate-700 mb-1">Número de Peces:</label>
+                        <input type="number" id="numPeces" value="1000" class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+
+                    <div>
+                        <label for="pesoPromedioInicial" class="block text-sm font-medium text-slate-700 mb-1">Peso Promedio Inicial (gramos):</label>
+                        <input type="number" id="pesoPromedioInicial" value="50" step="0.1" class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+
+                    <div>
+                        <label for="costoAlimento" class="block text-sm font-medium text-slate-700 mb-1">Costo del Alimento (por kg):</label>
+                        <input type="number" id="costoAlimento" value="1.5" step="0.01" class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+
+                    <div class="pt-2">
+                        <label for="tasaCrecimiento" class="block text-sm font-medium text-slate-700 mb-1">Tasa de Crecimiento (g/día):</label>
+                        <div class="slider-container">
+                            <input type="range" id="tasaCrecimiento" min="0.1" max="12" value="2.5" step="0.1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600">
+                            <span id="tasaCrecimientoValor" class="text-sky-700 font-semibold">2.5 g/día</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="tasaSuministro" class="block text-sm font-medium text-slate-700 mb-1">Tasa de Suministro de Alimento (% biomasa/día):</label>
+                        <div class="slider-container">
+                            <input type="range" id="tasaSuministro" min="0.8" max="8" value="3" step="0.1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600">
+                            <span id="tasaSuministroValor" class="text-sky-700 font-semibold">3.0 %</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold mb-6 text-sky-600">Resultados Semanales</h2>
+                <div class="space-y-5">
+                    <div class="bg-sky-50 p-4 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-sky-700">Kilos de Alimento a Suministrar:</h3>
+                        <p id="kilosAlimentoSemanal" class="text-2xl font-bold text-sky-600">0.00 kg</p>
+                    </div>
+                    <div class="bg-sky-50 p-4 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-sky-700">Conversión Alimenticia (FCR):</h3>
+                        <p id="fcrSemanal" class="text-2xl font-bold text-sky-600">0.00</p>
+                    </div>
+                    <div class="bg-sky-50 p-4 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-sky-700">Costo por Kilo de Biomasa Obtenida:</h3>
+                        <p id="costoKiloBiomasa" class="text-2xl font-bold text-sky-600">$0.00</p>
+                    </div>
+                     <div class="bg-green-50 p-4 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-green-700">Ganancia de Biomasa Semanal Total:</h3>
+                        <p id="gananciaBiomasaSemanal" class="text-2xl font-bold text-green-600">0.00 kg</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl md:text-2xl font-semibold mb-4 text-center text-sky-600">Impacto de la Tasa de Suministro en el Costo por Kilo de Biomasa</h2>
+            <p class="text-sm text-slate-500 text-center mb-4"> (Para la tasa de crecimiento actual de <span id="tasaCrecimientoChartInfo" class="font-semibold">2.5 g/día</span>)</p>
+            <div class="chart-container">
+                <canvas id="impactoChart"></canvas>
+            </div>
+        </div>
+
+        <footer class="text-center mt-12 py-4 border-t border-slate-200">
+            <p class="text-sm text-slate-500">&copy; <span id="currentYear"></span> Calculadora Acuícola. Herramienta de simulación.</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const numPecesInput = document.getElementById('numPeces');
+        const pesoPromedioInicialInput = document.getElementById('pesoPromedioInicial');
+        const costoAlimentoInput = document.getElementById('costoAlimento');
+        const tasaCrecimientoSlider = document.getElementById('tasaCrecimiento');
+        const tasaSuministroSlider = document.getElementById('tasaSuministro');
+
+        const tasaCrecimientoValorSpan = document.getElementById('tasaCrecimientoValor');
+        const tasaSuministroValorSpan = document.getElementById('tasaSuministroValor');
+        const tasaCrecimientoChartInfoSpan = document.getElementById('tasaCrecimientoChartInfo');
+
+
+        const kilosAlimentoSemanalP = document.getElementById('kilosAlimentoSemanal');
+        const fcrSemanalP = document.getElementById('fcrSemanal');
+        const costoKiloBiomasaP = document.getElementById('costoKiloBiomasa');
+        const gananciaBiomasaSemanalP = document.getElementById('gananciaBiomasaSemanal');
+
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        let impactoChartInstance = null; // To store the chart instance
+
+        // Function to format numbers to two decimal places
+        function formatNumber(num, decimals = 2) {
+            if (isNaN(num) || !isFinite(num)) {
+                return "N/A";
+            }
+            return num.toFixed(decimals);
+        }
+
+        // Function to calculate results
+        function calcularResultados() {
+            // Get input values
+            const numPeces = parseFloat(numPecesInput.value) || 0;
+            const pesoPromedioInicial_g = parseFloat(pesoPromedioInicialInput.value) || 0;
+            const costoAlimento_por_kg = parseFloat(costoAlimentoInput.value) || 0;
+            const tasaCrecimiento_g_dia = parseFloat(tasaCrecimientoSlider.value);
+            const tasaSuministro_porcentaje_dia = parseFloat(tasaSuministroSlider.value);
+
+            // Update slider value displays
+            tasaCrecimientoValorSpan.textContent = `${formatNumber(tasaCrecimiento_g_dia, 1)} g/día`;
+            tasaSuministroValorSpan.textContent = `${formatNumber(tasaSuministro_porcentaje_dia, 1)} %`;
+            tasaCrecimientoChartInfoSpan.textContent = `${formatNumber(tasaCrecimiento_g_dia, 1)} g/día`;
+
+
+            // Perform calculations
+            // 1. Initial Total Biomass (kg)
+            const biomasaInicialTotal_g = numPeces * pesoPromedioInicial_g;
+            // const biomasaInicialTotal_kg = biomasaInicialTotal_g / 1000; // Not directly used in subsequent main calculations, but good for context
+
+            // 2. Daily Feed Supplied (g)
+            const alimentoDiario_g = biomasaInicialTotal_g * (tasaSuministro_porcentaje_dia / 100);
+
+            // 3. Kilograms of Feed to Supply (weekly)
+            const alimentoSemanal_g = alimentoDiario_g * 7;
+            const kilosAlimentoSemanal_kg = alimentoSemanal_g / 1000;
+
+            // 4. Weekly Weight Gain per Fish (g)
+            const gananciaPesoSemanalPorPez_g = tasaCrecimiento_g_dia * 7;
+
+            // 5. Total Weekly Biomass Gain (kg)
+            const gananciaBiomasaSemanalTotal_g = numPeces * gananciaPesoSemanalPorPez_g;
+            const gananciaBiomasaSemanalTotal_kg = gananciaBiomasaSemanalTotal_g / 1000;
+
+            // 6. Weekly Feed Conversion Ratio (FCR)
+            let fcrSemanal = 0;
+            if (gananciaBiomasaSemanalTotal_kg > 0) {
+                fcrSemanal = kilosAlimentoSemanal_kg / gananciaBiomasaSemanalTotal_kg;
+            } else {
+                fcrSemanal = Infinity; // Or handle as N/A
+            }
+
+            // 7. Weekly Feed Cost
+            const costoAlimentoSemanal = kilosAlimentoSemanal_kg * costoAlimento_por_kg;
+
+            // 8. Cost per Kilo of Biomass Gained
+            let costoPorKiloBiomasa = 0;
+            if (gananciaBiomasaSemanalTotal_kg > 0) {
+                costoPorKiloBiomasa = costoAlimentoSemanal / gananciaBiomasaSemanalTotal_kg;
+            } else {
+                costoPorKiloBiomasa = Infinity; // Or handle as N/A
+            }
+
+            // Display results
+            kilosAlimentoSemanalP.textContent = `${formatNumber(kilosAlimentoSemanal_kg)} kg`;
+            fcrSemanalP.textContent = formatNumber(fcrSemanal);
+            costoKiloBiomasaP.textContent = `$${formatNumber(costoPorKiloBiomasa)}`;
+            gananciaBiomasaSemanalP.textContent = `${formatNumber(gananciaBiomasaSemanalTotal_kg)} kg`;
+            
+            // Update chart data
+            actualizarGrafico();
+        }
+
+        function calcularCostoPorKiloParaTasaSuministro(tasaSuministroTest_porcentaje_dia, numPeces, pesoPromedioInicial_g, costoAlimento_por_kg, tasaCrecimiento_g_dia) {
+            const biomasaInicialTotal_g_test = numPeces * pesoPromedioInicial_g;
+            const alimentoDiario_g_test = biomasaInicialTotal_g_test * (tasaSuministroTest_porcentaje_dia / 100);
+            const alimentoSemanal_g_test = alimentoDiario_g_test * 7;
+            const kilosAlimentoSemanal_kg_test = alimentoSemanal_g_test / 1000;
+
+            const gananciaPesoSemanalPorPez_g_test = tasaCrecimiento_g_dia * 7;
+            const gananciaBiomasaSemanalTotal_g_test = numPeces * gananciaPesoSemanalPorPez_g_test;
+            const gananciaBiomasaSemanalTotal_kg_test = gananciaBiomasaSemanalTotal_g_test / 1000;
+            
+            const costoAlimentoSemanal_test = kilosAlimentoSemanal_kg_test * costoAlimento_por_kg;
+
+            if (gananciaBiomasaSemanalTotal_kg_test > 0) {
+                return costoAlimentoSemanal_test / gananciaBiomasaSemanalTotal_kg_test;
+            }
+            return Infinity; // Represents a very high or undefined cost
+        }
+
+
+        function actualizarGrafico() {
+            const numPeces = parseFloat(numPecesInput.value) || 0;
+            const pesoPromedioInicial_g = parseFloat(pesoPromedioInicialInput.value) || 0;
+            const costoAlimento_por_kg = parseFloat(costoAlimentoInput.value) || 0;
+            const tasaCrecimiento_g_dia = parseFloat(tasaCrecimientoSlider.value);
+
+            const labels = []; // Tasas de suministro para el eje X
+            const dataCosto = []; // Costos por kilo para el eje Y
+
+            // Generate data points for the chart
+            // Iterate from min to max of the feed supply rate slider
+            const minSupplyRate = parseFloat(tasaSuministroSlider.min);
+            const maxSupplyRate = parseFloat(tasaSuministroSlider.max);
+            const stepSupplyRate = 0.1; // Granularity for the chart
+
+            for (let ts = minSupplyRate; ts <= maxSupplyRate; ts += stepSupplyRate) {
+                labels.push(formatNumber(ts,1) + "%");
+                const costo = calcularCostoPorKiloParaTasaSuministro(ts, numPeces, pesoPromedioInicial_g, costoAlimento_por_kg, tasaCrecimiento_g_dia);
+                dataCosto.push(isFinite(costo) ? costo : null); // Use null for Chart.js to break line for invalid data
+            }
+            
+            impactoChartInstance.data.labels = labels;
+            impactoChartInstance.data.datasets[0].data = dataCosto;
+            impactoChartInstance.update();
+        }
+
+
+        // Initialize Chart
+        const ctx = document.getElementById('impactoChart').getContext('2d');
+        impactoChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Will be populated by actualizarGrafico
+                datasets: [{
+                    label: 'Costo por Kilo de Biomasa ($)',
+                    data: [], // Will be populated by actualizarGrafico
+                    borderColor: 'rgb(14, 165, 233)', // sky-600
+                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                    tension: 0.2,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Important for custom container sizing
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Costo por Kilo ($)',
+                            font: { size: 14 }
+                        },
+                        ticks: {
+                             callback: function(value, index, values) {
+                                return '$' + formatNumber(value);
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tasa de Suministro de Alimento (%)',
+                            font: { size: 14 }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += '$' + formatNumber(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        // Event Listeners for all inputs
+        [numPecesInput, pesoPromedioInicialInput, costoAlimentoInput, tasaCrecimientoSlider, tasaSuministroSlider].forEach(element => {
+            element.addEventListener('input', calcularResultados);
+        });
+
+        // Initial calculation on page load
+        calcularResultados();
+    </script>
+</body>
+</html>
