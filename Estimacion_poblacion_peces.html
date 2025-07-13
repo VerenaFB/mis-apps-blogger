@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimación de Población de Peces</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #0056b3;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tabs button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            background-color: #e9e9e9;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .tabs button.active {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .tabs button:hover:not(.active) {
+            background-color: #dcdcdc;
+        }
+
+        .method {
+            display: none;
+        }
+
+        .method.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+            font-size: 16px;
+        }
+
+        button.calculate {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button.calculate:hover {
+            background-color: #218838;
+        }
+
+        .resultados {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .resultados h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+
+        .resultados p {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .resultados span {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .footer a {
+            color: #0056b3;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Estimación de Población de Peces</h1>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="showMethod('method1')">Método 1: Consumo de Alimento</button>
+        <button class="tab-button" onclick="showMethod('method2')">Método 2: Factor de Conversión</button>
+    </div>
+
+    <div id="method1" class="method active">
+        <h2>A partir del consumo de alimento</h2>
+        <p>Calcula la biomasa y población basándose en la cantidad de alimento consumido y la tasa de alimentación.</p>
+
+        <div class="input-group">
+            <label for="alimento1">Kilos de alimento consumidos en prom por día:</label>
+            <input type="number" id="alimento1" step="0.01" value="200">
+        </div>
+
+        <div class="input-group">
+            <label for="tasaAlimentacion1">Tasa de alimentación (% en peso):</label>
+            <input type="number" id="tasaAlimentacion1" step="0.01" value="2">
+        </div>
+
+        <div class="input-group">
+            <label for="pesoPromedio1">Peso promedio del pez (gramos):</label>
+            <input type="number" id="pesoPromedio1" step="0.01" value="500">
+        </div>
+
+        <button class="calculate" onclick="calcularMethod1()">Calcular</button>
+
+        <div id="resultados1" class="resultados">
+            <h3>Resultados (Método 1):</h3>
+            <p>Biomasa estimada: <span id="biomasa1">-</span> kg</p>
+            <p>Población estimada: <span id="poblacion1">-</span> peces</p>
+        </div>
+    </div>
+
+    <div id="method2" class="method">
+        <h2>A partir del factor de conversión</h2>
+         <p>Estima la biomasa y población al final del ciclo basándose en el alimento total, la biomasa inicial y el FCA histórico.</p>
+
+        <div class="input-group">
+            <label for="alimentoTotal2">Kilos alimento suministrados engorde:</label>
+            <input type="number" id="alimentoTotal2" step="0.01" value="22000">
+        </div>
+
+         <div class="input-group">
+            <label for="fcaHistorico2">FCA histórica:</label>
+            <input type="number" id="fcaHistorico2" step="0.01" value="1.30">
+        </div>
+
+         <div class="input-group">
+            <label for="biomasaInicial2">Biomasa inicial trasladada al estanque (kilos):</label>
+            <input type="number" id="biomasaInicial2" step="0.01" value="2100">
+        </div>
+
+        <div class="input-group">
+            <label for="pesoPromedio2">Peso promedio final del pez (gramos):</label>
+            <input type="number" id="pesoPromedio2" step="0.01" value="600">
+        </div>
+
+
+        <button class="calculate" onclick="calcularMethod2()">Calcular</button>
+
+        <div id="resultados2" class="resultados">
+            <h3>Resultados (Método 2):</h3>
+            <p>Biomasa estimada (cosecha): <span id="biomasa2">-</span> kg</p>
+            <p>Población estimada: <span id="poblacion2">-</span> peces</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        Para más información, contacta a <a href="mailto:vfbconsultoria@gmail.com">vfbconsultoria@gmail.com</a>
+    </div>
+</div>
+
+<script>
+    function showMethod(methodId) {
+        // Oculta todos los métodos
+        const methods = document.querySelectorAll('.method');
+        methods.forEach(method => {
+            method.classList.remove('active');
+        });
+
+        // Muestra el método seleccionado
+        document.getElementById(methodId).classList.add('active');
+
+        // Actualiza el estado activo de los botones
+        const buttons = document.querySelectorAll('.tab-button');
+        buttons.forEach(button => {
+            button.classList.remove('active');
+            if (button.onclick.toString().includes(methodId)) {
+                button.classList.add('active');
+            }
+        });
+    }
+
+    function calcularMethod1() {
+        const alimento = parseFloat(document.getElementById('alimento1').value);
+        const tasaAlimentacion = parseFloat(document.getElementById('tasaAlimentacion1').value);
+        const pesoPromedio = parseFloat(document.getElementById('pesoPromedio1').value);
+
+        // Validaciones
+        if (isNaN(alimento) || isNaN(tasaAlimentacion) || isNaN(pesoPromedio)) {
+            document.getElementById('biomasa1').textContent = 'Error';
+            document.getElementById('poblacion1').textContent = 'Error';
+            alert("Por favor, introduce valores numéricos válidos en el Método 1.");
+            return;
+        }
+
+        if (tasaAlimentacion <= 0) {
+            document.getElementById('biomasa1').textContent = 'Error';
+            document.getElementById('poblacion1').textContent = 'Error';
+            alert("La tasa de alimentación debe ser mayor a 0 en el Método 1.");
+            return;
+        }
+
+         if (pesoPromedio <= 0) {
+            document.getElementById('biomasa1').textContent = 'Error';
+            document.getElementById('poblacion1').textContent = 'Error';
+             alert("El peso promedio debe ser mayor a 0 en el Método 1.");
+             return;
+         }
+
+        // Convertir tasa de alimentación a decimal
+        const tasaAlimentacionDecimal = tasaAlimentacion / 100;
+
+        // Calcular Biomasa (Método 1)
+        const biomasa = alimento / tasaAlimentacionDecimal;
+
+        // Calcular Población (Método 1)
+        const poblacion = (biomasa * 1000) / pesoPromedio;
+
+        // Mostrar resultados (Método 1)
+        document.getElementById('biomasa1').textContent = biomasa.toFixed(2);
+        document.getElementById('poblacion1').textContent = Math.round(poblacion);
+    }
+
+    function calcularMethod2() {
+        const alimentoTotal = parseFloat(document.getElementById('alimentoTotal2').value);
+        const fcaHistorico = parseFloat(document.getElementById('fcaHistorico2').value);
+        const biomasaInicial = parseFloat(document.getElementById('biomasaInicial2').value);
+        const pesoPromedio = parseFloat(document.getElementById('pesoPromedio2').value);
+
+
+        // Validaciones
+        if (isNaN(alimentoTotal) || isNaN(fcaHistorico) || isNaN(biomasaInicial) || isNaN(pesoPromedio)) {
+             document.getElementById('biomasa2').textContent = 'Error';
+             document.getElementById('poblacion2').textContent = 'Error';
+            alert("Por favor, introduce valores numéricos válidos en el Método 2.");
+            return;
+        }
+
+        if (fcaHistorico <= 0) {
+             document.getElementById('biomasa2').textContent = 'Error';
+             document.getElementById('poblacion2').textContent = 'Error';
+            alert("El FCA histórico debe ser mayor a 0 en el Método 2.");
+            return;
+        }
+
+         if (pesoPromedio <= 0) {
+            document.getElementById('biomasa2').textContent = 'Error';
+            document.getElementById('poblacion2').textContent = 'Error';
+             alert("El peso promedio debe ser mayor a 0 en el Método 2.");
+             return;
+         }
+
+
+        // Calcular Biomasa (Método 2)
+        // Biomasa = (Kilos alimento suministrados engorde / FCA histórica) - Biomasa inicial
+        const biomasa = (alimentoTotal / fcaHistorico) - biomasaInicial;
+
+         if (biomasa < 0) {
+             document.getElementById('biomasa2').textContent = biomasa.toFixed(2); // Mostrar biomasa negativa si es el caso
+             document.getElementById('poblacion2').textContent = 'N/A';
+             alert("La biomasa calculada es negativa. Revisa tus valores de entrada.");
+             return;
+         }
+
+        // Calcular Población (Método 2)
+        // Población = (Biomasa en kilos * 1000) / Peso promedio (gramos)
+        const poblacion = (biomasa * 1000) / pesoPromedio;
+
+
+        // Mostrar resultados (Método 2)
+        document.getElementById('biomasa2').textContent = biomasa.toFixed(2);
+        document.getElementById('poblacion2').textContent = Math.round(poblacion);
+    }
+
+    // Muestra el primer método por defecto al cargar la página
+    window.onload = function() {
+        showMethod('method1');
+         // Opcional: Calcular resultados iniciales para el método 1 al cargar
+        calcularMethod1();
+    };
+
+</script>
+
+</body>
+</html>
