@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Estrategias de Control del Virus de la Tilapia del Lago (TiLV)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #003F5C;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #FF764A, #BC5090);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #FFA600;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-white uppercase">Combatiendo al</h1>
+            <h2 class="text-5xl md:text-7xl font-black gradient-text uppercase">Virus de la Tilapia del Lago (TiLV)</h2>
+            <p class="text-white text-lg mt-4 max-w-3xl mx-auto">Una guía estratégica para proteger la producción acuícola global frente a una amenaza emergente.</p>
+        </header>
+
+        <main class="space-y-12">
+            
+            <section id="threat" class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8">
+                <h3 class="text-3xl font-bold text-center mb-8 text-[#003F5C]">El Impacto Global del TiLV</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="bg-[#374C80] text-white p-6 rounded-xl shadow-lg">
+                        <div class="text-6xl font-bold">10-90%</div>
+                        <div class="text-xl mt-2">Tasa de Mortalidad</div>
+                        <p class="text-sm mt-2">Los brotes pueden diezmar la producción en granjas de todo el mundo.</p>
+                    </div>
+                    <div class="bg-[#7A5195] text-white p-6 rounded-xl shadow-lg">
+                        <div class="text-6xl font-bold">>$9.8B</div>
+                        <div class="text-xl mt-2">Industria en Riesgo</div>
+                        <p class="text-sm mt-2">Amenaza una fuente vital de proteína y desarrollo económico.</p>
+                    </div>
+                    <div class="bg-[#BC5090] text-white p-6 rounded-xl shadow-lg">
+                        <div class="text-6xl font-bold">>16</div>
+                        <div class="text-xl mt-2">Países Afectados</div>
+                        <p class="text-sm mt-2">Confirmado en 3 continentes, demostrando una rápida propagación global.</p>
+                    </div>
+                </div>
+                 <div class="mt-8">
+                    <h4 class="text-2xl font-bold text-center mb-4 text-[#003F5C]">Signos Clínicos Clave</h4>
+                    <div class="flex flex-wrap justify-center gap-4 md:gap-8">
+                        <div class="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg">
+                            <span class="text-2xl">🐟</span>
+                            <span class="font-semibold">Letargo y Anorexia</span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg">
+                            <span class="text-2xl">👁️</span>
+                            <span class="font-semibold">Lesiones Oculares</span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg">
+                            <span class="text-2xl">🩹</span>
+                            <span class="font-semibold">Úlceras Cutáneas</span>
+                        </div>
+                         <div class="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg">
+                            <span class="text-2xl">🧠</span>
+                            <span class="font-semibold">Natación Errática</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="defense-strategy" class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8">
+                <h3 class="text-3xl font-bold text-center mb-8 text-[#003F5C]">Un Modelo de Defensa en Tres Niveles</h3>
+                <p class="text-center max-w-3xl mx-auto mb-10">El control efectivo del TiLV no depende de una única solución, sino de un enfoque holístico que integra múltiples capas de defensa para crear una barrera robusta contra el patógeno.</p>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0">
+                    <div class="text-center p-6 bg-gray-50 rounded-lg border-2 border-[#374C80] w-full md:w-1/3">
+                        <div class="text-6xl font-bold text-[#374C80]">1</div>
+                        <h4 class="text-xl font-bold mt-2">Bioseguridad Estricta</h4>
+                        <p class="mt-2 text-sm">La base no negociable. Incluye cuarentena, desinfección y control de acceso para prevenir la entrada del virus.</p>
+                    </div>
+                    <div class="flow-arrow transform md:-rotate-90">⬇️</div>
+                    <div class="text-center p-6 bg-gray-50 rounded-lg border-2 border-[#7A5195] w-full md:w-1/3">
+                        <div class="text-6xl font-bold text-[#7A5195]">2</div>
+                        <h4 class="text-xl font-bold mt-2">Resiliencia del Huésped</h4>
+                        <p class="mt-2 text-sm">Fortalecer al pez mediante nutrición funcional (probióticos) e inmunoestimulantes para mejorar sus defensas naturales.</p>
+                    </div>
+                     <div class="flow-arrow transform md:-rotate-90">⬇️</div>
+                    <div class="text-center p-6 bg-gray-50 rounded-lg border-2 border-[#BC5090] w-full md:w-1/3">
+                        <div class="text-6xl font-bold text-[#BC5090]">3</div>
+                        <h4 class="text-xl font-bold mt-2">Tecnología Avanzada</h4>
+                        <p class="mt-2 text-sm">Inversión a futuro en genética resistente al TiLV y adopción de vacunas comerciales cuando estén disponibles.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="vaccines" class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8">
+                <h3 class="text-3xl font-bold text-center mb-2 text-[#003F5C]">La Frontera de la Inmunización</h3>
+                <p class="text-center max-w-3xl mx-auto mb-8">La vacunación es la estrategia más prometedora para el control a largo plazo. La investigación ha demostrado una eficacia considerable en diversas plataformas experimentales.</p>
+                <div class="chart-container">
+                    <canvas id="vaccineChart"></canvas>
+                </div>
+                <p class="text-center text-sm mt-4 text-gray-600">La Supervivencia Relativa Porcentual (RPS) indica el porcentaje de muertes prevenidas en el grupo vacunado en comparación con un grupo no vacunado. Valores más altos indican mayor eficacia.</p>
+            </section>
+
+            <section id="host-resistance" class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8">
+                 <h3 class="text-3xl font-bold text-center mb-8 text-[#003F5C]">Construyendo una Tilapia más Fuerte</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h4 class="text-2xl font-bold text-[#374C80] mb-4">La Promesa de la Genética</h4>
+                        <p class="mb-4">Investigaciones en la cepa GIFT (Tilapia de Cultivo Genéticamente Mejorada) han demostrado que la resistencia al TiLV es un rasgo altamente hereditario. Se observó una variación drástica en la supervivencia entre familias, desde 0% hasta 100%, sin afectar negativamente el crecimiento.</p>
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <p class="font-bold text-center">Esto abre la puerta a la cría selectiva de líneas de tilapia que son a la vez de rápido crecimiento y resistentes a la enfermedad, la solución más sostenible a largo plazo.</p>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="height: 300px; max-height: 40vh;">
+                         <canvas id="geneticsChart"></canvas>
+                    </div>
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-[#EF5675]">
+                         <h4 class="text-xl font-bold text-[#EF5675]">🛡️ Probióticos y Nutrición</h4>
+                         <p class="mt-2">La suplementación con probióticos (ej. *Bacillus spp.*) reduce la mortalidad y la carga viral al modular y "preparar" el sistema inmune para una respuesta más rápida y efectiva contra el virus.</p>
+                     </div>
+                     <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-[#FFA600]">
+                         <h4 class="text-xl font-bold text-[#FFA600]">⚡ Inmunoestimulantes</h4>
+                         <p class="mt-2">Compuestos como los β-glucanos activan de forma no específica el sistema inmune innato del pez, aumentando su capacidad general para combatir patógenos y resistir infecciones.</p>
+                     </div>
+                 </div>
+            </section>
+
+            <section id="roadmap" class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8">
+                <h3 class="text-3xl font-bold text-center mb-8 text-[#003F5C]">Hoja de Ruta Estratégica para el Productor</h3>
+                <div class="space-y-6">
+                    <div class="p-6 rounded-lg bg-blue-50 border-2 border-blue-200">
+                        <h4 class="text-xl font-bold text-blue-800">1. Acciones Inmediatas (Bajo Costo)</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-gray-700">
+                            <li>Desarrollar y aplicar un Plan de Bioseguridad escrito y específico para su granja.</li>
+                            <li>Capacitar a todo el personal en protocolos de desinfección y control.</li>
+                            <li>Implementar un registro diario de monitoreo de salud y mortalidad.</li>
+                        </ul>
+                    </div>
+                    <div class="p-6 rounded-lg bg-purple-50 border-2 border-purple-200">
+                        <h4 class="text-xl font-bold text-purple-800">2. Acciones a Corto Plazo (Inversión Moderada)</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-gray-700">
+                            <li>Construir o designar una unidad de cuarentena físicamente separada.</li>
+                            <li>Adquirir alevines únicamente de proveedores con garantías sanitarias.</li>
+                            <li>Incorporar probióticos o inmunoestimulantes en la dieta durante periodos de estrés.</li>
+                        </ul>
+                    </div>
+                    <div class="p-6 rounded-lg bg-orange-50 border-2 border-orange-200">
+                        <h4 class="text-xl font-bold text-orange-800">3. Acciones a Largo Plazo (Inversión Estratégica)</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-1 text-gray-700">
+                            <li>Planificar la transición a líneas de tilapia genéticamente resistentes al TiLV.</li>
+                            <li>Mantenerse actualizado sobre el desarrollo de vacunas comerciales.</li>
+                            <li>Establecer un plan de contingencia y contacto con la autoridad sanitaria local.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 text-white/70 text-sm">
+            <p>Esta infografía se basa en una síntesis de la investigación científica actual sobre el TiLV. La prevención y el manejo integrado son clave para la sostenibilidad de la industria de la tilapia.</p>
+            <p class="mt-2">Un enfoque proactivo protege su inversión y la seguridad alimentaria global.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const wrapLabel = (label, maxWidth) => {
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = currentLine ? currentLine + ' ' + word : word;
+                }
+            }
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+            return lines;
+        };
+        
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+              return label.join(' ');
+            } else {
+              return label;
+            }
+        };
+
+        const vaccineData = {
+            labels: [
+                'Inactivada (Formalina)',
+                'Prime-Boost (ADN + Proteína)',
+                'Inactivada (Calor)',
+                'Inmersión (Nanopartículas)',
+                'ADN (combinada)',
+                'Viva Atenuada'
+            ],
+            datasets: [{
+                label: 'Eficacia (RPS %)',
+                data: [79.6, 72.5, 71.3, 68.2, 61.1, 50.0],
+                backgroundColor: [
+                    '#FFA600',
+                    '#FF764A',
+                    '#EF5675',
+                    '#BC5090',
+                    '#7A5195',
+                    '#374C80'
+                ],
+                borderColor: '#003F5C',
+                borderWidth: 2
+            }]
+        };
+
+        const vaccineConfig = {
+            type: 'bar',
+            data: vaccineData,
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Supervivencia Relativa Porcentual (RPS %)',
+                            color: '#003F5C',
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 63, 92, 0.1)'
+                        },
+                        ticks: {
+                           color: '#374C80'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                           color: '#374C80',
+                           font: {
+                               size: 11
+                           }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Comparativa de Eficacia de Vacunas Experimentales contra TiLV',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        color: '#003F5C',
+                        padding: {
+                            bottom: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        };
+
+        const vaccineCtx = document.getElementById('vaccineChart').getContext('2d');
+        new Chart(vaccineCtx, vaccineConfig);
+
+        const geneticsData = {
+            labels: ['Familias Altamente Resistentes', 'Familias con Resistencia Variable', 'Familias Altamente Susceptibles'],
+            datasets: [{
+                label: 'Variación Genética en Supervivencia',
+                data: [25, 50, 25],
+                backgroundColor: [
+                    '#374C80',
+                    '#7A5195',
+                    '#EF5675'
+                ],
+                hoverOffset: 4
+            }]
+        };
+
+        const geneticsConfig = {
+            type: 'doughnut',
+            data: geneticsData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#003F5C'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Variación de Resistencia Genética al TiLV',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        color: '#003F5C',
+                        padding: {
+                            bottom: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        };
+
+        const geneticsCtx = document.getElementById('geneticsChart').getContext('2d');
+        new Chart(geneticsCtx, geneticsConfig);
+
+    </script>
+</body>
