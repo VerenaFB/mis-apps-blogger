@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Micronutrición Avanzada en la Acuicultura de Tilapia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F8FF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .kpi-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border-left: 5px solid #366E8A;
+        }
+        .flowchart-step {
+            background-color: white;
+            border: 2px solid #7CB5D2;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            margin: 0 auto;
+        }
+        .flowchart-arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 3rem;
+            font-size: 2.5rem;
+            color: #366E8A;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex items-center justify-center">
+                <h1 class="text-xl md:text-2xl font-bold text-[#003F5C]">Nutrición de Precisión en Tilapia</h1>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="hero" class="text-center py-12">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-[#003F5C] mb-4">El Poder Oculto de los Micronutrientes</h2>
+            <p class="text-lg md:text-xl text-[#366E8A] max-w-3xl mx-auto">Más allá de la supervivencia, la micronutrición estratégica es la clave para desbloquear el máximo potencial genético, inmunitario y comercial de la tilapia.</p>
+        </section>
+
+        <section id="lifecycle" class="py-12">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-[#003F5C]">Nutrición Dinámica: Requerimientos por Etapa de Vida</h3>
+                <p class="text-[#366E8A] mt-2 max-w-2xl mx-auto">Las necesidades de la tilapia cambian drásticamente. Una dieta única no es suficiente; se requiere una formulación adaptada a cada fase del ciclo productivo.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold text-center text-[#003F5C] mb-4">Larvas y Alevines (&lt;30g)</h4>
+                    <div class="chart-container h-64 md:h-72"><canvas id="larvaChart"></canvas></div>
+                    <p class="text-sm text-gray-600 mt-4">En esta fase de crecimiento explosivo, la **Vitamina C** es crítica, con requerimientos de hasta **1,000 mg/kg** para potenciar la supervivencia y prevenir deformidades durante la reversión sexual.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold text-center text-[#003F5C] mb-4">Juveniles y Engorde (&gt;30g)</h4>
+                    <div class="chart-container h-64 md:h-72"><canvas id="juvenilChart"></canvas></div>
+                    <p class="text-sm text-gray-600 mt-4">El enfoque se desplaza al crecimiento sostenido y la resistencia. La **Vitamina E** (hasta 500 mg/kg en dietas grasas) y el **Zinc** (45-60 mg/kg) son vitales para la eficiencia metabólica.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md md:col-span-2 lg:col-span-1">
+                    <h4 class="text-xl font-bold text-center text-[#003F5C] mb-4">Reproductores</h4>
+                    <div class="chart-container h-64 md:h-72"><canvas id="reproductorChart"></canvas></div>
+                    <p class="text-sm text-gray-600 mt-4">La calidad de la progenie depende de una nutrición superior. Dosis elevadas de **Vitamina E (350 mg/kg)** y **Zinc (120 mg/kg)** han demostrado aumentar la fecundidad y la tasa de eclosión.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="interactions" class="py-12 bg-white rounded-lg shadow-lg my-12 p-8">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-[#003F5C]">El Equilibrio Bioquímico: Sinergias y Antagonismos</h3>
+                <p class="text-[#366E8A] mt-2 max-w-3xl mx-auto">La eficacia de un nutriente depende de sus acompañantes. Optimizar las interacciones es crucial, especialmente con el auge de las dietas vegetales.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div>
+                    <h4 class="text-2xl font-semibold text-[#003F5C] mb-4 text-center">Sinergias Potenciadoras</h4>
+                    <div class="space-y-6">
+                        <div class="flex items-center p-4 bg-[#C1E1F4] rounded-lg">
+                            <span class="text-2xl font-bold text-[#003F5C] mr-4">Vit C + Vit E</span>
+                            <p class="text-sm text-[#003F5C]">La Vitamina C regenera a la Vitamina E, creando un ciclo antioxidante que protege las células del estrés y mejora el crecimiento y la supervivencia hasta en un 70%.</p>
+                        </div>
+                        <div class="flex items-center p-4 bg-[#C1E1F4] rounded-lg">
+                             <span class="text-2xl font-bold text-[#003F5C] mr-4">Vit E + Se</span>
+                             <p class="text-sm text-[#003F5C]">Protección antioxidante a dos niveles: Vitamina E en la membrana celular y Selenio (vía GSH-Px) en el interior. Esencial para la salud de los gametos y la supervivencia de las larvas.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-2xl font-semibold text-[#003F5C] mb-4 text-center">El Reto del Ácido Fítico</h4>
+                    <p class="text-sm text-center text-gray-600 mb-4">Presente en ingredientes vegetales, el ácido fítico "secuestra" minerales vitales, reduciendo su absorción.</p>
+                    <div class="chart-container h-80"><canvas id="fiticoChart"></canvas></div>
+                    <p class="text-sm text-gray-600 mt-4 text-center">La adición de la enzima **fitasa** rompe el ácido fítico, liberando el Fósforo y el Zinc, y aumentando drásticamente su biodisponibilidad para el pez.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="performance" class="py-12">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-[#003F5C]">Rendimiento Superior: Más Allá de la Supervivencia</h3>
+                <p class="text-[#366E8A] mt-2 max-w-2xl mx-auto">La suplementación supranutricional es una inversión que se traduce en crecimiento acelerado y un producto final de mayor calidad y valor comercial.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold text-center text-[#003F5C] mb-4">Impacto en el Crecimiento</h4>
+                    <p class="text-sm text-center text-gray-600 mb-4">Comparativa de crecimiento en alevines con dietas estándar vs. dietas suplementadas con nano-minerales.</p>
+                    <div class="chart-container"><canvas id="crecimientoChart"></canvas></div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-bold text-center text-[#003F5C] mb-4">Calidad y Vida Útil del Filete</h4>
+                    <p class="text-sm text-center text-gray-600 mb-4">La Vitamina E dietética se deposita en el músculo, actuando como un conservante natural que retrasa la oxidación lipídica (rancidez) post-cosecha.</p>
+                    <div class="chart-container"><canvas id="fileteChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="immunity" class="py-12 bg-white rounded-lg shadow-lg my-12 p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="text-center md:text-left">
+                    <h3 class="text-3xl font-bold text-[#003F5C]">Inmunonutrición: Construyendo un Escudo Biológico</h3>
+                    <p class="text-[#366E8A] mt-4">En sistemas intensivos, el estrés es constante. Una dieta fortificada es la primera línea de defensa, reduciendo la mortalidad y la necesidad de antibióticos.</p>
+                    <p class="text-gray-600 mt-4">Micronutrientes como las Vitaminas C y E, junto con el Zinc y Selenio, son fundamentales para:</p>
+                    <ul class="list-none space-y-2 mt-4 text-left inline-block">
+                        <li class="flex items-center"><span class="text-xl text-[#366E8A] mr-2">🛡️</span> Mantener la integridad de barreras (piel y mucosas).</li>
+                        <li class="flex items-center"><span class="text-xl text-[#366E8A] mr-2">💥</span> Proteger las células inmunes del daño oxidativo.</li>
+                        <li class="flex items-center"><span class="text-xl text-[#366E8A] mr-2">🚀</span> Potenciar la rápida respuesta de los linfocitos.</li>
+                        <li class="flex items-center"><span class="text-xl text-[#366E8A] mr-2">🌡️</span> Mitigar los efectos negativos del estrés por frío.</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="chart-container"><canvas id="inmuneChart"></canvas></div>
+                    <p class="text-sm text-center text-gray-600 mt-2">Perfil de una dieta inmunomoduladora.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="formulation" class="py-12">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-[#003F5C]">Del Laboratorio al Estanque: Proceso de Formulación Moderna</h3>
+                <p class="text-[#366E8A] mt-2 max-w-2xl mx-auto">Crear una dieta de alto rendimiento es un proceso holístico que integra ciencia, tecnología y estrategia.</p>
+            </div>
+            <div class="space-y-0">
+                <div class="flowchart-step">
+                    <span class="font-bold text-[#003F5C]">1. Definir Base de la Dieta</span>
+                    <p class="text-sm text-gray-600">Seleccionar ingredientes para cumplir metas de proteína y energía.</p>
+                </div>
+                <div class="flowchart-arrow">↓</div>
+                <div class="flowchart-step">
+                    <span class="font-bold text-[#003F5C]">2. Evaluar Carga Antinutricional</span>
+                    <p class="text-sm text-gray-600">Calcular el contenido de ácido fítico de los ingredientes vegetales.</p>
+                </div>
+                <div class="flowchart-arrow">↓</div>
+                <div class="flowchart-step">
+                    <span class="font-bold text-[#003F5C]">3. Incorporar Enzimas</span>
+                    <p class="text-sm text-gray-600">Añadir fitasa para liberar minerales atrapados por el ácido fítico.</p>
+                </div>
+                <div class="flowchart-arrow">↓</div>
+                <div class="flowchart-step">
+                    <span class="font-bold text-[#003F5C]">4. Diseñar Premezcla (Premix)</span>
+                    <p class="text-sm text-gray-600">Formular paquete de vitaminas y minerales usando fuentes estables y biodisponibles (quelados).</p>
+                </div>
+                <div class="flowchart-arrow">↓</div>
+                <div class="flowchart-step bg-[#7CB5D2]">
+                    <span class="font-bold text-white">5. Ajuste Estratégico</span>
+                    <p class="text-sm text-white">Aumentar dosis de Vit. C, E, Zn, Se según el objetivo: reproductores, inmunidad o calidad del filete.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#003F5C] text-white text-center p-6 mt-12">
+        <p>Esta infografía visualiza datos de investigación sobre la nutrición de la tilapia (*Oreochromis niloticus*).</p>
+        <p class="text-sm text-gray-300 mt-2">Diseño y desarrollo sin el uso de SVG o Mermaid JS.</p>
+    </footer>
+
+    <script>
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+
+        const wrapLabel = (label, maxLength = 16) => {
+            if (label.length <= maxLength) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        };
+        
+        const brilliantBlues = {
+            dark: '#003F5C',
+            medium: '#366E8A',
+            light: '#7CB5D2',
+            lighter: '#C1E1F4',
+            bg: '#F0F8FF'
+        };
+
+        const defaultChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: brilliantBlues.dark,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: { color: brilliantBlues.dark },
+                    grid: { color: '#e0e0e0' }
+                },
+                x: {
+                    ticks: { color: brilliantBlues.dark },
+                    grid: { display: false }
+                }
+            }
+        };
+
+        new Chart(document.getElementById('larvaChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Vitamina C', 'Fósforo', 'Proteína'],
+                datasets: [{
+                    label: 'Requerimiento Crítico',
+                    data: [45, 30, 25],
+                    backgroundColor: [brilliantBlues.dark, brilliantBlues.medium, brilliantBlues.light],
+                    borderColor: brilliantBlues.bg,
+                    borderWidth: 4
+                }]
+            },
+            options: { ...defaultChartOptions, cutout: '60%' }
+        });
+
+        new Chart(document.getElementById('juvenilChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Vitamina E', 'Zinc', 'Energía'],
+                datasets: [{
+                    label: 'Requerimiento Crítico',
+                    data: [40, 35, 25],
+                    backgroundColor: [brilliantBlues.dark, brilliantBlues.medium, brilliantBlues.light],
+                    borderColor: brilliantBlues.bg,
+                    borderWidth: 4
+                }]
+            },
+            options: { ...defaultChartOptions, cutout: '60%' }
+        });
+
+        new Chart(document.getElementById('reproductorChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Vitamina E', 'Zinc', 'Selenio'],
+                datasets: [{
+                    label: 'Requerimiento Crítico',
+                    data: [50, 35, 15],
+                    backgroundColor: [brilliantBlues.dark, brilliantBlues.medium, brilliantBlues.light],
+                    borderColor: brilliantBlues.bg,
+                    borderWidth: 4
+                }]
+            },
+            options: { ...defaultChartOptions, cutout: '60%' }
+        });
+
+        new Chart(document.getElementById('fiticoChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Zinc (con Ácido Fítico)', 'Zinc (con Fitasa)'],
+                datasets: [{
+                    label: 'Biodisponibilidad Relativa de Zinc (%)',
+                    data: [40, 95],
+                    backgroundColor: [brilliantBlues.medium, brilliantBlues.dark],
+                    borderColor: [brilliantBlues.medium, brilliantBlues.dark],
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                ...defaultChartOptions,
+                indexAxis: 'y',
+                scales: {
+                    x: { max: 100, ticks: { color: brilliantBlues.dark }, grid: { color: '#e0e0e0' } },
+                    y: { 
+                        ticks: { 
+                            color: brilliantBlues.dark, 
+                            callback: function(value) { 
+                                return wrapLabel(this.getLabelForValue(value)); 
+                            } 
+                        }, 
+                        grid: { 
+                            display: false 
+                        } 
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('crecimientoChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Ganancia de Masa', 'Tasa de Crecimiento'],
+                datasets: [
+                    {
+                        label: 'Dieta Control',
+                        data: [100, 100],
+                        backgroundColor: brilliantBlues.light,
+                        borderRadius: 5
+                    },
+                    {
+                        label: 'Dieta Suplementada (Nano-Se)',
+                        data: [232, 137],
+                        backgroundColor: brilliantBlues.dark,
+                        borderRadius: 5
+                    }
+                ]
+            },
+            options: {
+                ...defaultChartOptions,
+                plugins: {
+                    ...defaultChartOptions.plugins,
+                    tooltip: {
+                        ...defaultChartOptions.plugins.tooltip,
+                        callbacks: {
+                            ...defaultChartOptions.plugins.tooltip.callbacks,
+                            label: (context) => `Aumento: ${context.raw - 100}%`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: (value) => value + '%'
+                        }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('fileteChart'), {
+            type: 'line',
+            data: {
+                labels: ['Día 0', 'Día 3', 'Día 6', 'Día 9', 'Día 12'],
+                datasets: [
+                    {
+                        label: 'Filete Control (Oxidación)',
+                        data: [0.1, 0.8, 1.5, 2.4, 3.5],
+                        borderColor: brilliantBlues.medium,
+                        backgroundColor: brilliantBlues.medium + '33',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Filete con Vitamina E (Oxidación)',
+                        data: [0.1, 0.3, 0.6, 1.1, 1.8],
+                        borderColor: brilliantBlues.dark,
+                        backgroundColor: brilliantBlues.dark + '33',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                ...defaultChartOptions,
+                plugins: {
+                    ...defaultChartOptions.plugins,
+                    title: {
+                        display: true,
+                        text: 'Niveles de TBARS (mg MDA/kg) en Almacenamiento',
+                        color: brilliantBlues.dark
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('inmuneChart'), {
+            type: 'radar',
+            data: {
+                labels: ['Integridad de Barreras', 'Capacidad Antioxidante', 'Respuesta Linfocitaria', 'Resistencia al Estrés', 'Actividad Fagocítica'],
+                datasets: [{
+                    label: 'Dieta Inmunomoduladora',
+                    data: [90, 95, 85, 92, 80],
+                    backgroundColor: brilliantBlues.medium + '80',
+                    borderColor: brilliantBlues.dark,
+                    pointBackgroundColor: brilliantBlues.dark,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: brilliantBlues.dark
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    r: {
+                        angleLines: { color: brilliantBlues.light },
+                        grid: { color: brilliantBlues.light },
+                        pointLabels: {
+                            font: { size: 10 },
+                            color: brilliantBlues.dark
+                        },
+                        ticks: {
+                            display: false,
+                            stepSize: 20
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
