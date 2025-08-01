@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Demanda de Oxígeno para Tilapia Roja (en Gramos)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #005f73;
+            --secondary-color: #0a9396;
+            --accent-color: #94d2bd;
+            --background-color: #f0f8ff;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 95, 115, 0.1);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: var(--card-bg);
+            padding: 2em 3em;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            margin-top: 1.5em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 2em;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(10, 147, 150, 0.2);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 2em;
+            border: none;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            font-size: 1.1em;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 95, 115, 0.2);
+        }
+
+        #resultado {
+            margin-top: 2.5em;
+            padding: 1.5em;
+            background-color: #eef7f7;
+            border-left: 6px solid var(--secondary-color);
+            border-radius: 8px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .resultado-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .resultado-item {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .resultado-item strong {
+            display: block;
+            font-size: 1.5em;
+            color: var(--primary-color);
+        }
+        .resultado-item span {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .resultado-destacado {
+            grid-column: 1 / -1;
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+        .resultado-destacado strong {
+            color: var(--primary-color);
+        }
+
+
+        .infografia {
+            margin-top: 3em;
+            padding: 2em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .infografia ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .infografia li {
+            margin-bottom: 15px;
+            padding-left: 35px;
+            position: relative;
+        }
+        
+        .infografia li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1.5em;
+            line-height: 1;
+        }
+
+        .nota-tecnica {
+            font-size: 0.9em;
+            color: #666;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 1em;
+        }
+
+        footer {
+            margin-top: 3em;
+            font-size: 0.85em;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Calculadora de Demanda de Oxígeno para Tilapia Roja</h1>
+        <p>Esta herramienta estima la demanda de oxígeno para lotes de tilapia roja (<em>Oreochromis sp.</em>), aplicando las ecuaciones de regresión obtenidas en el estudio de Valbuena-Villarreal y Cruz-Casallas (2006). Ingrese los parámetros de su unidad de producción para calcular la tasa de consumo.</p>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="peso">Peso Corporal Promedio (g)</label>
+                <input type="number" id="peso" placeholder="Ej: 200">
+            </div>
+
+            <div class="form-group">
+                <label for="temperatura">Temperatura del Agua (°C)</label>
+                <input type="number" id="temperatura" placeholder="Ej: 28">
+            </div>
+
+            <div class="form-group">
+                <label for="peces">Número de Peces</label>
+                <input type="number" id="peces" placeholder="Ej: 2000">
+            </div>
+            
+            <div class="form-group">
+                <label for="volumen">Volumen del Tanque (L)</label>
+                <input type="number" id="volumen" placeholder="Ej: 10000">
+            </div>
+        </div>
+
+        <button onclick="calcularConsumo()">Calcular Demanda de Oxígeno</button>
+
+        <div id="resultado" style="display:none;"></div>
+
+        <div class="infografia">
+            <h2>Parámetros Técnicos del Modelo</h2>
+            <ul>
+                <li><strong>Metabolismo y Peso:</strong> El consumo de oxígeno por unidad de biomasa (tasa metabólica específica) es inversamente proporcional al peso corporal. Organismos juveniles presentan una mayor demanda relativa de oxígeno que los adultos.</li>
+                <li><strong>Efecto de la Temperatura:</strong> El consumo de oxígeno es directamente proporcional a la temperatura del agua. El incremento térmico acelera las reacciones metabólicas, elevando la demanda de O₂.</li>
+                <li><strong>Condiciones del Modelo:</strong> Las ecuaciones se derivaron de mediciones de la tasa metabólica de rutina en peces con 48 horas de ayuno. Los valores pueden ser mayores en periodos post-alimentación.</li>
+                <li><strong>Especie y Línea:</strong> Los datos corresponden a híbridos de tilapia roja (línea Red Florida) sometidos a reversión sexual, un estándar en la industria.</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p><strong>Referencia:</strong> Valbuena-Villarreal, R.D. & Cruz-Casallas, P.E. (2006). Efecto del peso corporal y temperatura del agua sobre el consumo de oxígeno de tilapia roja (Oreochromis sp). <em>Revista Orinoquia, 10</em>(1), 57-63.</p>
+        </footer>
+    </div>
+
+    <script>
+        function calcularConsumo() {
+            // 1. OBTENCIÓN Y VALIDACIÓN DE DATOS DE ENTRADA
+            const peso = parseFloat(document.getElementById('peso').value);
+            const tempInput = parseFloat(document.getElementById('temperatura').value);
+            const numPeces = parseInt(document.getElementById('peces').value);
+            const volumen = parseFloat(document.getElementById('volumen').value);
+
+            if (isNaN(peso) || isNaN(tempInput) || isNaN(numPeces) || isNaN(volumen) || peso <= 0 || numPeces <= 0 || volumen <= 0) {
+                // Usar un cuadro de diálogo personalizado o mostrar mensaje en la página en lugar de alert()
+                const resultadoDiv = document.getElementById('resultado');
+                resultadoDiv.style.display = 'block';
+                resultadoDiv.innerHTML = `<p style="color: red; font-weight: bold;">Error: Por favor, ingrese valores numéricos válidos y positivos en todos los campos.</p>`;
+                return;
+            }
+            
+            // 2. SELECCIÓN DE LA ECUACIÓN BASADA EN LA TEMPERATURA MÁS CERCANA
+            const temperaturasEstudio = [18, 24, 30];
+            const tempReferencia = temperaturasEstudio.reduce((a, b) => {
+                return Math.abs(b - tempInput) < Math.abs(a - tempInput) ? b : a;
+            });
+
+            let consumoKgHoraMg; // Variable para el consumo en mg O₂ / kg de biomasa / hora
+            const lnPeso = Math.log(peso);
+
+            switch (tempReferencia) {
+                case 18:
+                    // Ecuación para 18°C: CO = 269 - 22.5 * ln(PC)
+                    consumoKgHoraMg = 269 - 22.5 * lnPeso;
+                    break;
+                case 24:
+                    // Ecuación para 24°C: CO = 377 - 34.6 * ln(PC)
+                    consumoKgHoraMg = 377 - 34.6 * lnPeso;
+                    break;
+                case 30:
+                    // Ecuación para 30°C: CO = 679 - 75.5 * ln(PC)
+                    consumoKgHoraMg = 679 - 75.5 * lnPeso;
+                    break;
+            }
+
+            // Asegurar que el consumo no sea negativo.
+            if (consumoKgHoraMg < 0) consumoKgHoraMg = 0;
+
+            // 3. CÁLCULOS ZOOTÉCNICOS EN GRAMOS
+            const biomasaTotalKg = (peso * numPeces) / 1000;
+            
+            // **CAMBIO CLAVE: Conversión de la tasa específica de mg a g (1 g = 1000 mg)**
+            const consumoKgHoraG = consumoKgHoraMg / 1000;
+            
+            // Cálculo de la demanda total en gramos/hora
+            const demandaTotalHoraG = consumoKgHoraG * biomasaTotalKg;
+
+            // Cálculo del consumo volumétrico en gramos/litro/hora
+            const consumoPorLitroHoraG = demandaTotalHoraG / volumen;
+
+            // 4. PRESENTACIÓN DE RESULTADOS EN GRAMOS
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.style.display = 'block';
+            // Se ajusta el número de decimales para mejor visualización de los valores en gramos.
+            resultadoDiv.innerHTML = `
+                <h2>Estimación de la Demanda de Oxígeno</h2>
+                <div class="resultado-grid">
+                    <div class="resultado-item">
+                        <strong>${biomasaTotalKg.toFixed(2)}</strong>
+                        <span>Biomasa Total (kg)</span>
+                    </div>
+                    <div class="resultado-item">
+                        <strong>${consumoKgHoraG.toFixed(4)}</strong>
+                        <span>Tasa de Consumo Específico (g O₂/kg/h)</span>
+                    </div>
+                    <div class="resultado-item resultado-destacado">
+                        <strong>${demandaTotalHoraG.toFixed(2)} g/h</strong>
+                        <span>Demanda Total de Oxígeno del Lote</span>
+                    </div>
+                    <div class="resultado-item resultado-destacado">
+                        <strong>${consumoPorLitroHoraG.toFixed(5)} g/L/h</strong>
+                        <span>Reducción de OD en el tanque (sin aireación)</span>
+                    </div>
+                </div>
+                <p class="nota-tecnica"><strong>Nota Técnica:</strong> El cálculo se realizó utilizando la ecuación para <strong>${tempReferencia}°C</strong>, por ser la temperatura de referencia del estudio más cercana a la ingresada (${tempInput}°C).</p>
+            `;
+        }
+    </script>
+
+</body>
+</html>
