@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Dimensionamiento de Aireadores para Acuicultura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #005f73;
+            --secondary-color: #0a9396;
+            --accent-color: #94d2bd;
+            --background-color: #f0f8ff;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 95, 115, 0.1);
+            --danger-color: #d9534f;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: var(--card-bg);
+            padding: 2em 3em;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        h1 {
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            margin-top: 1.5em;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .form-section {
+            margin-bottom: 2.5em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        label .tooltip {
+            font-weight: 300;
+            font-size: 0.8em;
+            color: #666;
+            cursor: help;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(10, 147, 150, 0.2);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 2em;
+            border: none;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            font-size: 1.2em;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 95, 115, 0.2);
+        }
+
+        #resultado {
+            margin-top: 2.5em;
+            padding: 1.5em;
+            background-color: #eef7f7;
+            border-left: 6px solid var(--secondary-color);
+            border-radius: 8px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .resultado-final {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+        }
+        .resultado-final span {
+            display: block;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .resultado-final strong {
+            font-size: 3em;
+            line-height: 1;
+        }
+
+        .resultado-detalle {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 0.9em;
+        }
+        .resultado-detalle div {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .nota-tecnica {
+            margin-top: 3em;
+            padding: 1.5em;
+            border-top: 2px solid var(--accent-color);
+        }
+
+        footer {
+            margin-top: 3em;
+            font-size: 0.85em;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Calculadora de Dimensionamiento de Aireadores</h1>
+        <p>Esta herramienta estima el número de aireadores requeridos para satisfacer la demanda de oxígeno de un sistema acuícola, corrigiendo la eficiencia del equipo según las condiciones operativas reales de la finca.</p>
+
+        <div class="form-section">
+            <h2>1. Demanda y Especificaciones del Aireador</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="aor">Demanda de Oxígeno (AOR) <span class="tooltip">(kg O₂/h)</span></label>
+                    <input type="number" id="aor" placeholder="Ej: 0.35">
+                </div>
+                <div class="form-group">
+                    <label for="sotr">Tasa de Transferencia Estándar (SOTR) <span class="tooltip">(kg O₂/h por aireador)</span></label>
+                    <input type="number" id="sotr" placeholder="Ej: 1.5">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>2. Condiciones Operativas de la Finca</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="temperatura">Temperatura del Agua (°C)</label>
+                    <input type="number" id="temperatura" placeholder="Ej: 28">
+                </div>
+                <div class="form-group">
+                    <label for="altitud">Altitud de la Finca (msnm)</label>
+                    <input type="number" id="altitud" placeholder="Ej: 500">
+                </div>
+                <div class="form-group">
+                    <label for="cl">OD Mínimo a Mantener (C_L) <span class="tooltip">(mg/L)</span></label>
+                    <input type="number" id="cl" value="4.5">
+                </div>
+                <div class="form-group">
+                    <label for="alfa">Factor de Calidad de Agua (α)</label>
+                    <select id="alfa">
+                        <option value="0.9">Agua limpia (ej. recirculación clara)</option>
+                        <option value="0.8" selected>Acuicultura semi-intensiva</option>
+                        <option value="0.7">Acuicultura intensiva (alta carga)</option>
+                        <option value="0.6">Condiciones de muy alta carga</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2>3. Parámetro de Seguridad</h2>
+             <div class="form-grid" style="grid-template-columns: 1fr;">
+                <div class="form-group">
+                    <label for="seguridad">Factor de Seguridad</label>
+                    <input type="number" id="seguridad" value="1.5">
+                </div>
+            </div>
+        </div>
+
+        <button onclick="calcularAireadores()">Calcular Número de Aireadores</button>
+
+        <div id="resultado" style="display:none;"></div>
+
+        <div class="nota-tecnica">
+            <h3>Notas Técnicas del Cálculo</h3>
+            <p><strong>SOTR vs. AOTR:</strong> La Tasa de Transferencia de Oxígeno Estándar (SOTR) es un valor de catálogo medido en condiciones ideales (20°C, agua limpia, 0 mg/L OD). La Tasa de Transferencia de Oxígeno Real (AOTR) es el rendimiento que el aireador tendrá en sus condiciones específicas de temperatura, altitud, nivel de OD y calidad de agua. Esta calculadora estima el AOTR para dimensionar correctamente el equipo.</p>
+            <p><strong>Factor Alfa (α):</strong> Este coeficiente corrige la eficiencia de transferencia debido a la presencia de sólidos disueltos y suspendidos en el agua, comunes en acuicultura. Un valor más bajo indica una menor eficiencia de transferencia.</p>
+             <p><strong>Factor de Seguridad:</strong> Es una práctica estándar en ingeniería acuícola para sobredimensionar ligeramente el sistema de aireación. Esto proporciona un colchón para manejar picos inesperados de consumo (ej. post-alimentación en días muy calurosos) y asegura el sistema ante la posible falla de una unidad.</p>
+        </div>
+        
+        <footer>
+            <p>Cálculos basados en principios de ingeniería de la acuicultura. Consulte siempre la ficha técnica de su proveedor de equipos.</p>
+        </footer>
+    </div>
+
+    <script>
+        function calcularAireadores() {
+            // 1. OBTENCIÓN Y VALIDACIÓN DE DATOS
+            const aor = parseFloat(document.getElementById('aor').value);
+            const sotr = parseFloat(document.getElementById('sotr').value);
+            const T = parseFloat(document.getElementById('temperatura').value);
+            const altitud = parseFloat(document.getElementById('altitud').value);
+            const CL = parseFloat(document.getElementById('cl').value);
+            const alfa = parseFloat(document.getElementById('alfa').value);
+            const seguridad = parseFloat(document.getElementById('seguridad').value);
+
+            if (isNaN(aor) || isNaN(sotr) || isNaN(T) || isNaN(altitud) || isNaN(CL) || isNaN(alfa) || isNaN(seguridad)) {
+                alert("Error: Verifique que todos los campos contengan valores numéricos válidos.");
+                return;
+            }
+            if (aor <= 0 || sotr <= 0) {
+                 alert("Error: La demanda de oxígeno (AOR) y la tasa de transferencia (SOTR) deben ser mayores a cero.");
+                return;
+            }
+
+            // 2. CÁLCULO DE LA TASA DE TRANSFERENCIA REAL (AOTR)
+            
+            // 2.1. Calcular la saturación de oxígeno a nivel del mar para la temperatura T (Fórmula empírica)
+            const Cs_temp = 14.652 - (0.41022 * T) + (0.007991 * T * T) - (0.000077774 * T * T * T);
+            
+            // 2.2. Corregir la saturación por la altitud
+            const presion_corr = Math.pow((1 - (0.0000225577 * altitud)), 5.25588); // Corrección de presión atmosférica
+            const Cs_T_P = Cs_temp * presion_corr;
+
+            // 2.3. Calcular AOTR usando la fórmula de corrección completa
+            // AOTR = SOTR * ( (β * Cs_T_P - CL) / C_s_20 ) * 1.024^(T-20) * α
+            // Donde C_s_20 (saturación a 20°C) es 9.09 mg/L y β (beta) se asume como 1.
+            const aotr = sotr * ((Cs_T_P - CL) / 9.09) * Math.pow(1.024, (T - 20)) * alfa;
+
+            if (aotr <= 0) {
+                alert("Error de cálculo: La Tasa de Transferencia Real (AOTR) es cero o negativa. Verifique que el 'OD Mínimo a Mantener' sea menor que la capacidad de saturación en sus condiciones.");
+                return;
+            }
+            
+            // 3. CÁLCULO DEL NÚMERO DE AIREADORES
+            
+            // 3.1. Demanda con factor de seguridad
+            const aor_seguro = aor * seguridad;
+
+            // 3.2. Número teórico de aireadores
+            const numero_teorico = aor_seguro / aotr;
+
+            // 3.3. Número recomendado (redondeado hacia arriba)
+            const numero_recomendado = Math.ceil(numero_teorico);
+
+            // 4. PRESENTACIÓN DE RESULTADOS
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.style.display = 'block';
+            resultadoDiv.innerHTML = `
+                <h3>Resultados del Dimensionamiento</h3>
+                <div class="resultado-final">
+                    <span>Número de aireadores recomendados</span>
+                    <strong>${numero_recomendado}</strong>
+                </div>
+                <div class="resultado-detalle">
+                    <div><strong>Aporte Real por Aireador (AOTR):</strong> ${aotr.toFixed(3)} kg O₂/h</div>
+                    <div><strong>Demanda de Oxígeno con Seguridad:</strong> ${aor_seguro.toFixed(3)} kg O₂/h</div>
+                    <div><strong>Saturación de OD en sus condiciones (C_s,T,P):</strong> ${Cs_T_P.toFixed(2)} mg/L</div>
+                    <div><strong>Número Teórico (sin redondear):</strong> ${numero_teorico.toFixed(2)}</div>
+                </div>
+            `;
+        }
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
