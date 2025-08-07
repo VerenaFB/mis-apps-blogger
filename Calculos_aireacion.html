@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Aireación para Acuicultura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F9FF;
+        }
+        .result-card h3 {
+            color: #005F73;
+        }
+        .result-value {
+            color: #EE9B00;
+        }
+        .final-result {
+            background-color: #005F73;
+            color: white;
+        }
+        .final-result .result-value {
+            color: #E9D8A6;
+        }
+        /* Custom styles for the range slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #94D2BD;
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #005F73;
+            cursor: pointer;
+            margin-top: -8px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #94D2BD;
+            border-radius: 5px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #005F73;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-black text-[#005F73] uppercase">Calculadora de Aireación</h1>
+            <p class="text-lg md:text-xl mt-2 text-gray-600">Estime sus necesidades de oxigenación de forma precisa.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-xl p-6 sticky top-8">
+                    <form id="aerationForm" class="space-y-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-[#005F73] mb-4 border-b pb-2">Parámetros del Cultivo</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="numPeces" class="block text-sm font-medium text-gray-700">Número de Peces</label>
+                                    <input type="number" id="numPeces" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0A9396] focus:ring-[#0A9396] sm:text-sm" placeholder="Ej: 50000" required>
+                                </div>
+                                <div>
+                                    <label for="pesoPromedio" class="block text-sm font-medium text-gray-700">Peso Promedio (gramos)</label>
+                                    <input type="number" id="pesoPromedio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0A9396] focus:ring-[#0A9396] sm:text-sm" placeholder="Ej: 300" required>
+                                </div>
+                                <div>
+                                    <label for="temperatura" class="block text-sm font-medium text-gray-700">Temperatura del Agua (°C)</label>
+                                    <input type="number" id="temperatura" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0A9396] focus:ring-[#0A9396] sm:text-sm" placeholder="Ej: 28" required>
+                                </div>
+                                <div>
+                                    <label for="salinidad" class="block text-sm font-medium text-gray-700">Salinidad (ppt)</label>
+                                    <input type="number" id="salinidad" value="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0A9396] focus:ring-[#0A9396] sm:text-sm" required>
+                                </div>
+                                <div>
+                                    <label for="altitud" class="block text-sm font-medium text-gray-700">Altitud (msnm)</label>
+                                    <input type="number" id="altitud" value="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0A9396] focus:ring-[#0A9396] sm:text-sm" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                             <h2 class="text-2xl font-bold text-[#005F73] mb-4 border-b pb-2">Parámetros de Operación</h2>
+                             <div class="space-y-2">
+                                <label for="odObjetivo" class="block text-sm font-medium text-gray-700">
+                                    Oxígeno Disuelto Objetivo (mg/L): <span id="odObjetivoValue" class="font-bold text-[#005F73]">5.0</span>
+                                </label>
+                                <input type="range" id="odObjetivo" min="3" max="6" value="5" step="0.1" class="w-full">
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                             <h2 class="text-2xl font-bold text-[#005F73] mb-4 border-b pb-2">Especificaciones del Aireador</h2>
+                             <div class="space-y-4">
+                                <div>
+                                    <label for="caballaje" class="block text-sm font-medium text-gray-700">Caballaje del Aireador (HP)</label>
+                                    <input type="number" id="caballaje" value="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0A9396] focus:ring-[#0A9396] sm:text-sm" required>
+                                </div>
+                                <div>
+                                    <label for="sotrEquipo" class="block text-sm font-medium text-gray-700">SOTR del Aireador (kg O₂/h)</label>
+                                    <input type="number" id="sotrEquipo" value="2.6" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0A9396] focus:ring-[#0A9396] sm:text-sm" required>
+                                </div>
+                             </div>
+                        </div>
+                        <button type="submit" class="w-full bg-[#EE9B00] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#CA6702] transition duration-300 shadow-lg !mt-6">Calcular Requerimiento</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3">
+                <div id="resultsContainer" class="bg-white rounded-lg shadow-xl p-6 space-y-4 hidden">
+                    <h2 class="text-2xl font-bold text-[#005F73] mb-4 border-b pb-2">Resultados del Cálculo</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="result-card bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-lg">Biomasa Total</h3>
+                            <p id="biomasaResult" class="result-value text-3xl font-black">0 kg</p>
+                        </div>
+                         <div class="result-card bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-lg">Alimento Diario (1.5%)</h3>
+                            <p id="alimentoResult" class="result-value text-3xl font-black">0 kg</p>
+                        </div>
+                        <div class="result-card bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-lg">Demanda de Oxígeno (AOR)</h3>
+                            <p id="aorResult" class="result-value text-3xl font-black">0 kg O₂/h</p>
+                        </div>
+                        <div class="result-card bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-lg">Saturación de O₂ en Sitio</h3>
+                            <p id="saturacionResult" class="result-value text-3xl font-black">0 mg/L</p>
+                        </div>
+                    </div>
+
+                    <div class="final-result p-6 rounded-lg text-center mt-4">
+                        <h3 class="text-xl font-bold text-white uppercase tracking-wider">Requerimiento SOTR</h3>
+                        <p id="sotrResult" class="result-value text-5xl font-black my-2">0 kg O₂/h</p>
+                        <p class="text-sm text-[#94D2BD]">Esta es la capacidad de catálogo que deben sumar sus equipos.</p>
+                    </div>
+
+                    <div class="final-result p-6 rounded-lg text-center mt-4">
+                        <h3 class="text-xl font-bold text-white uppercase tracking-wider">Equipos Recomendados</h3>
+                        <p id="equiposResult" class="result-value text-5xl font-black my-2">0</p>
+                        <p id="equiposResultText" class="text-sm text-[#94D2BD]">Unidades de aireadores de 2 HP.</p>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-gray-100 rounded-lg text-xs text-gray-600">
+                        <p><strong class="font-bold">Supuestos del cálculo:</strong> Tasa de alimentación del 1.5% de la biomasa. Demanda de 0.5 kg O₂ por kg de alimento. Factor Alfa (α) de 0.9. Factor Beta (β) de 1.0.</p>
+                        <p class="mt-2"><strong class="font-bold">Descargo de responsabilidad:</strong> Esta calculadora es una herramienta de estimación. Los resultados deben ser validados por un profesional en acuicultura antes de realizar cualquier inversión.</p>
+                    </div>
+                </div>
+                <div id="initialMessage" class="bg-white rounded-lg shadow-xl p-10 text-center flex flex-col justify-center items-center h-full">
+                    <p class="text-5xl mb-4">⚙️</p>
+                    <h2 class="text-2xl font-bold text-[#005F73]">Ingrese los datos de su cultivo</h2>
+                    <p class="text-gray-500 mt-2">Los resultados del cálculo aparecerán aquí.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const odSlider = document.getElementById('odObjetivo');
+        const odValueDisplay = document.getElementById('odObjetivoValue');
+
+        odSlider.addEventListener('input', function() {
+            odValueDisplay.textContent = parseFloat(this.value).toFixed(1);
+        });
+
+        document.getElementById('aerationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const numPeces = parseFloat(document.getElementById('numPeces').value);
+            const pesoPromedio = parseFloat(document.getElementById('pesoPromedio').value);
+            const T = parseFloat(document.getElementById('temperatura').value);
+            const S = parseFloat(document.getElementById('salinidad').value);
+            const H = parseFloat(document.getElementById('altitud').value);
+            const C_L = parseFloat(document.getElementById('odObjetivo').value); // Valor del slider
+            const caballaje = parseFloat(document.getElementById('caballaje').value);
+            const sotrPorEquipo = parseFloat(document.getElementById('sotrEquipo').value);
+
+            if (isNaN(numPeces) || isNaN(pesoPromedio) || isNaN(T) || isNaN(S) || isNaN(H) || isNaN(caballaje) || isNaN(sotrPorEquipo)) {
+                alert('Por favor, ingrese valores numéricos válidos en todos los campos.');
+                return;
+            }
+            if (sotrPorEquipo <= 0) {
+                alert('El SOTR del equipo debe ser mayor que cero.');
+                return;
+            }
+
+            // --- Cálculos ---
+            
+            const biomasaKg = (numPeces * pesoPromedio) / 1000;
+            const alimentoDiarioKg = biomasaKg * 0.015; 
+            const aorKgDia = alimentoDiarioKg * 0.5;
+            const aorKgHora = aorKgDia / 24;
+
+            const cs_T = 14.652 - (0.41022 * T) + (0.007991 * T * T) - (0.000077774 * T * T * T);
+            const cs_T_S = cs_T * (1 - (0.000975 * S));
+            const presionFactor = Math.exp(-H / 9450);
+            const cs_final_sitio = cs_T_S * presionFactor;
+
+            const Cs_20 = 9.09;
+            const alpha = 0.9;
+            const beta = 1.0;
+            const theta = 1.024;
+
+            const AOTR_SOTR_ratio = (((beta * cs_final_sitio) - C_L) / Cs_20) * Math.pow(theta, T - 20) * alpha;
+            
+            let sotrRequerido = 0;
+            if (AOTR_SOTR_ratio > 0) {
+                sotrRequerido = aorKgHora / AOTR_SOTR_ratio;
+            } else {
+                sotrRequerido = Infinity;
+            }
+
+            let numEquipos = 0;
+            if (sotrRequerido !== Infinity) {
+                numEquipos = Math.ceil(sotrRequerido / sotrPorEquipo);
+            }
+
+            // --- Mostrar Resultados ---
+            document.getElementById('initialMessage').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+
+            document.getElementById('biomasaResult').textContent = `${biomasaKg.toFixed(1)} kg`;
+            document.getElementById('alimentoResult').textContent = `${alimentoDiarioKg.toFixed(1)} kg`;
+            document.getElementById('aorResult').textContent = `${aorKgHora.toFixed(2)} kg O₂/h`;
+            document.getElementById('saturacionResult').textContent = `${cs_final_sitio.toFixed(2)} mg/L`;
+            
+            if (sotrRequerido === Infinity || sotrRequerido < 0) {
+                 document.getElementById('sotrResult').textContent = 'N/A';
+                 document.getElementById('equiposResult').textContent = 'N/A';
+                 document.getElementById('equiposResultText').textContent = 'Las condiciones del sitio (ej. alta temp/salinidad) hacen imposible alcanzar el OD objetivo.';
+            } else {
+                 document.getElementById('sotrResult').textContent = `${sotrRequerido.toFixed(2)} kg O₂/h`;
+                 document.getElementById('equiposResult').textContent = numEquipos;
+                 document.getElementById('equiposResultText').textContent = `Unidades de aireadores de ${caballaje} HP (SOTR ${sotrPorEquipo} kg O₂/h).`;
+            }
+        });
+    </script>
+
+</body>
+</html>
