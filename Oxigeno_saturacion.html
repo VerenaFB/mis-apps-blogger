@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Oxígeno Disuelto en Acuicultura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Usamos Inter como fuente principal, con fallbacks estándar */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Pequeño ajuste para que el foco en los inputs sea más notorio */
+        .form-input:focus, .form-select:focus {
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3); /* sky-500 con opacidad */
+            border-color: #0ea5e9; /* sky-500 */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        
+        <!-- Encabezado -->
+        <div class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Saturación de Oxígeno Disuelto</h1>
+            <p class="text-slate-500 mt-2">Calcule la concentración de O₂ (mg/L) a 100% de saturación.</p>
+        </div>
+
+        <!-- Formulario de Entradas -->
+        <div class="space-y-6">
+            <div>
+                <label for="temperatura" class="block text-sm font-medium text-slate-700 mb-1">Temperatura del Agua (°C)</label>
+                <input type="number" id="temperatura" placeholder="Ej: 25" class="form-input w-full px-4 py-2 border border-slate-300 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500">
+            </div>
+            
+            <div>
+                <label for="altitud" class="block text-sm font-medium text-slate-700 mb-1">Altitud (metros)</label>
+                <input type="number" id="altitud" placeholder="Ej: 500" class="form-input w-full px-4 py-2 border border-slate-300 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500">
+            </div>
+            
+            <div>
+                <label for="salinidad" class="block text-sm font-medium text-slate-700 mb-1">Salinidad (ppt)</label>
+                <input type="number" id="salinidad" placeholder="Ej: 35" class="form-input w-full px-4 py-2 border border-slate-300 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500">
+            </div>
+        </div>
+
+        <!-- Botón de Cálculo -->
+        <div class="mt-8">
+            <button onclick="calcularOxigeno()" class="w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-300 transition-all duration-300 transform hover:scale-105">
+                Calcular
+            </button>
+        </div>
+
+        <!-- Área de Resultado -->
+        <div id="resultadoArea" class="mt-8 text-center bg-slate-50 rounded-xl p-6 border border-slate-200" style="display: none;">
+            <h2 class="text-sm font-medium text-slate-600">Oxígeno Disuelto a Saturación</h2>
+            <p id="resultado" class="text-5xl font-bold text-sky-600 mt-2">
+                <!-- El resultado se insertará aquí -->
+            </p>
+            <span class="text-slate-500 font-medium">mg/L</span>
+        </div>
+        
+        <!-- Pie de página con información de la fórmula -->
+        <div class="text-center mt-8">
+            <p class="text-xs text-slate-400">Fórmula de Weiss (1970) con corrección barométrica.</p>
+        </div>
+
+    </div>
+
+    <script>
+        function calcularOxigeno() {
+            // 1. Obtener valores de la interfaz de usuario
+            const tempC = parseFloat(document.getElementById('temperatura').value);
+            const altitudM = parseFloat(document.getElementById('altitud').value);
+            const salinidad = parseFloat(document.getElementById('salinidad').value);
+
+            // Validación simple de entradas
+            if (isNaN(tempC) || isNaN(altitudM) || isNaN(salinidad)) {
+                // Podríamos usar un modal más elegante en lugar de un alert
+                alert("Por favor, complete todos los campos con valores numéricos.");
+                return;
+            }
+
+            // --- INICIO DE LA LÓGICA DE CÁLCULO CIENTÍFICO ---
+
+            // 2. Convertir Temperatura a Kelvin para los cálculos termodinámicos
+            const tempK = tempC + 273.15;
+            
+            // 3. Calcular la solubilidad del O2 a nivel del mar (1 atm) usando la fórmula de Weiss (1970)
+            // La fórmula calcula el logaritmo natural de la concentración en ml/L
+            const ln_C_ml_L = -173.4292 +
+                            (249.6339 * (100 / tempK)) +
+                            (143.3483 * Math.log(tempK / 100)) -
+                            (21.8492 * (tempK / 100)) +
+                            salinidad * (-0.033096 +
+                                        (0.014259 * (tempK / 100)) -
+                                        (0.0017000 * Math.pow(tempK / 100, 2)));
+
+            // Exponencial para obtener la concentración en ml/L
+            const o2_ml_L_sealevel = Math.exp(ln_C_ml_L);
+
+            // 4. Convertir la concentración de ml/L a mg/L
+            // Se usa el factor de conversión 1.4276 (basado en la masa molar del O2)
+            const o2_mg_L_sealevel = o2_ml_L_sealevel * 1.4276;
+
+            // 5. Calcular la corrección por presión barométrica (efecto de la altitud)
+            // Fórmula barométrica estándar para obtener la presión en atmósferas
+            const presionAtm = Math.pow((1 - (0.0000225577 * altitudM)), 5.25588);
+            
+            // 6. Calcular la corrección por presión de vapor de agua
+            // La presión de vapor reduce la presión parcial de los otros gases
+            const presionVaporAgua_atm = Math.exp(11.8571 - (3840.70 / tempK) - (216961 / Math.pow(tempK, 2))) / 760; // Convertido a atm
+            
+            // 7. Aplicar las correcciones al valor de saturación a nivel del mar
+            // La solubilidad es directamente proporcional a la presión parcial del gas (Ley de Henry)
+            const correccionPresionTotal = (presionAtm - presionVaporAgua_atm) / (1 - presionVaporAgua_atm);
+            const o2_mg_L_final = o2_mg_L_sealevel * correccionPresionTotal;
+
+            // --- FIN DE LA LÓGICA DE CÁLCULO ---
+
+            // 8. Mostrar el resultado en la interfaz
+            const resultadoArea = document.getElementById('resultadoArea');
+            const resultadoElemento = document.getElementById('resultado');
+            
+            if (o2_mg_L_final > 0) {
+                resultadoElemento.textContent = o2_mg_L_final.toFixed(2);
+                resultadoArea.style.display = 'block';
+            } else {
+                // Manejo de caso de error o valores no físicos
+                resultadoElemento.textContent = '--';
+                resultadoArea.style.display = 'block';
+                alert("El cálculo resultó en un valor no válido. Por favor, revise los datos de entrada.");
+            }
+        }
+    </script>
+
+</body>
+</html>
