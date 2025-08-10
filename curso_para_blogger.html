@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso Interactivo: Bienestar Animal en Acuicultura</title>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    :root {
+        --primary-color: #005a9e; /* Azul ICA */
+        --secondary-color: #78be20; /* Verde ICA */
+        --background-color: #f4f6f9;
+        --text-color: #333;
+        --container-bg: #ffffff;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .course-container {
+        background-color: var(--container-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        width: 100%;
+        max-width: 800px;
+        overflow: hidden;
+    }
+
+    header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 1.8em;
+    }
+
+    .progress-bar-container {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        margin-top: 15px;
+        height: 20px;
+        position: relative;
+    }
+
+    .progress-bar {
+        background-color: var(--secondary-color);
+        width: 0%;
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.5s ease-in-out;
+    }
+
+    #progressText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+        font-size: 0.8em;
+        color: var(--primary-color);
+    }
+
+    main {
+        padding: 25px;
+    }
+
+    #module-container {
+        margin-bottom: 25px;
+    }
+
+    #module-title {
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--secondary-color);
+        padding-bottom: 10px;
+    }
+
+    #module-summary {
+        line-height: 1.6;
+    }
+
+    #quiz-container h3 {
+        color: var(--primary-color);
+    }
+
+    .quiz-question {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-left: 4px solid var(--secondary-color);
+        border-radius: 4px;
+    }
+
+    .quiz-question p {
+        margin: 0 0 10px 0;
+        font-weight: bold;
+    }
+
+    .quiz-options label {
+        display: block;
+        margin-bottom: 8px;
+        cursor: pointer;
+    }
+
+    .quiz-options input {
+        margin-right: 10px;
+    }
+
+    footer {
+        background-color: #f1f1f1;
+        padding: 20px;
+        text-align: center;
+        border-top: 1px solid #ddd;
+    }
+
+    .nav-button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        font-size: 1em;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .nav-button:hover {
+        background-color: #004175;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    #feedback-container {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: var(--border-radius);
+    }
+
+    #feedback-container.correct {
+        background-color: #e8f5e9; /* Verde claro */
+        border: 1px solid #4caf50;
+    }
+
+    #feedback-container.incorrect {
+        background-color: #ffebee; /* Rojo claro */
+        border: 1px solid #f44336;
+    }
+
+    .correct-answer {
+        color: #388e3c;
+        font-weight: bold;
+    }
+
+    .incorrect-answer {
+        color: #d32f2f;
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body>
+    <div class="course-container">
+        <header>
+            <h1>Curso de Bienestar Animal en Acuicultura (ICA)</h1>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <span id="progressText"></span>
+            </div>
+        </header>
+        
+        <main id="course-content">
+            <div id="module-container">
+                <h2 id="module-title"></h2>
+                <div id="module-summary"></div>
+            </div>
+            
+            <div id="quiz-container">
+                <h3>Test de Autoevaluación</h3>
+                <form id="quiz-form"></form>
+            </div>
+
+            <div id="feedback-container" class="hidden">
+                <h3>Resultados</h3>
+                <p id="feedback-text"></p>
+            </div>
+        </main>
+
+        <footer>
+            <button id="nav-button" class="nav-button">Comprobar Respuestas</button>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+    const courseData = [
+        {
+            title: "Módulo 1: Introducción al Bienestar Animal en Acuicultura",
+            summary: `<h4>Un Concepto Integral</h4>
+<p>El Bienestar Animal es un concepto complejo y multidimensional que va más allá de la simple ausencia de enfermedad. Debe mirarse como el estado de un animal en relación con sus intentos de afrontar el entorno. Incluye tanto la salud física como la mental. La base para entender el bienestar animal se encuentra en las "Cinco Libertades", un marco reconocido internacionalmente:</p>
+<ul>
+    <li><strong>1. Libre de hambre, sed y desnutrición:</strong> Acceso a agua fresca y una dieta adecuada para mantener una salud y vigor plenos.</li>
+    <li><strong>2. Libre de miedos y angustias:</strong> Asegurando condiciones y un trato que eviten el sufrimiento mental.</li>
+    <li><strong>3. Libre de incomodidades físicas o térmicas:</strong> Proporcionando un entorno apropiado, incluyendo refugio y un área de descanso cómoda.</li>
+    <li><strong>4. Libre de dolor, lesiones o enfermedades:</strong> Mediante la prevención o el diagnóstico y tratamiento rápidos.</li>
+    <li><strong>5. Libre para expresar las pautas propias de comportamiento:</strong> Proporcionando espacio suficiente, instalaciones adecuadas y la compañía de animales de su propia especie.</li>
+</ul>
+<p>En el contexto de la acuicultura, aplicar estos principios es un desafío y una responsabilidad. Factores como la calidad del agua (oxígeno, pH, temperatura), la densidad de población en los estanques, las prácticas de manejo y alimentación, y los métodos de sacrificio son cruciales para garantizar un nivel de bienestar adecuado para los peces y otros animales acuáticos.</p>`,
+            quiz: [
+                {
+                    question: "¿Cuál de las siguientes NO es una de las 'Cinco Libertades' del bienestar animal?",
+                    options: ["Libre de hambre y sed.", "Libre para socializar con humanos.", "Libre de dolor, lesiones y enfermedad.", "Libre para expresar un comportamiento normal."],
+                    answer: "Libre para socializar con humanos."
+                },
+                {
+                    question: "En el contexto de la acuicultura, ¿qué factor es fundamental para el bienestar de los peces?",
+                    options: ["La decoración del estanque.", "La calidad del agua.", "El color del alimento.", "La música ambiental."],
+                    answer: "La calidad del agua."
+                },
+                {
+                    question: "El concepto de bienestar animal se refiere únicamente a la salud física del animal.",
+                    options: ["Verdadero", "Falso"],
+                    answer: "Falso"
+                }
+            ]
+        },
+        {
+            title: "Módulo 2: Metodología de Evaluación del Bienestar",
+            summary: `<h4>¿Cómo se mide el Bienestar?</h4>
+<p>Para evaluar de forma objetiva el bienestar animal en los predios acuícolas, el ICA ha desarrollado una metodología basada en indicadores medibles y verificables. Estos indicadores se agrupan en tres categorías principales:</p>
+<ul>
+    <li><strong>Medidas Basadas en los Recursos:</strong> Evalúan el entorno del animal. Incluyen la calidad del agua, la calidad y acceso al alimento, la profundidad del estanque y la protección contra depredadores. Son una medida indirecta del bienestar.</li>
+    <li><strong>Medidas Basadas en el Animal:</strong> Son los indicadores más directos, ya que miden el estado del propio animal. Ejemplos claros son la evaluación de lesiones, heridas en la piel, aletas o branquias, el tamaño y peso corporal, la tasa de mortalidad y la presencia de comportamientos anormales.</li>
+    <li><strong>Medidas Basadas en la Gestión:</strong> Se centran en las acciones y la planificación del productor. Esto incluye la existencia de un plan sanitario escrito, los registros de tratamientos médicos, la capacitación del personal en bienestar animal y los procedimientos documentados de manejo y sacrificio.</li>
+</ul>
+<h4>El Proceso de Evaluación</h4>
+<p>La evaluación en el predio se desarrolla en cuatro etapas:
+<ol>
+    <li><strong>Etapa I (Reunión Inicial):</strong> Planificación de la visita y recopilación de información básica.</li>
+    <li><strong>Etapa II (Inspección del Predio):</strong> Revisión de instalaciones y observación general de los animales.</li>
+    <li><strong>Etapa III (Inspección Documental):</strong> Verificación de registros, planes y certificaciones.</li>
+    <li><strong>Etapa IV (Procesamiento y Entrega):</strong> Tabulación de los datos para obtener una calificación final (Excelente, Alto, Medio o Bajo) y entrega de resultados al productor.</li>
+</ol>
+</p>`,
+            quiz: [
+                {
+                    question: "Observar la presencia de heridas en la piel de los peces es un indicador basado en...",
+                    options: ["El animal", "Los recursos", "La gestión", "La economía"],
+                    answer: "El animal"
+                },
+                {
+                    question: "La revisión del plan sanitario y los registros de mortalidad corresponde a un indicador basado en...",
+                    options: ["El animal", "Los recursos", "La gestión", "La opinión del productor"],
+                    answer: "La gestión"
+                },
+                {
+                    question: "La calificación final del bienestar en un predio se obtiene a través de una única observación visual.",
+                    options: ["Verdadero", "Falso"],
+                    answer: "Falso"
+                }
+            ]
+        },
+        {
+            title: "Módulo 3: Marco Normativo y Resoluciones",
+            summary: `<h4>La Base Legal del Bienestar Animal</h4>
+<p>El Instituto Colombiano Agropecuario (ICA) es la autoridad encargada de establecer y verificar el cumplimiento de la normativa de bienestar animal en la producción primaria. Las resoluciones emitidas por el ICA son de obligatorio cumplimiento para todos los productores.</p>
+<p>Documentos como la <strong>Resolución 253 de 2020</strong> del Ministerio de Agricultura y la <strong>Resolución 00016409 del ICA</strong> son fundamentales, ya que adoptan y detallan los manuales de condiciones de bienestar para las diferentes especies, incluyendo los animales acuáticos.</p>
+<h4>Obligaciones Clave del Productor:</h4>
+<ul>
+    <li><strong>Plan Sanitario:</strong> Todo establecimiento debe contar con un plan sanitario escrito, implementado y firmado por un médico veterinario o profesional competente. Este plan debe incluir medidas de prevención y control de enfermedades.</li>
+    <li><strong>Uso de Medicamentos:</strong> Se debe llevar un registro estricto de todos los tratamientos veterinarios. Está prohibido el uso de sustancias no autorizadas por el ICA y no se deben emplear medicamentos vencidos. La administración de fármacos debe seguir la prescripción de un profesional.</li>
+    <li><strong>Sacrificio Humanitario:</strong> Se deben seguir métodos que aseguren una rápida pérdida de conocimiento y muerte del animal, evitando el sufrimiento innecesario. Los métodos deben estar documentados y el personal debe estar capacitado para realizarlos correctamente.</li>
+    <li><strong>Capacitación:</strong> El personal que maneja los animales debe demostrar conocimiento y capacitación en temas de bienestar animal.</li>
+</ul>`,
+            quiz: [
+                {
+                    question: "¿Qué entidad establece la normativa de bienestar animal para la producción acuícola en Colombia?",
+                    options: ["Ministerio de Ambiente", "Federación de Acuicultores", "Instituto Colombiano Agropecuario (ICA)", "La AUNAP"],
+                    answer: "Instituto Colombiano Agropecuario (ICA)"
+                },
+                {
+                    question: "Según la normativa, ¿el uso de medicamentos veterinarios debe ser registrado?",
+                    options: ["No, solo si hay una emergencia.", "Solo los antibióticos.", "Sí, todos los tratamientos deben ser registrados.", "No, es opcional."],
+                    answer: "Sí, todos los tratamientos deben ser registrados."
+                },
+                {
+                    question: "El sacrificio humanitario busca...",
+                    options: ["Aumentar la producción.", "Reducir costos.", "Minimizar el dolor y el sufrimiento del animal.", "Facilitar el proceso para el operario."],
+                    answer: "Minimizar el dolor y el sufrimiento del animal."
+                }
+            ]
+        },
+        {
+            title: "Módulo 4: Prácticas Clave de Manejo",
+            summary: `<h4>Del Papel a la Práctica</h4>
+<p>La implementación de buenas prácticas de manejo es la forma más efectiva de asegurar el bienestar animal en el día a día. A continuación, se detallan algunas de las áreas más importantes:</p>
+<h4>Calidad del Agua</h4>
+<p>Es el factor más crítico. Se debe monitorear constantemente los parámetros fisicoquímicos clave. Según la especie, los valores de referencia pueden variar, pero generalmente se debe controlar:</p>
+<ul>
+    <li><strong>Temperatura:</strong> Mantenerla en el rango óptimo para la especie (ej. 24-32 °C para Tilapias).</li>
+    <li><strong>Oxígeno Disuelto:</strong> Niveles adecuados son vitales para evitar la asfixia (generalmente > 4 mg/l).</li>
+    <li><strong>pH:</strong> Mantenerlo en un rango estable y adecuado (ej. 6.0 - 9.0).</li>
+    <li><strong>Turbidez:</strong> El exceso de sólidos en suspensión puede afectar las branquias.</li>
+</ul>
+<h4>Manejo y Captura</h4>
+<p>Cualquier manipulación es una fuente de estrés. Los procesos de captura, clasificación o traslado deben ser rápidos y cuidadosos. Se debe evitar el hacinamiento prolongado y el uso de herramientas que puedan causar lesiones, heridas o aplastamiento. El tiempo que los peces pasan fuera del agua debe ser el mínimo indispensable.</p>
+<h4>Densidad Poblacional</h4>
+<p>Una sobrepoblación en los estanques o jaulas genera competencia por el alimento y el espacio, deteriora la calidad del agua y aumenta el estrés y la agresividad. Se deben respetar las densidades recomendadas para cada sistema productivo y especie (ej. Estanque: ~2 kg/m², Jaulas flotantes: ~10 kg/m³).</p>`,
+            quiz: [
+                {
+                    question: "¿Qué se debe evitar durante el proceso de captura de los peces?",
+                    options: ["La rapidez.", "El uso de redes.", "Largos periodos de hacinamiento y lesiones.", "La supervisión del personal."],
+                    answer: "Largos periodos de hacinamiento y lesiones."
+                },
+                {
+                    question: "Una alta densidad poblacional en los estanques puede causar...",
+                    options: ["Mayor crecimiento.", "Estrés y competencia por recursos.", "Mejor coloración en los peces.", "Menor necesidad de alimento."],
+                    answer: "Estrés y competencia por recursos."
+                },
+                {
+                    question: "La capacitación del personal en temas de bienestar animal es un componente clave para el éxito de un plan de manejo.",
+                    options: ["Verdadero", "Falso"],
+                    answer: "Verdadero"
+                }
+            ]
+        }
+    ];
+
+    let currentModuleIndex = 0;
+    let quizSubmitted = false;
+
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const moduleTitle = document.getElementById('module-title');
+    const moduleSummary = document.getElementById('module-summary');
+    const quizForm = document.getElementById('quiz-form');
+    const navButton = document.getElementById('nav-button');
+    const feedbackContainer = document.getElementById('feedback-container');
+    const feedbackText = document.getElementById('feedback-text');
+
+    function loadModule(moduleIndex) {
+        const module = courseData[moduleIndex];
+        quizSubmitted = false;
+
+        moduleTitle.textContent = module.title;
+        moduleSummary.innerHTML = module.summary; // Changed to innerHTML
+
+        quizForm.innerHTML = '';
+        module.quiz.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'quiz-question';
+            
+            let optionsHtml = '';
+            q.options.forEach(opt => {
+                optionsHtml += `
+                    <label>
+                        <input type="radio" name="question${index}" value="${opt}" required>
+                        ${opt}
+                    </label>
+                `;
+            });
+
+            questionDiv.innerHTML = `
+                <p>${index + 1}. ${q.question}</p>
+                <div class="quiz-options" id="q-options-${index}">${optionsHtml}</div>
+            `;
+            quizForm.appendChild(questionDiv);
+        });
+
+        updateProgress();
+        navButton.textContent = 'Comprobar Respuestas';
+        feedbackContainer.classList.add('hidden');
+    }
+
+    function updateProgress() {
+        const progressPercentage = ((currentModuleIndex) / courseData.length) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+        progressText.textContent = `Progreso: ${Math.round(progressPercentage)}%`;
+    }
+
+    function handleSubmit() {
+        if (quizSubmitted) {
+            // Navigate to next module
+            currentModuleIndex++;
+            if (currentModuleIndex < courseData.length) {
+                loadModule(currentModuleIndex);
+            } else {
+                showCompletionScreen();
+            }
+        } else {
+            // Check answers
+            if (quizForm.checkValidity()) {
+                checkAnswers();
+                quizSubmitted = true;
+                if (currentModuleIndex < courseData.length - 1) {
+                    navButton.textContent = 'Siguiente Módulo';
+                } else {
+                    navButton.textContent = 'Finalizar Curso';
+                }
+                 const finalProgress = ((currentModuleIndex + 1) / courseData.length) * 100;
+                 progressBar.style.width = `${finalProgress}%`;
+                 progressText.textContent = `Progreso: ${Math.round(finalProgress)}%`;
+            } else {
+                alert("Por favor, responde todas las preguntas.");
+            }
+        }
+    }
+
+    function checkAnswers() {
+        const module = courseData[currentModuleIndex];
+        let correctCount = 0;
+
+        module.quiz.forEach((q, index) => {
+            const selectedOption = quizForm.querySelector(`input[name="question${index}"]:checked`);
+            const optionsContainer = document.getElementById(`q-options-${index}`);
+            
+            // Disable further changes
+            optionsContainer.querySelectorAll('input').forEach(input => input.disabled = true);
+
+            if (selectedOption && selectedOption.value === q.answer) {
+                correctCount++;
+                selectedOption.parentElement.classList.add('correct-answer');
+            } else {
+                selectedOption.parentElement.classList.add('incorrect-answer');
+                // Also show the correct answer
+                const correctInput = optionsContainer.querySelector(`input[value='''${q.answer}''']`);
+                if(correctInput) {
+                    correctInput.parentElement.classList.add('correct-answer');
+                }
+            }
+        });
+
+        const totalQuestions = module.quiz.length;
+        feedbackText.textContent = `Obtuviste ${correctCount} de ${totalQuestions} respuestas correctas.`;
+        feedbackContainer.className = 'feedback-container'; // remove hidden
+        feedbackContainer.classList.add(correctCount === totalQuestions ? 'correct' : 'incorrect');
+    }
+
+    function showCompletionScreen() {
+        const courseContent = document.getElementById('course-content');
+        courseContent.innerHTML = `
+            <h2>¡Felicidades!</h2>
+            <p>Has completado el curso de Bienestar Animal en Acuicultura.</p>
+            <p>Has finalizado todos los módulos y tests. Ahora tienes una mejor comprensión de las normativas y mejores prácticas para garantizar el bienestar de los animales acuáticos.</p>
+        `;
+        navButton.style.display = 'none';
+        progressText.textContent = "Completado: 100%";
+    }
+
+    navButton.addEventListener('click', handleSubmit);
+
+    // Initial load
+    loadModule(currentModuleIndex);
+});
+    </script>
+</body>
+</html>
