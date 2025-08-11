@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Amonio No Ionizado</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .input-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .results-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .results-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .result-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .result-unit {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-left: 5px;
+        }
+
+        .charts-section {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .chart-container h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .info-section {
+            grid-column: 1 / -1;
+            background: #e8f4fd;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #bee5eb;
+            margin-top: 20px;
+        }
+
+        .info-section h3 {
+            color: #0c5460;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .info-section p {
+            color: #0c5460;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .warning i {
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .result-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-flask"></i> Calculadora de Amonio No Ionizado</h1>
+            <p>Calcule el porcentaje de amonio no ionizado (NH₃) a partir de amonio total, temperatura y pH</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2><i class="fas fa-cog"></i> Parámetros de Entrada</h2>
+                
+                <div class="form-group">
+                    <label for="amonioTotal">Amonio Total (TAN) - mg/L:</label>
+                    <input type="number" id="amonioTotal" step="0.01" placeholder="Ej: 2.5" value="2.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="temperatura">Temperatura - °C:</label>
+                    <input type="number" id="temperatura" step="0.1" placeholder="Ej: 25" value="25">
+                </div>
+
+                <div class="form-group">
+                    <label for="ph">pH:</label>
+                    <input type="number" id="ph" step="0.01" placeholder="Ej: 7.5" value="7.5">
+                </div>
+
+                <button class="calculate-btn" onclick="calcular()">
+                    <i class="fas fa-calculator"></i> Calcular
+                </button>
+
+                <div class="loading" id="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Calculando...</p>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2><i class="fas fa-chart-line"></i> Resultados</h2>
+                
+                <div class="result-card">
+                    <h3>Porcentaje de Amonio No Ionizado</h3>
+                    <div class="result-value" id="porcentajeNH3">0.00<span class="result-unit">%</span></div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Concentración de NH₃</h3>
+                    <div class="result-value" id="concentracionNH3">0.00<span class="result-unit">mg/L</span></div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Concentración de NH₄⁺</h3>
+                    <div class="result-value" id="concentracionNH4">0.00<span class="result-unit">mg/L</span></div>
+                </div>
+
+                <div class="result-card">
+                    <h3>pKa Calculado</h3>
+                    <div class="result-value" id="pKa">0.00<span class="result-unit"></span></div>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-container">
+                    <h3>Distribución de Amonio</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="distribucionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Efecto del pH en el Porcentaje de NH₃</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="phChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Efecto de la Temperatura en el Porcentaje de NH₃</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="temperaturaChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Relación entre Parámetros</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="relacionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3><i class="fas fa-info-circle"></i> Información Importante</h3>
+                <p><strong>Fórmulas utilizadas:</strong></p>
+                <p>• pKa = 0.09018 + 2729.92 / T (donde T es temperatura en Kelvin)</p>
+                <p>• Fracción NH₃ = 1 / (10^(pKa - pH) + 1)</p>
+                <p>• Porcentaje NH₃ = Fracción NH₃ × 100</p>
+                <p>• Concentración NH₃ = Amonio Total × Fracción NH₃</p>
+                <p>• Concentración NH₄⁺ = Amonio Total × (1 - Fracción NH₃)</p>
+                
+                <div class="warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Advertencia:</strong> El amonio no ionizado (NH₃) es aproximadamente 100-300 veces más tóxico para los organismos acuáticos que el amonio ionizado (NH₄⁺). Niveles superiores a 0.02 mg/L de NH₃ pueden ser peligrosos para muchas especies de peces.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let distribucionChart, phChart, temperaturaChart, relacionChart;
+
+        function calcular() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            setTimeout(() => {
+                const amonioTotal = parseFloat(document.getElementById('amonioTotal').value);
+                const temperaturaC = parseFloat(document.getElementById('temperatura').value);
+                const ph = parseFloat(document.getElementById('ph').value);
+
+                if (isNaN(amonioTotal) || isNaN(temperaturaC) || isNaN(ph)) {
+                    alert('Por favor, ingrese valores numéricos válidos en todos los campos.');
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                // Convertir temperatura a Kelvin
+                const temperaturaK = temperaturaC + 273.15;
+
+                // Calcular pKa
+                const pKa = 0.09018 + 2729.92 / temperaturaK;
+
+                // Calcular fracción de NH3
+                const fraccionNH3 = 1 / (Math.pow(10, pKa - ph) + 1);
+
+                // Calcular porcentaje
+                const porcentajeNH3 = fraccionNH3 * 100;
+
+                // Calcular concentraciones
+                const concentracionNH3 = amonioTotal * fraccionNH3;
+                const concentracionNH4 = amonioTotal * (1 - fraccionNH3);
+
+                // Actualizar resultados
+                document.getElementById('porcentajeNH3').innerHTML = porcentajeNH3.toFixed(3) + '<span class="result-unit">%</span>';
+                document.getElementById('concentracionNH3').innerHTML = concentracionNH3.toFixed(4) + '<span class="result-unit">mg/L</span>';
+                document.getElementById('concentracionNH4').innerHTML = concentracionNH4.toFixed(4) + '<span class="result-unit">mg/L</span>';
+                document.getElementById('pKa').innerHTML = pKa.toFixed(4) + '<span class="result-unit"></span>';
+
+                // Actualizar gráficos
+                actualizarGraficos(amonioTotal, temperaturaC, ph, porcentajeNH3, concentracionNH3, concentracionNH4);
+
+                loading.style.display = 'none';
+            }, 500);
+        }
+
+        function actualizarGraficos(amonioTotal, temperaturaC, ph, porcentajeNH3, concentracionNH3, concentracionNH4) {
+            // Gráfico de distribución
+            const ctx1 = document.getElementById('distribucionChart').getContext('2d');
+            if (distribucionChart) distribucionChart.destroy();
+            
+            distribucionChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['NH₃ (No Ionizado)', 'NH₄⁺ (Ionizado)'],
+                    datasets: [{
+                        data: [concentracionNH3, concentracionNH4],
+                        backgroundColor: ['#e74c3c', '#3498db'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de efecto del pH
+            const ctx2 = document.getElementById('phChart').getContext('2d');
+            if (phChart) phChart.destroy();
+            
+            const phValues = [];
+            const phPorcentajes = [];
+            for (let p = 6; p <= 10; p += 0.2) {
+                const tempK = temperaturaC + 273.15;
+                const pKaCalc = 0.09018 + 2729.92 / tempK;
+                const frac = 1 / (Math.pow(10, pKaCalc - p) + 1);
+                phValues.push(p.toFixed(1));
+                phPorcentajes.push(frac * 100);
+            }
+
+            phChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: phValues,
+                    datasets: [{
+                        label: '% NH₃',
+                        data: phPorcentajes,
+                        borderColor: '#9b59b6',
+                        backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'pH'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '% NH₃'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de efecto de la temperatura
+            const ctx3 = document.getElementById('temperaturaChart').getContext('2d');
+            if (temperaturaChart) temperaturaChart.destroy();
+            
+            const tempValues = [];
+            const tempPorcentajes = [];
+            for (let t = 0; t <= 40; t += 2) {
+                const tempK = t + 273.15;
+                const pKaCalc = 0.09018 + 2729.92 / tempK;
+                const frac = 1 / (Math.pow(10, pKaCalc - ph) + 1);
+                tempValues.push(t);
+                tempPorcentajes.push(frac * 100);
+            }
+
+            temperaturaChart = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: tempValues,
+                    datasets: [{
+                        label: '% NH₃',
+                        data: tempPorcentajes,
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Temperatura (°C)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '% NH₃'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de relación entre parámetros
+            const ctx4 = document.getElementById('relacionChart').getContext('2d');
+            if (relacionChart) relacionChart.destroy();
+            
+            relacionChart = new Chart(ctx4, {
+                type: 'radar',
+                data: {
+                    labels: ['Amonio Total', 'Temperatura', 'pH', '% NH₃', 'NH₃ (mg/L)'],
+                    datasets: [{
+                        label: 'Valores Actuales',
+                        data: [
+                            amonioTotal / 10, // Escalado para mejor visualización
+                            temperaturaC / 10,
+                            ph,
+                            porcentajeNH3 / 10,
+                            concentracionNH3 * 10
+                        ],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                        pointBackgroundColor: '#27ae60',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#27ae60'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Calcular al cargar la página
+        window.onload = function() {
+            calcular();
+        };
+
+        // Calcular al cambiar cualquier input
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = ['amonioTotal', 'temperatura', 'ph'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', calcular);
+            });
+        });
+    </script>
+</body>
+</html>
