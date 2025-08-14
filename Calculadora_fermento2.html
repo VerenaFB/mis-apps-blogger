@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Protocolo de Fermentación</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Usamos Inter como fuente principal, definida a través de Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo para que los input number no muestren las flechas de subir/bajar */
+        input[type='number']::-webkit-outer-spin-button,
+        input[type='number']::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type='number'] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <!-- Encabezado -->
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Calculadora de Protocolo de Fermentación</h1>
+            <p class="mt-2 text-md md:text-lg text-slate-600 max-w-2xl mx-auto">Herramienta para el cálculo preciso de componentes según el volumen de agua y parámetros base ajustables.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+            <!-- Columna Izquierda: Parámetros y Cronograma -->
+            <div class="lg:col-span-1 flex flex-col gap-8">
+                
+                <!-- Card: Parámetros y Configuración -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-3 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 16v-2m8-8h-2M4 12H2m15.364 6.364l-1.414-1.414M6.05 6.05L4.636 4.636m12.728 0l-1.414 1.414M6.05 17.95l-1.414 1.414M12 18a6 6 0 100-12 6 6 0 000 12z" />
+                        </svg>
+                        <h2 class="text-xl font-semibold text-slate-900">Parámetros y Configuración</h2>
+                    </div>
+
+                    <div>
+                        <label for="total-volume" class="block text-sm font-medium text-slate-600 mb-2">Volumen Total de Agua (Litros)</label>
+                        <input type="number" id="total-volume" value="1000" min="0" class="w-full p-3 text-2xl font-bold text-center text-blue-600 bg-slate-100 rounded-lg border-2 border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-slate-200">
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Cantidades Base (por 100 L)</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between items-center"><span class="text-slate-600">Salvado de Arroz (kg)</span><span class="font-semibold text-slate-800" id="base-rice-bran"></span></div>
+                            <div class="flex justify-between items-center"><span class="text-slate-600">Hipoclorito Sodio 13% (ml)</span><span class="font-semibold text-slate-800" id="base-hypochlorite"></span></div>
+                            <div class="flex justify-between items-center"><span class="text-slate-600">Tiosulfato de Sodio (g)</span><span class="font-semibold text-slate-800" id="base-thiosulfate"></span></div>
+                            <div class="flex justify-between items-center"><span class="text-slate-600">Sanolife Pro W (g)</span><span class="font-semibold text-slate-800" id="base-sanolife"></span></div>
+                            <div class="flex justify-between items-center"><span class="text-slate-600">Melaza (g)</span><span class="font-semibold text-slate-800" id="base-molasses"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Cronograma del Proceso -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                     <div class="flex items-center gap-3 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <h2 class="text-xl font-semibold text-slate-900">Cronograma del Proceso</h2>
+                    </div>
+                    <div class="relative pl-8 border-l-2 border-slate-200 space-y-6">
+                        <!-- Paso 1 -->
+                        <div class="relative">
+                            <div class="absolute -left-[2.1rem] top-1 h-8 w-8 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold ring-4 ring-white">1</div>
+                            <p class="text-slate-600">Mezclar agua y salvado. Desinfectar con Hipoclorito.</p>
+                        </div>
+                        <!-- Paso 2 -->
+                        <div class="relative">
+                            <div class="absolute -left-[2.1rem] top-1 h-8 w-8 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold ring-4 ring-white">2</div>
+                            <p class="text-slate-600">Verificar cloro. Aplicar Tiosulfato (si es necesario), Sanolife y Melaza.</p>
+                        </div>
+                        <!-- Paso 3 -->
+                        <div class="relative">
+                            <div class="absolute -left-[2.1rem] top-1 h-8 w-8 bg-blue-600 rounded-full text-white flex items-center justify-center font-bold ring-4 ring-white">3</div>
+                            <p class="text-slate-600">Período de reposo y activación del fermento.</p>
+                        </div>
+                        <!-- Paso 4 -->
+                        <div class="relative">
+                            <div class="absolute -left-[2.1rem] top-1 h-8 w-8 bg-green-500 rounded-full text-white flex items-center justify-center ring-4 ring-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <p class="font-semibold text-green-700">4: Inicio de Uso</p>
+                            <p class="text-slate-600">El fermento está listo para ser aplicado en los estanques.</p>
+                        </div>
+                        <!-- Paso 8 -->
+                        <div class="relative">
+                            <div class="absolute -left-[2.1rem] top-1 h-8 w-8 bg-red-500 rounded-full text-white flex items-center justify-center font-bold ring-4 ring-white">!</div>
+                            <p class="font-semibold text-red-700">8: Fin del Periodo de Uso</p>
+                            <p class="text-slate-600">Se recomienda desechar la mezcla y preparar un nuevo lote.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Días del Proceso -->
+            <div class="lg:col-span-2 flex flex-col gap-8">
+                <!-- Card: Día 1 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-200">
+                        <div class="flex-shrink-0 h-10 w-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">1</div>
+                        <h2 class="text-xl font-semibold text-slate-900">Día 1: Mezcla y Desinfección</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 h-10 w-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                                </div>
+                                <span class="font-medium">Salvado de Arroz</span>
+                            </div>
+                            <div class="text-lg font-bold text-blue-700 bg-blue-100 px-4 py-1 rounded-md"><span id="calc-rice-bran"></span> kg</div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 h-10 w-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                </div>
+                                <span class="font-medium">Hipoclorito (13%)</span>
+                            </div>
+                            <div class="text-lg font-bold text-blue-700 bg-blue-100 px-4 py-1 rounded-md"><span id="calc-hypochlorite"></span> ml</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Día 2 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-200">
+                        <div class="flex-shrink-0 h-10 w-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">2</div>
+                        <h2 class="text-xl font-semibold text-slate-900">Día 2: Neutralización e Inoculación</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 h-10 w-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                                </div>
+                                <span class="font-medium">Sanolife Pro W</span>
+                            </div>
+                            <div class="text-lg font-bold text-blue-700 bg-blue-100 px-4 py-1 rounded-md"><span id="calc-sanolife"></span> g</div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 h-10 w-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                </div>
+                                <span class="font-medium">Melaza</span>
+                            </div>
+                            <div class="text-lg font-bold text-blue-700 bg-blue-100 px-4 py-1 rounded-md"><span id="calc-molasses"></span> g</div>
+                        </div>
+                        
+                        <!-- Sección Condicional Tiosulfato -->
+                        <div class="mt-4 p-4 border-2 border-dashed border-amber-400 bg-amber-50 rounded-lg">
+                            <p class="text-center text-sm font-medium text-amber-700 mb-3">Aplicar solo si hay residuo de cloro</p>
+                            <div class="flex items-center justify-between bg-white p-3 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    </div>
+                                    <span class="font-medium">Tiosulfato de Sodio</span>
+                                </div>
+                                <div class="text-lg font-bold text-amber-800 bg-amber-200 px-4 py-1 rounded-md"><span id="calc-thiosulfate"></span> g</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. Definición de Parámetros Base (por 100 L) ---
+            const baseValues = {
+                riceBran: 1.0,      // kg
+                hypochlorite: 2.8,  // ml
+                thiosulfate: 0.8,   // g (Valor ajustado según solicitud)
+                sanolife: 3.5,      // g
+                molasses: 265       // g
+            };
+
+            // --- 2. Selección de Elementos del DOM ---
+            const totalVolumeInput = document.getElementById('total-volume');
+            
+            // Elementos para mostrar valores base
+            const baseElements = {
+                riceBran: document.getElementById('base-rice-bran'),
+                hypochlorite: document.getElementById('base-hypochlorite'),
+                thiosulfate: document.getElementById('base-thiosulfate'),
+                sanolife: document.getElementById('base-sanolife'),
+                molasses: document.getElementById('base-molasses')
+            };
+
+            // Elementos para mostrar resultados calculados
+            const calculatedElements = {
+                riceBran: document.getElementById('calc-rice-bran'),
+                hypochlorite: document.getElementById('calc-hypochlorite'),
+                thiosulfate: document.getElementById('calc-thiosulfate'),
+                sanolife: document.getElementById('calc-sanolife'),
+                molasses: document.getElementById('calc-molasses')
+            };
+
+            // --- 3. Función Principal de Cálculo y Actualización ---
+            function calculateAndDisplay() {
+                // Obtener el volumen y asegurar que sea un número válido
+                const totalVolume = parseFloat(totalVolumeInput.value) || 0;
+                
+                // El factor de cálculo se basa en la proporción por cada 100 litros
+                const factor = totalVolume / 100;
+
+                // Iterar sobre los valores base para calcular y mostrar los resultados
+                for (const key in baseValues) {
+                    if (Object.hasOwnProperty.call(baseValues, key)) {
+                        const calculatedValue = (baseValues[key] * factor).toFixed(2);
+                        calculatedElements[key].textContent = calculatedValue;
+                    }
+                }
+            }
+
+            // --- 4. Función de Inicialización ---
+            function initializeApp() {
+                // Mostrar los valores base en la UI con sus unidades
+                baseElements.riceBran.textContent = `${baseValues.riceBran.toFixed(1)} kg`;
+                baseElements.hypochlorite.textContent = `${baseValues.hypochlorite.toFixed(1)} ml`;
+                baseElements.thiosulfate.textContent = `${baseValues.thiosulfate.toFixed(1)} g`;
+                baseElements.sanolife.textContent = `${baseValues.sanolife.toFixed(1)} g`;
+                baseElements.molasses.textContent = `${baseValues.molasses.toFixed(0)} g`;
+
+                // Añadir el listener al input para recalcular en cada cambio
+                totalVolumeInput.addEventListener('input', calculateAndDisplay);
+
+                // Realizar el primer cálculo al cargar la página con el valor por defecto
+                calculateAndDisplay();
+            }
+
+            // --- 5. Ejecutar la Inicialización de la App ---
+            initializeApp();
+        });
+    </script>
+
+</body>
+</html>
