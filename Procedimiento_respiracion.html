@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Medición de la Respiración en Estanques Acuícolas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        :root {
+            --bg-main: #f0f7f4;
+            --text-dark: #001219;
+            --primary: #005f73;
+            --secondary: #0a9396;
+            --accent: #ee9b00;
+            --card-bg: #ffffff;
+        }
+        .flowchart-step {
+            position: relative;
+            padding-bottom: 2.5rem; 
+        }
+        .flowchart-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 55px;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--secondary);
+            opacity: 0.5;
+        }
+        .flowchart-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.5rem;
+            z-index: 10;
+            border: 4px solid var(--bg-main);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 200px;
+            max-height: 250px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[--bg-main] text-[--text-dark]">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-[--primary] mb-2">¿Qué tan Saludable es tu Estanque?</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Una guía visual para medir la respiración del agua y del sedimento, un indicador clave de la salud del ecosistema acuícola.</p>
+        </header>
+
+        <main class="space-y-16">
+
+            <section id="materials" class="bg-[--card-bg] p-6 md:p-8 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold text-[--primary] text-center mb-8">🧪 Herramientas del Oficio</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 text-center">
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">📏</span><span class="font-bold">Tubos de PVC</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">🌡️</span><span class="font-bold">Oxímetro</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">🧢</span><span class="font-bold">Tapas</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">⏱️</span><span class="font-bold">Cronómetro</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">📝</span><span class="font-bold">Bitácora</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">📐</span><span class="font-bold">Cinta Métrica</span></div>
+                </div>
+            </section>
+
+            <section id="procedure">
+                <h2 class="text-3xl font-bold text-[--primary] text-center mb-12">🗺️ El Procedimiento: Paso a Paso</h2>
+                <div class="max-w-3xl mx-auto">
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">1</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Selección del Sitio</h3>
+                        <p class="text-gray-700">Elige un área representativa del estanque, lejos de bordes, entradas de agua o zonas de alimentación directa para obtener una muestra precisa.</p>
+                    </div>
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">2</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Instalación de Núcleos</h3>
+                        <p class="text-gray-700">Instala dos tubos: uno sellado en el fondo (para medir la respiración de la columna de agua, RC) y otro abierto y enterrado 10 cm en el sedimento (para medir la respiración total, RC + RF).</p>
+                    </div>
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">3</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Medición Inicial (T₀)</h3>
+                        <p class="text-gray-700">Tras esperar 5-10 minutos para que el sistema se estabilice, mide y registra la concentración de oxígeno disuelto inicial en ambos tubos.</p>
+                    </div>
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">4</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Incubación</h3>
+                        <p class="text-gray-700">Sella ambos tubos con tapas y déjalos incubar por un período de 1 a 3 horas. Esto aísla las muestras y permite medir el consumo de oxígeno.</p>
+                    </div>
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">5</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Medición Final (T₁)</h3>
+                        <p class="text-gray-700">Al finalizar el tiempo, retira las tapas y mide inmediatamente la concentración de oxígeno final en cada tubo. ¡No olvides registrar la hora!</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="interpretation">
+                <h2 class="text-3xl font-bold text-[--primary] text-center mb-2">📈 Interpretando los Resultados</h2>
+                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Una tasa de respiración alta indica una elevada carga orgánica. Esto puede agotar el oxígeno disponible y generar estrés o mortalidad en los peces.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-[--card-bg] p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold text-[--secondary] mb-2">Respiración de la Columna de Agua (RC)</h3>
+                        <p class="text-gray-600 mb-4">Refleja la actividad de plancton y bacterias. Una RC alta puede ser por exceso de alimento o floraciones algales.</p>
+                        <div class="chart-container">
+                            <canvas id="rcGauge"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-[--card-bg] p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold text-[--secondary] mb-2">Respiración del Sedimento (RF)</h3>
+                        <p class="text-gray-600 mb-4">Indica la acumulación de materia orgánica en el fondo. Una RF alta es señal de un fondo en mal estado.</p>
+                        <div class="chart-container">
+                            <canvas id="rfGauge"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-300">
+            <p class="text-gray-500">La monitorización regular de RC y RF es una herramienta poderosa para la gestión proactiva de la calidad del agua en la acuicultura.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const tooltipCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const createGauge = (canvasId, label, value) => {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [label],
+                    datasets: [
+                        { label: 'Bajo', data: [0.1], backgroundColor: '#94d2bd', borderWidth: 0, barPercentage: 1.0, categoryPercentage: 1.0 },
+                        { label: 'Moderado', data: [0.2], backgroundColor: '#e9d8a6', borderWidth: 0, barPercentage: 1.0, categoryPercentage: 1.0 },
+                        { label: 'Alto', data: [0.2], backgroundColor: '#ae2012', borderWidth: 0, barPercentage: 1.0, categoryPercentage: 1.0 },
+                        {
+                            label: 'Valor de Ejemplo',
+                            data: [value],
+                            backgroundColor: '#001219',
+                            borderColor: 'white',
+                            borderWidth: 2,
+                            type: 'scatter',
+                            pointRadius: 10,
+                            pointHoverRadius: 12,
+                            pointStyle: 'triangle',
+                            rotation: 90,
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, max: 0.5, grid: { display: false }, ticks: { font: { weight: 'bold' } } },
+                        y: { stacked: true, grid: { display: false }, ticks: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: tooltipCallback.plugins.tooltip
+                    }
+                }
+            });
+        };
+        
+        window.onload = () => {
+            createGauge('rcGauge', 'RC', 0.22);
+            createGauge('rfGauge', 'RF', 0.35);
+        };
+
+    </script>
+
+</body>
+</html>

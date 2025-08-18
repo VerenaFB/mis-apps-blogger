@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe Interactivo de Respiración Acuática</title>
+    <style>
+        :root {
+            --color-primario: #005f73;
+            --color-secundario: #0a9396;
+            --color-fondo: #e9d8a6;
+            --color-texto: #333;
+            --color-claro: #ee9b00;
+            --color-alerta-baja: #2a9d8f;
+            --color-alerta-moderada: #e9c46a;
+            --color-alerta-alta: #e76f51;
+            --sombra-caja: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: var(--color-texto);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--sombra-caja);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--color-primario);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+        }
+
+        header h1 {
+            color: var(--color-primario);
+            margin: 0;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        .calculadoras-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background-color: #fdfdfd;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--sombra-caja);
+        }
+
+        .card h2 {
+            color: var(--color-secundario);
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--color-primario);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #004c5a;
+        }
+        
+        #rf-btn[disabled] {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .resultado-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+
+        .resultado-valor {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--color-primario);
+        }
+
+        .resultado-unidad {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .resultado-calificacion {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .status-bajo { background-color: var(--color-alerta-baja); }
+        .status-moderado { background-color: var(--color-alerta-moderada); color: #333; }
+        .status-alto { background-color: var(--color-alerta-alta); }
+
+        .visualizacion {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--color-primario);
+        }
+        
+        .visualizacion h2 {
+            text-align: center;
+            color: var(--color-primario);
+        }
+
+        .medidores-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .medidor-wrapper {
+            text-align: center;
+        }
+        
+        .medidor {
+            width: 200px;
+            height: 100px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 100px 100px 0 0;
+            background: linear-gradient(to right, var(--color-alerta-baja) 33%, var(--color-alerta-moderada) 33%, var(--color-alerta-moderada) 66%, var(--color-alerta-alta) 66%);
+            margin: 0 auto;
+        }
+
+        .medidor-overlay {
+            width: 160px;
+            height: 80px;
+            background: #fff;
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            border-radius: 80px 80px 0 0;
+        }
+        
+        .medidor-aguja {
+            width: 2px;
+            height: 80px;
+            background: #333;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            transition: transform 0.5s ease-in-out;
+            transform: translateX(-50%) rotate(-90deg); /* Start at -90deg */
+        }
+        
+        .medidor-etiqueta {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+            color: var(--color-secundario);
+        }
+
+        .referencia {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #eef;
+            border-left: 5px solid var(--color-secundario);
+        }
+        .referencia h3 {
+            margin-top: 0;
+        }
+        .referencia ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .calculadoras-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Informe Interactivo de Consumo de Oxígeno</h1>
+            <p>Calculadora para la Respiración de la Columna de Agua (RC) y del Sedimento (RF) en sistemas acuícolas.</p>
+        </header>
+
+        <main>
+            <div class="calculadoras-grid">
+                <div class="card">
+                    <h2>1. Respiración Columna de Agua (RC)</h2>
+                    <div class="form-group">
+                        <label for="rc-o2-inicial">Oxígeno Inicial (mg O₂/L)</label>
+                        <input type="number" id="rc-o2-inicial" placeholder="Ej: 6.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="rc-o2-final">Oxígeno Final (mg O₂/L)</label>
+                        <input type="number" id="rc-o2-final" placeholder="Ej: 6.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="rc-tiempo">Tiempo (horas)</label>
+                        <input type="number" id="rc-tiempo" placeholder="Ej: 2">
+                    </div>
+                    <button id="rc-btn" class="btn">Calcular RC</button>
+                    <div id="rc-resultado-area" class="resultado-area" style="display: none;">
+                        <span id="rc-resultado-valor" class="resultado-valor"></span>
+                        <span class="resultado-unidad">mg O₂/L/h</span>
+                        <div id="rc-resultado-calificacion" class="resultado-calificacion"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>2. Respiración del Sedimento (RF)</h2>
+                    <div class="form-group">
+                        <label for="rf-o2-inicial">Oxígeno Inicial (mg O₂/L)</label>
+                        <input type="number" id="rf-o2-inicial" placeholder="Ej: 6.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="rf-o2-final">Oxígeno Final (mg O₂/L)</label>
+                        <input type="number" id="rf-o2-final" placeholder="Ej: 5.8">
+                    </div>
+                    <div class="form-group">
+                        <label for="rf-tiempo">Tiempo (horas)</label>
+                        <input type="number" id="rf-tiempo" placeholder="Ej: 2">
+                    </div>
+                    <button id="rf-btn" class="btn" disabled>Calcular RF</button>
+                    <div id="rf-resultado-area" class="resultado-area" style="display: none;">
+                        <span id="rf-resultado-valor" class="resultado-valor"></span>
+                        <span class="resultado-unidad">mg O₂/L/h</span>
+                        <div id="rf-resultado-calificacion" class="resultado-calificacion"></div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="visualizacion">
+                <h2>Visualización de Resultados</h2>
+                <div class="medidores-container">
+                    <div class="medidor-wrapper">
+                        <div class="medidor">
+                           <div class="medidor-overlay"></div>
+                           <div id="rc-aguja" class="medidor-aguja"></div>
+                        </div>
+                        <div class="medidor-etiqueta">RC</div>
+                    </div>
+                    <div class="medidor-wrapper">
+                        <div class="medidor">
+                            <div class="medidor-overlay"></div>
+                            <div id="rf-aguja" class="medidor-aguja"></div>
+                        </div>
+                         <div class="medidor-etiqueta">RF</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="referencia">
+                <h3>Interpretación de Valores de Referencia</h3>
+                <p>Los valores de consumo de oxígeno son indicadores clave de la carga orgánica y la salud del ecosistema del estanque. Los rangos aquí presentados son una guía general basada en publicaciones técnicas para acuicultura semi-intensiva e intensiva.</p>
+                <ul>
+                    <li><strong style="color: var(--color-alerta-baja);">Bajo (&lt; 0.1 mg O₂/L/h):</strong> Indica una baja carga orgánica y un bajo consumo de oxígeno por parte del plancton y las bacterias (RC) o del sedimento (RF). Es una condición ideal que sugiere un buen manejo del alimento y una buena calidad del fondo.</li>
+                    <li><strong style="color: var(--color-alerta-moderada);">Moderado (0.1 - 0.3 mg O₂/L/h):</strong> Es un rango común en estanques productivos. Requiere monitoreo, ya que un aumento en la carga orgánica (exceso de alimento, alta biomasa) puede elevar el consumo y generar condiciones de hipoxia, especialmente durante la noche.</li>
+                    <li><strong style="color: var(--color-alerta-alta);">&gt; 0.3 mg O₂/L/h):</strong> Señal de alerta. Un alto consumo de oxígeno indica una elevada carga de materia orgánica en descomposición. Esto aumenta significativamente el riesgo de caídas drásticas de oxígeno disuelto, pudiendo causar estrés o mortalidad en los organismos cultivados. Es necesario tomar medidas correctivas como mejorar la aireación, controlar la alimentación o realizar recambios de agua.</li>
+                </ul>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Almacenamiento del valor de RC para uso en RF
+        let valorRC = null;
+
+        // Elementos del DOM
+        const rcBtn = document.getElementById('rc-btn');
+        const rfBtn = document.getElementById('rf-btn');
+
+        // Inputs RC
+        const rcO2Inicial = document.getElementById('rc-o2-inicial');
+        const rcO2Final = document.getElementById('rc-o2-final');
+        const rcTiempo = document.getElementById('rc-tiempo');
+        
+        // Inputs RF
+        const rfO2Inicial = document.getElementById('rf-o2-inicial');
+        const rfO2Final = document.getElementById('rf-o2-final');
+        const rfTiempo = document.getElementById('rf-tiempo');
+
+        // Áreas de resultado
+        const rcResultadoArea = document.getElementById('rc-resultado-area');
+        const rcResultadoValor = document.getElementById('rc-resultado-valor');
+        const rcResultadoCalificacion = document.getElementById('rc-resultado-calificacion');
+        
+        const rfResultadoArea = document.getElementById('rf-resultado-area');
+        const rfResultadoValor = document.getElementById('rf-resultado-valor');
+        const rfResultadoCalificacion = document.getElementById('rf-resultado-calificacion');
+
+        // Agujas de medidores
+        const rcAguja = document.getElementById('rc-aguja');
+        const rfAguja = document.getElementById('rf-aguja');
+
+        // Función para calificar y colorear el resultado
+        function calificarResultado(valor) {
+            if (valor < 0.1) {
+                return { texto: 'Bajo', clase: 'status-bajo' };
+            } else if (valor >= 0.1 && valor <= 0.3) {
+                return { texto: 'Moderado', clase: 'status-moderado' };
+            } else {
+                return { texto: 'Alto', clase: 'status-alto' };
+            }
+        }
+
+        // Función para actualizar el medidor
+        function actualizarMedidor(agujaElement, valor) {
+            const maxValor = 0.5; // El valor máximo del medidor para el rango de rotación
+            const valorLimitado = Math.max(0, Math.min(valor, maxValor));
+            const grados = (valorLimitado / maxValor) * 180 - 90; // Mapea 0-0.5 a -90 a 90 grados
+            agujaElement.style.transform = `translateX(-50%) rotate(${grados}deg)`;
+        }
+
+        // Event Listener para el cálculo de RC
+        rcBtn.addEventListener('click', () => {
+            const o2i = parseFloat(rcO2Inicial.value);
+            const o2f = parseFloat(rcO2Final.value);
+            const t = parseFloat(rcTiempo.value);
+
+            if (isNaN(o2i) || isNaN(o2f) || isNaN(t) || t <= 0) {
+                alert('Por favor, ingrese valores numéricos válidos. El tiempo debe ser mayor a cero.');
+                return;
+            }
+            if(o2f > o2i) {
+                alert('El oxígeno final no puede ser mayor que el oxígeno inicial.');
+                return;
+            }
+
+            valorRC = (o2i - o2f) / t;
+            
+            const calificacion = calificarResultado(valorRC);
+
+            rcResultadoValor.textContent = valorRC.toFixed(3);
+            rcResultadoCalificacion.textContent = calificacion.texto;
+            rcResultadoCalificacion.className = 'resultado-calificacion ' + calificacion.clase;
+            rcResultadoArea.style.display = 'block';
+
+            // Habilitar el botón de RF
+            rfBtn.disabled = false;
+            
+            // Actualizar visualización
+            actualizarMedidor(rcAguja, valorRC);
+        });
+
+        // Event Listener para el cálculo de RF
+        rfBtn.addEventListener('click', () => {
+            if (valorRC === null) {
+                alert('Debe calcular primero la Respiración de la Columna de Agua (RC).');
+                return;
+            }
+
+            const o2i = parseFloat(rfO2Inicial.value);
+            const o2f = parseFloat(rfO2Final.value);
+            const t = parseFloat(rfTiempo.value);
+
+            if (isNaN(o2i) || isNaN(o2f) || isNaN(t) || t <= 0) {
+                alert('Por favor, ingrese valores numéricos válidos para RF. El tiempo debe ser mayor a cero.');
+                return;
+            }
+            if(o2f > o2i) {
+                alert('El oxígeno final no puede ser mayor que el oxígeno inicial.');
+                return;
+            }
+
+            const consumoTotal = (o2i - o2f) / t;
+            const valorRF = consumoTotal - valorRC;
+
+            if (valorRF < 0) {
+                alert('El resultado de RF es negativo, lo cual es inusual. Verifique los datos de entrada. Puede indicar una producción neta de oxígeno en el fondo (fotosíntesis bentónica) o un error de medición.');
+            }
+
+            const calificacion = calificarResultado(valorRF);
+
+            rfResultadoValor.textContent = valorRF.toFixed(3);
+            rfResultadoCalificacion.textContent = calificacion.texto;
+            rfResultadoCalificacion.className = 'resultado-calificacion ' + calificacion.clase;
+            rfResultadoArea.style.display = 'block';
+
+            // Actualizar visualización
+            actualizarMedidor(rfAguja, valorRF);
+        });
+    </script>
+</body>
+</html>
+```
