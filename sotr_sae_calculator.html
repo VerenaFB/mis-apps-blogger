@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora SOTR y SAE (Corregida)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(79, 172, 254, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #4facfe;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4facfe;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .unit {
+            color: #666;
+            font-size: 0.9rem;
+            margin-left: 5px;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .result-title {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .result-unit {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+            position: relative;
+        }
+
+        .formula-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .formula-title {
+            font-size: 1.2rem;
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 0.9rem;
+            border: 1px solid #e1e5e9;
+        }
+
+        .reference {
+            font-size: 0.8rem;
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .result-value {
+                font-size: 1.5rem;
+            }
+            
+            body {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .input-section, .results-section {
+                padding: 20px;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        .info-panel {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff8a65;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: #bf360c;
+            margin-bottom: 10px;
+        }
+
+        .info-text {
+            color: #5d4037;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Calculadora SOTR y SAE</h1>
+            <p>Herramienta para el cálculo de la Tasa Patrón de Transferencia de Oxígeno y Eficiencia del Aireador</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">🔧 Parámetros de Entrada</h2>
+                
+                <div class="info-panel">
+                    <div class="info-title">ℹ️ Información del Test</div>
+                    <div class="info-text">
+                        Ingrese los datos obtenidos del test de transferencia de oxígeno según la metodología de Boyd y Ahman (1987).
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="t10">⏱️ Tiempo para alcanzar 10% de saturación <span class="unit">(segundos)</span></label>
+                    <input type="number" id="t10" step="1" placeholder="Ej: 150">
+                </div>
+
+                <div class="input-group">
+                    <label for="t70">⏱️ Tiempo para alcanzar 70% de saturación <span class="unit">(segundos)</span></label>
+                    <input type="number" id="t70" step="1" placeholder="Ej: 950">
+                </div>
+
+                <div class="input-group">
+                    <label for="temperature">🌡️ Temperatura del test <span class="unit">(°C)</span></label>
+                    <input type="number" id="temperature" step="0.1" placeholder="Ej: 25.0">
+                </div>
+
+                <div class="input-group">
+                    <label for="volume">🏊 Volumen del tanque <span class="unit">(m³)</span></label>
+                    <input type="number" id="volume" step="0.1" placeholder="Ej: 100.0">
+                </div>
+
+                <div class="input-group">
+                    <label for="power">⚡ Potencia del aireador <span class="unit">(HP)</span></label>
+                    <input type="number" id="power" step="0.1" placeholder="Ej: 2.0">
+                </div>
+
+                <button class="calculate-btn" onclick="calculate()">🧮 Calcular SOTR y SAE</button>
+
+                <div class="formula-section">
+                    <div class="formula-title">📐 Fórmulas Utilizadas</div>
+                    <div class="formula">*KLaT = 1.1 / ((t₇₀ - t₁₀) / 3600)</div>
+                    <div class="formula">Kla20 = KlaT × 1.024^|20-T|</div>
+                    <div class="formula">SOTR = Kla20 × Cs × V × 10⁻³</div>
+                    <div class="formula">SAE = SOTR / Potencia(HP)</div>
+                    <div class="reference">
+                        Referencia: *Metodología (Boyd e Ahman 1987)<br>
+                        Nota: t₇₀ y t₁₀ deben estar en segundos.
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2 class="section-title">📈 Resultados</h2>
+                
+                <div id="results">
+                    <div class="info-panel">
+                        <div class="info-title">👆 Complete los datos</div>
+                        <div class="info-text">
+                            Ingrese todos los parámetros requeridos y presione "Calcular" para obtener los resultados de SOTR y SAE.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="oxygenChart"></canvas>
+                </div>
+
+                <div class="formula-section">
+                    <div class="formula-title">📚 Definiciones</div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>SOTR:</strong> Tasa Patrón de Transferencia de Oxígeno (kg O₂/h)
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>SAE:</strong> Eficiencia Patrón del Aireador (kg O₂/HP⋅h)
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Kla20:</strong> Coeficiente de transferencia de oxígeno a 20°C (h⁻¹)
+                    </div>
+                    <div class="reference">
+                        Basado en documentación "Anexos Calidad de agua" - Procedimientos estándar para acuicultura. Profesor Luis Felipe Collazos- Unillanos.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        function getOxygenSaturation(temperature) {
+            // Tabla de solubilidad del oxígeno a diferentes temperaturas (salinidad 0‰)
+            const saturationTable = {
+                0: 14.6, 1: 14.2, 2: 13.8, 3: 13.4, 4: 13.0, 5: 12.7, 6: 12.4, 7: 12.1, 8: 11.8, 9: 11.5,
+                10: 11.2, 11: 11.0, 12: 10.7, 13: 10.5, 14: 10.2, 15: 10.0, 16: 9.8, 17: 9.6, 18: 9.4, 19: 9.2,
+                20: 9.0, 21: 8.9, 22: 8.7, 23: 8.5, 24: 8.4, 25: 8.2, 26: 8.0, 27: 7.9, 28: 7.8, 29: 7.6,
+                30: 7.5, 31: 7.4, 32: 7.2, 33: 7.1, 34: 7.0, 35: 6.9, 36: 6.8, 37: 6.7, 38: 6.6, 39: 6.5, 40: 6.4
+            };
+            
+            const tempFloor = Math.floor(temperature);
+            const tempCeil = Math.ceil(temperature);
+            
+            if (tempFloor === tempCeil) {
+                return saturationTable[tempFloor] || 9.0;
+            }
+            
+            const valueLower = saturationTable[tempFloor] || 9.0;
+            const valueUpper = saturationTable[tempCeil] || 9.0;
+            const fraction = temperature - tempFloor;
+            
+            return valueLower + (valueUpper - valueLower) * fraction;
+        }
+
+        function calculate() {
+            // Tiempo en segundos
+            const t10 = parseFloat(document.getElementById('t10').value);
+            const t70 = parseFloat(document.getElementById('t70').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const volume = parseFloat(document.getElementById('volume').value);
+            const power = parseFloat(document.getElementById('power').value);
+
+            if (isNaN(t10) || isNaN(t70) || isNaN(temperature) || isNaN(volume) || isNaN(power)) {
+                document.getElementById('results').innerHTML = `<div class="error">⚠️ Error: Por favor complete todos los campos con valores numéricos válidos.</div>`;
+                return;
+            }
+
+            if (t70 <= t10) {
+                document.getElementById('results').innerHTML = `<div class="error">⚠️ Error: El tiempo para 70% debe ser mayor que el tiempo para 10% de saturación.</div>`;
+                return;
+            }
+
+            try {
+                // CORRECCIÓN 1: Unidades de tiempo en segundos
+                // Fórmula: *KLaT = 1.1 / ((t₇₀ - t₁₀) / 3600)
+                // Se divide entre 3600 para pasar de segundos a horas.
+                const KLaT = 1.1 / ((t70 - t10) / 3600);
+                
+                // CORRECCIÓN 2: Uso de valor absoluto para el exponente de temperatura
+                // Fórmula: Kla20 = KlaT × 1.024^|20-T|
+                const Kla20 = KLaT * Math.pow(1.024, Math.abs(20 - temperature));
+                
+                const Cs = 9.0; // g/m³ a 20°C y salinidad 0‰
+                
+                // SOTR (kg O₂/h)
+                const SOTR = Kla20 * Cs * volume * Math.pow(10, -3);
+                
+                // SAE usando HP
+                const SAE = SOTR / power;
+                
+                const powerKW = power * 0.745;
+
+                document.getElementById('results').innerHTML = `
+                    <div class="result-card">
+                        <div class="result-title">⚡ SOTR</div>
+                        <div class="result-value">${SOTR.toFixed(3)}</div>
+                        <div class="result-unit">kg O₂/h</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-title">🔋 SAE</div>
+                        <div class="result-value">${SAE.toFixed(3)}</div>
+                        <div class="result-unit">kg O₂/HP⋅h</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                        <div style="font-weight: 600; margin-bottom: 10px; color: #4facfe;">📊 Parámetros Calculados:</div>
+                        <div style="margin-bottom: 5px;">*KLaT: ${KLaT.toFixed(4)} h⁻¹</div>
+                        <div style="margin-bottom: 5px;">Kla20: ${Kla20.toFixed(4)} h⁻¹</div>
+                        <div style="margin-bottom: 5px;">Cs: ${Cs.toFixed(1)} g/m³ (20°C, 0‰)</div>
+                        <div style="margin-bottom: 5px;">Potencia: ${power} HP (${powerKW.toFixed(2)} kW)</div>
+                        <div style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                            SAE en kWh: ${(SOTR / powerKW).toFixed(3)} kg O₂/kWh
+                        </div>
+                    </div>
+                `;
+
+                // Crear gráfico (los tiempos se pasan en segundos)
+                createChart(t10, t70, temperature, KLaT);
+
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<div class="error">⚠️ Error en el cálculo: ${error.message}</div>`;
+            }
+        }
+
+        // t10 y t70 se reciben en segundos desde la función calculate()
+        function createChart(t10_sec, t70_sec, temperature, KLaT) {
+            const ctx = document.getElementById('oxygenChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            const t10_min = t10_sec / 60;
+            const t70_min = t70_sec / 60;
+            
+            // El eje X del gráfico se mostrará en minutos para mejor visualización
+            const maxTime = Math.max(t70_min * 1.2, 30);
+            const timePoints = [];
+            const oxygenPoints = [];
+            const Cs = getOxygenSaturation(temperature);
+
+            // Bucle 't' itera en minutos para el eje X del gráfico
+            for (let t = 0; t <= maxTime; t += 0.5) {
+                timePoints.push(t);
+                // Modelo exponencial: t se convierte a horas (t/60) para ser compatible con KLaT (h⁻¹)
+                const DO = Cs * (1 - Math.exp(-KLaT * (t / 60))) / Cs * 100; // Porcentaje de saturación
+                oxygenPoints.push(DO);
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timePoints,
+                    datasets: [{
+                        label: 'Saturación de Oxígeno (%)',
+                        data: oxygenPoints,
+                        borderColor: '#4facfe',
+                        backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Punto 10%',
+                        // Se compara 't' (en minutos) con t10_min
+                        data: timePoints.map(t => t === Math.round(t10_min * 2) / 2 ? 10 : null),
+                        backgroundColor: '#ff6b6b',
+                        borderColor: '#ff6b6b',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        showLine: false
+                    }, {
+                        label: 'Punto 70%',
+                        // Se compara 't' (en minutos) con t70_min
+                        data: timePoints.map(t => t === Math.round(t70_min * 2) / 2 ? 70 : null),
+                        backgroundColor: '#51cf66',
+                        borderColor: '#51cf66',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Curva de Transferencia de Oxígeno',
+                            font: { size: 16, weight: 'bold' },
+                            color: '#333'
+                        },
+                        legend: { display: true, position: 'top' }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Tiempo (minutos)',
+                                font: { weight: 'bold' }
+                            },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Saturación de Oxígeno (%)',
+                                font: { weight: 'bold' }
+                            },
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        }
+
+        window.addEventListener('load', function() {
+            const ctx = document.getElementById('oxygenChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Gráfico de Transferencia de Oxígeno',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        x: { display: true, title: { display: true, text: 'Tiempo (minutos)' }},
+                        y: { display: true, title: { display: true, text: 'Saturación (%)' }}
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
