@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Medición de la Respiración en Estanques Acuícolas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        :root {
+            --bg-main: #f0f7f4;
+            --text-dark: #001219;
+            --primary: #005f73;
+            --secondary: #0a9396;
+            --accent: #ee9b00;
+            --card-bg: #ffffff;
+            --status-low: #94d2bd;
+            --status-mid: #e9d8a6;
+            --status-high: #ae2012;
+        }
+        .flowchart-step {
+            position: relative;
+            padding-bottom: 2.5rem; 
+        }
+        .flowchart-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 55px;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--secondary);
+            opacity: 0.5;
+        }
+        .flowchart-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.5rem;
+            z-index: 10;
+            border: 4px solid var(--bg-main);
+        }
+    </style>
+</head>
+<body class="bg-[--bg-main] text-[--text-dark]">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-[--primary] mb-2">¿Qué tan Saludable es tu Estanque?</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Una guía visual e interactiva para medir la respiración del agua y del sedimento, un indicador clave de la salud del ecosistema acuícola.</p>
+        </header>
+
+        <main class="space-y-16">
+
+            <section id="materials" class="bg-[--card-bg] p-6 md:p-8 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold text-[--primary] text-center mb-8">🧪 Herramientas del Oficio</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 text-center">
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">📏</span><span class="font-bold">Tubos de PVC</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">🌡️</span><span class="font-bold">Oxímetro</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">🧢</span><span class="font-bold">Tapas</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">⏱️</span><span class="font-bold">Cronómetro</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">📝</span><span class="font-bold">Bitácora</span></div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg"><span class="text-4xl mb-2">📐</span><span class="font-bold">Cinta Métrica</span></div>
+                </div>
+            </section>
+
+            <section id="procedure">
+                <h2 class="text-3xl font-bold text-[--primary] text-center mb-12">🗺️ El Procedimiento: Paso a Paso</h2>
+                <div class="max-w-3xl mx-auto">
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">1</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Selección del Sitio</h3>
+                        <p class="text-gray-700">Elige un área representativa del estanque, lejos de bordes, entradas de agua o zonas de alimentación directa para obtener una muestra precisa.</p>
+                    </div>
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">2</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Instalación de Núcleos</h3>
+                        <p class="text-gray-700">Instala dos tubos: uno sellado en el fondo (para medir la respiración de la columna de agua, RC) y otro abierto y enterrado 10 cm en el sedimento (para medir la respiración total, RC + RF).</p>
+                    </div>
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">3</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Medición Inicial (T₀)</h3>
+                        <p class="text-gray-700">Tras esperar 5-10 minutos para que el sistema se estabilice, mide y registra la concentración de oxígeno disuelto inicial en ambos tubos.</p>
+                    </div>
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">4</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Incubación</h3>
+                        <p class="text-gray-700">Sella ambos tubos con tapas y déjalos incubar por un período de 1 a 3 horas. Esto aísla las muestras y permite medir el consumo de oxígeno.</p>
+                    </div>
+                    <div class="flowchart-step pl-20">
+                        <div class="flowchart-number">5</div>
+                        <h3 class="text-2xl font-bold text-[--secondary] pt-2">Medición Final (T₁)</h3>
+                        <p class="text-gray-700">Al finalizar el tiempo, retira las tapas y mide inmediatamente la concentración de oxígeno final en cada tubo. ¡No olvides registrar la hora!</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="calculator" class="bg-[--card-bg] p-6 md:p-8 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold text-[--primary] text-center mb-8">📊 Calculadora y Resultados</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-[--secondary] mb-2">1. Datos del Tubo Sellado (RC)</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <input type="number" id="rc_od_inicial" placeholder="OD Inicial (mg/L)" class="p-2 border rounded w-full">
+                                <input type="number" id="rc_od_final" placeholder="OD Final (mg/L)" class="p-2 border rounded w-full">
+                                <input type="number" id="rc_tiempo" placeholder="Tiempo (h)" class="p-2 border rounded w-full">
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-[--secondary] mb-2">2. Datos del Tubo Abierto (Total)</h3>
+                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <input type="number" id="total_od_inicial" placeholder="OD Inicial (mg/L)" class="p-2 border rounded w-full">
+                                <input type="number" id="total_od_final" placeholder="OD Final (mg/L)" class="p-2 border rounded w-full">
+                                <input type="number" id="total_tiempo" placeholder="Tiempo (h)" class="p-2 border rounded w-full">
+                            </div>
+                        </div>
+                        <button id="calculateBtn" class="w-full bg-[--accent] text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors">Calcular Resultados</button>
+                    </div>
+                    <div class="space-y-4">
+                         <div id="rc-result-card" class="p-4 rounded-lg bg-gray-50 text-center transition-all duration-300">
+                            <h3 class="font-bold text-lg text-gray-500">Respiración Columna Agua (RC)</h3>
+                            <p id="rc-value-display" class="text-5xl font-black text-[--primary]">0.000</p>
+                            <p class="text-sm text-gray-500">mg O₂/L/h</p>
+                            <p id="rc-status-display" class="mt-2 font-bold text-lg p-1 rounded-md">-</p>
+                        </div>
+                        <div id="rf-result-card" class="p-4 rounded-lg bg-gray-50 text-center transition-all duration-300">
+                            <h3 class="font-bold text-lg text-gray-500">Respiración Sedimento (RF)</h3>
+                            <p id="rf-value-display" class="text-5xl font-black text-[--primary]">0.000</p>
+                            <p class="text-sm text-gray-500">mg O₂/L/h</p>
+                            <p id="rf-status-display" class="mt-2 font-bold text-lg p-1 rounded-md">-</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="interpretation" class="bg-[--card-bg] p-6 md:p-8 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold text-[--primary] text-center mb-4">Interpretación de Resultados</h2>
+                <div class="max-w-4xl mx-auto">
+                    <div class="border-l-4 border-[--primary] pl-6">
+                        <p class="text-gray-700 mb-4">Los valores de consumo de oxígeno son indicadores clave de la carga orgánica y la salud del ecosistema del estanque. Los rangos aquí presentados son una guía general basada en publicaciones técnicas para acuicultura semi-intensiva e intensiva.</p>
+                        <ul class="space-y-3 text-gray-700">
+                            <li><strong style="color:var(--status-low)">● Bajo (&lt; 0.1 mg O₂/L/h):</strong> Indica una baja carga orgánica y un bajo consumo de oxígeno. Es una condición ideal que sugiere un buen manejo del alimento y una buena calidad del fondo.</li>
+                            <li><strong style="color:var(--status-mid)">● Moderado (0.1 - 0.3 mg O₂/L/h):</strong> Es un rango común en estanques productivos. Requiere monitoreo, ya que un aumento en la carga orgánica puede elevar el consumo y generar condiciones de hipoxia.</li>
+                            <li><strong style="color:var(--status-high)">● Alto (&gt; 0.3 mg O₂/L/h):</strong> Señal de alerta. Un alto consumo de oxígeno indica una elevada carga de materia orgánica en descomposición, aumentando el riesgo de caídas drásticas de oxígeno.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-300">
+            <p class="text-gray-500">La monitorización regular de RC y RF es una herramienta poderosa para la gestión proactiva de la calidad del agua en la acuicultura.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const getQualification = (value) => {
+            if (value < 0.1) {
+                return { text: 'Bajo', color: 'var(--status-low)', textColor: 'var(--text-dark)' };
+            } else if (value <= 0.3) {
+                return { text: 'Moderado', color: 'var(--status-mid)', textColor: 'var(--text-dark)' };
+            } else {
+                return { text: 'Alto', color: 'var(--status-high)', textColor: 'white' };
+            }
+        };
+
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const rcOdi = parseFloat(document.getElementById('rc_od_inicial').value);
+            const rcOdf = parseFloat(document.getElementById('rc_od_final').value);
+            const rcT = parseFloat(document.getElementById('rc_tiempo').value);
+            const totOdi = parseFloat(document.getElementById('total_od_inicial').value);
+            const totOdf = parseFloat(document.getElementById('total_od_final').value);
+            const totT = parseFloat(document.getElementById('total_tiempo').value);
+
+            if ([rcOdi, rcOdf, rcT, totOdi, totOdf, totT].some(isNaN) || rcT <= 0 || totT <= 0) {
+                alert('Por favor, introduce valores numéricos válidos en todos los campos. El tiempo debe ser mayor a cero.');
+                return;
+            }
+
+            const rc = (rcOdi - rcOdf) / rcT;
+            const totalRespiration = (totOdi - totOdf) / totT;
+            const rf = totalRespiration - rc;
+
+            const rcValueDisplay = document.getElementById('rc-value-display');
+            const rfValueDisplay = document.getElementById('rf-value-display');
+            const rcStatusDisplay = document.getElementById('rc-status-display');
+            const rfStatusDisplay = document.getElementById('rf-status-display');
+
+            rcValueDisplay.textContent = rc.toFixed(3);
+            rfValueDisplay.textContent = rf.toFixed(3);
+
+            const rcQual = getQualification(rc);
+            rcStatusDisplay.textContent = rcQual.text;
+            rcStatusDisplay.style.backgroundColor = rcQual.color;
+            rcStatusDisplay.style.color = rcQual.textColor;
+
+            const rfQual = getQualification(rf);
+            rfStatusDisplay.textContent = rfQual.text;
+            rfStatusDisplay.style.backgroundColor = rfQual.color;
+            rfStatusDisplay.style.color = rfQual.textColor;
+        });
+    </script>
+
+</body>
+</html>
