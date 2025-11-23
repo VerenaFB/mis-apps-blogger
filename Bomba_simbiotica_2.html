@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe Técnico: Bomba Simbiótica - AquaSim</title>
+    
+    <!-- Tailwind CSS para estilos rápidos y responsivos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-aqua-gradient {
+            background: linear-gradient(135deg, #0e7490 0%, #06b6d4 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .step-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header / Hero Section -->
+    <header class="bg-aqua-gradient text-white shadow-lg">
+        <div class="container mx-auto px-6 py-12 text-center">
+            
+            <!-- EMBLEMA AQUASIM (SVG Integrado) -->
+            <div class="flex justify-center mb-6">
+                <div class="bg-white rounded-full p-4 shadow-xl">
+                    <svg width="120" height="120" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Gota de agua (Contorno) -->
+                        <path d="M100 10C100 10 30 90 30 135C30 173.66 61.3401 205 100 205C138.66 205 170 173.66 170 135C170 90 100 10 100 10Z" fill="#E0F7FA" stroke="#06B6D4" stroke-width="5"/>
+                        
+                        <!-- Elementos bióticos (Bacterias/Puntos) -->
+                        <circle cx="70" cy="100" r="5" fill="#4ADE80" />
+                        <circle cx="140" cy="110" r="4" fill="#4ADE80" />
+                        <circle cx="100" cy="60" r="3" fill="#4ADE80" />
+                        <circle cx="60" cy="150" r="6" fill="#4ADE80" />
+                        <circle cx="150" cy="140" r="5" fill="#4ADE80" />
+
+                        <!-- Pez (Silueta estilizada) -->
+                        <path d="M145 135C145 135 125 120 100 120C75 120 55 135 55 135C55 135 60 115 75 100C90 85 100 85 100 85C100 85 110 85 125 100C140 115 145 135 145 135Z" fill="#0E7490"/>
+                        <path d="M145 135L160 125V145L145 135Z" fill="#0E7490"/> <!-- Cola -->
+                        
+                        <!-- Texto AquaSim dentro del SVG (Opcional, mejor fuera para accesibilidad, pero decorativo aquí) -->
+                    </svg>
+                </div>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">AquaSim</h1>
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4 opacity-90">Bomba Simbiótica Aplicada</h2>
+            <p class="text-lg font-light italic opacity-80">"El equilibrio natural de su cultivo"</p>
+            <p class="text-sm font-bold mt-2 uppercase tracking-widest">By AsiaAcuacultura</p>
+
+            <div class="mt-8 flex justify-center gap-4 flex-wrap">
+                <span class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm border border-white/30">Disciplina</span>
+                <span class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm border border-white/30">Registro</span>
+                <span class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm border border-white/30">Análisis de Datos</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Anchor Links (Sticky on mobile roughly) -->
+    <nav class="bg-white shadow sticky top-0 z-50 overflow-x-auto">
+        <div class="container mx-auto px-4">
+            <ul class="flex space-x-8 py-4 text-sm font-bold text-gray-600 whitespace-nowrap">
+                <li><a href="#componentes" class="hover:text-cyan-600 transition">Componentes</a></li>
+                <li><a href="#preparacion" class="hover:text-cyan-600 transition">Preparación (Paso a Paso)</a></li>
+                <li><a href="#calculadora" class="hover:text-cyan-600 transition">Calculadora</a></li>
+                <li><a href="#monitoreo" class="hover:text-cyan-600 transition">Monitoreo</a></li>
+                <li><a href="#beneficios" class="hover:text-cyan-600 transition">Beneficios</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 space-y-16">
+
+        <!-- SECTION 1: COMPONENTES -->
+        <section id="componentes">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800">Componentes Básicos e Insumos</h2>
+                <p class="text-gray-600 mt-2">Elementos esenciales para generar el inóculo bacteriano.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-md card-hover border-t-4 border-cyan-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center text-cyan-600 mr-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold">Fuente de Carbono</h3>
+                    </div>
+                    <ul class="text-gray-600 list-disc list-inside space-y-2">
+                        <li><strong>Harina de Arroz:</strong> Sin gluten, aporta energía.</li>
+                        <li><strong>Melaza de Caña:</strong> Fuente rápida de carbohidratos.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-md card-hover border-t-4 border-green-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 mr-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold">Inóculo Biológico</h3>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-2">Pool de Bacterias Probióticas:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded border border-green-200">Lactobacilos</span>
+                        <span class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded border border-green-200">Bacilos</span>
+                        <span class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded border border-green-200">Rodopseudomonas</span>
+                        <span class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded border border-green-200">Levadura Panadería</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-md card-hover border-t-4 border-indigo-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mr-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold">Químicos y Equipos</h3>
+                    </div>
+                    <ul class="text-gray-600 list-disc list-inside space-y-2 text-sm">
+                        <li><strong>Tiosulfato de Sodio:</strong> Neutralizador de cloro.</li>
+                        <li><strong>Hipoclorito de Sodio:</strong> Desinfección inicial.</li>
+                        <li><strong>Equipos:</strong> Balanza, Jeringa, pHchímetro.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: PREPARACIÓN (Timeline Interactivo) -->
+        <section id="preparacion" class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Protocolo de Preparación</h2>
+                <p class="text-gray-600">Proceso de 48 horas para la activación de la bomba.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <button onclick="showStep(1)" id="btn-step-1" class="flex-1 py-3 px-4 bg-cyan-600 text-white rounded-lg font-semibold shadow hover:bg-cyan-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500">Preliminares</button>
+                <button onclick="showStep(2)" id="btn-step-2" class="flex-1 py-3 px-4 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition focus:outline-none">Día 1: Desinfección</button>
+                <button onclick="showStep(3)" id="btn-step-3" class="flex-1 py-3 px-4 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition focus:outline-none">Día 2: Activación</button>
+                <button onclick="showStep(4)" id="btn-step-4" class="flex-1 py-3 px-4 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition focus:outline-none">Aplicación</button>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 min-h-[300px]">
+                
+                <!-- STEP 1 Content -->
+                <div id="step-1" class="step-content active">
+                    <h3 class="text-2xl font-bold text-cyan-700 mb-4">Preliminares</h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="text-cyan-500 mr-2 font-bold">➤</span> Calcular volumen de agua (500L por 10,000 m³).</li>
+                        <li class="flex items-start"><span class="text-cyan-500 mr-2 font-bold">➤</span> Disponer de tanque con tapa.</li>
+                        <li class="flex items-start"><span class="text-cyan-500 mr-2 font-bold">➤</span> Pesar todos los ingredientes según tabla específica del proyecto.</li>
+                        <li class="flex items-start"><span class="text-red-500 mr-2 font-bold">⚠</span> Solo preparar cantidad para 5 días máximo.</li>
+                    </ul>
+                </div>
+
+                <!-- STEP 2 Content -->
+                <div id="step-2" class="step-content">
+                    <h3 class="text-2xl font-bold text-cyan-700 mb-4">Día 1: Preparación del Medio</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start"><span class="bg-cyan-100 text-cyan-800 text-xs font-bold px-2 py-1 rounded mr-2">1</span> Lavar y desinfectar el tanque.</li>
+                            <li class="flex items-start"><span class="bg-cyan-100 text-cyan-800 text-xs font-bold px-2 py-1 rounded mr-2">2</span> Llenar al 50% con agua.</li>
+                            <li class="flex items-start"><span class="bg-cyan-100 text-cyan-800 text-xs font-bold px-2 py-1 rounded mr-2">3</span> Aplicar Hipoclorito de Sodio (desinfección del agua).</li>
+                            <li class="flex items-start"><span class="bg-cyan-100 text-cyan-800 text-xs font-bold px-2 py-1 rounded mr-2">4</span> Aplicar Harina de Arroz (fuente carbono compleja).</li>
+                            <li class="flex items-start"><span class="bg-cyan-100 text-cyan-800 text-xs font-bold px-2 py-1 rounded mr-2">5</span> Completar agua al 100%, agitar vigorosamente y tapar por 24h.</li>
+                        </ul>
+                        <div class="bg-blue-100 rounded flex items-center justify-center p-4">
+                            <p class="text-center italic text-blue-800">"El objetivo es crear un medio libre de patógenos y rico en carbono para la siembra del día siguiente."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3 Content -->
+                <div id="step-3" class="step-content">
+                    <h3 class="text-2xl font-bold text-cyan-700 mb-4">Día 2: Inoculación y Fermentación</h3>
+                    <div class="space-y-4 text-gray-700">
+                        <div class="flex items-center p-3 bg-white rounded shadow-sm border-l-4 border-yellow-500">
+                            <span class="font-bold mr-2">Paso A:</span> Disolver Tiosulfato de Sodio en agua limpia y aplicar (Neutraliza cloro residual).
+                        </div>
+                        <div class="flex items-center p-3 bg-white rounded shadow-sm border-l-4 border-orange-500">
+                            <span class="font-bold mr-2">Paso B:</span> Disolver Melaza en agua limpia y añadir al tanque.
+                        </div>
+                        <div class="flex items-center p-3 bg-white rounded shadow-sm border-l-4 border-green-500">
+                            <span class="font-bold mr-2">Paso C:</span> Disolver Probióticos y Levadura, añadir a la mezcla.
+                        </div>
+                        <div class="p-4 bg-gray-100 rounded text-sm font-semibold">
+                            <span class="text-red-600">IMPORTANTE:</span> Agitar vigorosamente 3 veces al día para resuspender sólidos. Medir pH (debe comenzar a bajar).
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- STEP 4 Content -->
+                 <div id="step-4" class="step-content">
+                    <h3 class="text-2xl font-bold text-cyan-700 mb-4">Aplicación y Dosis</h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="text-green-500 mr-2 font-bold">✓</span> Lista para aplicar al día siguiente de la mezcla final.</li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2 font-bold">✓</span> pH Objetivo: Menor a 4.5.</li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2 font-bold">✓</span> Horario: Entre 8:00 AM y 9:00 AM.</li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2 font-bold">✓</span> Método: Voleo o sistema de tuberías para grandes lagos.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: CALCULADORA -->
+        <section id="calculadora" class="grid lg:grid-cols-2 gap-8">
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    Calculadora de Volumen
+                </h2>
+                <p class="text-gray-600 mb-6 text-sm">Ingrese el volumen de su cuerpo de agua para calcular la cantidad de Bomba Simbiótica necesaria basada en la relación 500L / 10,000 m³.</p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Volumen del Lago / Piscina (m³)</label>
+                        <input type="number" id="volumenInput" placeholder="Ej: 10000" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none" oninput="calcularDosis()">
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-cyan-50 p-6 rounded-xl border border-cyan-100">
+                    <h3 class="text-lg font-semibold text-cyan-800">Requerimiento Diario Estimado:</h3>
+                    <div class="text-4xl font-bold text-cyan-600 mt-2" id="resultadoLitros">0 Litros</div>
+                    <p class="text-xs text-cyan-600 mt-1">*Cantidad de mezcla líquida de Bomba Simbiótica a aplicar.</p>
+                </div>
+                <div class="mt-4 text-xs text-gray-500">
+                    * Nota: Las cantidades exactas de melaza, harina y probióticos (en gramos) dependen de la tabla específica de formulación entregada por el proveedor, no calculadas aquí para evitar errores de formulación.
+                </div>
+            </div>
+
+            <!-- Gráfico de pH -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Comportamiento Esperado del pH</h2>
+                <p class="text-gray-600 mb-4 text-sm">El éxito de la fermentación se mide por la caída del pH.</p>
+                <div class="relative h-64 w-full">
+                    <canvas id="phChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: MONITOREO Y BENEFICIOS -->
+        <section id="monitoreo">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Parámetros de Monitoreo</h2>
+                    <div class="bg-white rounded-xl shadow overflow-hidden">
+                        <table class="min-w-full">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parámetro</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frecuencia Inicial</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr><td class="px-6 py-4 font-medium text-gray-900">pH (Bomba)</td><td class="px-6 py-4 text-gray-600">Diario</td></tr>
+                                <tr><td class="px-6 py-4 font-medium text-gray-900">Oxígeno Disuelto</td><td class="px-6 py-4 text-gray-600">Diario</td></tr>
+                                <tr><td class="px-6 py-4 font-medium text-gray-900">Amonio</td><td class="px-6 py-4 text-gray-600">Diario</td></tr>
+                                <tr><td class="px-6 py-4 font-medium text-gray-900">Nitrito</td><td class="px-6 py-4 text-gray-600">Diario</td></tr>
+                                <tr><td class="px-6 py-4 font-medium text-gray-900">Alcalinidad</td><td class="px-6 py-4 text-gray-600">Diario</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 italic">Posteriormente medir cada 2 o 3 días según estabilidad.</p>
+                </div>
+
+                <div id="beneficios">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Beneficios Biológicos</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start p-4 bg-green-50 rounded-lg border border-green-100">
+                            <div class="bg-green-500 text-white rounded-full p-1 mr-3 mt-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-green-800">Sistema Inmunológico</h4>
+                                <p class="text-sm text-green-700">Los microorganismos simbióticos fortalecen las defensas naturales del pez, aumentando la resistencia a enfermedades.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start p-4 bg-blue-50 rounded-lg border border-blue-100">
+                            <div class="bg-blue-500 text-white rounded-full p-1 mr-3 mt-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-blue-800">Crecimiento y Talla</h4>
+                                <p class="text-sm text-blue-700">Mejora la digestibilidad del alimento, permitiendo alcanzar la talla comercial de manera más rápida y eficiente.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                            <div class="bg-indigo-500 text-white rounded-full p-1 mr-3 mt-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-indigo-800">Reducción de Mortalidad</h4>
+                                <p class="text-sm text-indigo-700">El equilibrio microbiológico y la exclusión competitiva reducen drásticamente las tasas de mortalidad.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-xl font-bold mb-2">AquaSim</h3>
+            <p class="text-gray-400 text-sm">El equilibrio natural de su cultivo.</p>
+            <p class="text-gray-500 text-xs mt-4">Basado en el Manual de Uso y Preparación de Simbiótica Aplicada.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts Funcionales -->
+    <script>
+        // Lógica del Timeline (Stepper)
+        function showStep(stepNumber) {
+            // Ocultar todos los pasos
+            document.querySelectorAll('.step-content').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+            });
+            
+            // Resetear estilos de botones
+            document.querySelectorAll('button[id^="btn-step-"]').forEach(btn => {
+                btn.classList.remove('bg-cyan-600', 'text-white', 'shadow');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+
+            // Mostrar paso seleccionado
+            const selectedStep = document.getElementById(`step-${stepNumber}`);
+            selectedStep.style.display = 'block';
+            setTimeout(() => selectedStep.classList.add('active'), 10);
+
+            // Activar botón seleccionado
+            const selectedBtn = document.getElementById(`btn-step-${stepNumber}`);
+            selectedBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            selectedBtn.classList.add('bg-cyan-600', 'text-white', 'shadow');
+        }
+
+        // Inicializar primer paso
+        showStep(1);
+
+        // Lógica de la Calculadora
+        function calcularDosis() {
+            const volumen = parseFloat(document.getElementById('volumenInput').value);
+            const resultadoElement = document.getElementById('resultadoLitros');
+            
+            if (!volumen || volumen <= 0) {
+                resultadoElement.textContent = "0 Litros";
+                return;
+            }
+
+            // Regla: 500 Litros por cada 10,000 m3
+            const ratio = 500 / 10000;
+            const litrosRequeridos = volumen * ratio;
+            
+            // Formatear número
+            resultadoElement.textContent = litrosRequeridos.toLocaleString('es-ES', {maximumFractionDigits: 1}) + " Litros";
+        }
+
+        // Inicialización de Gráficos
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('phChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Inicio', 'Día 1 (Mezcla)', 'Día 2 (Fermentación)', 'Aplicación'],
+                    datasets: [{
+                        label: 'pH de la Bomba Simbiótica',
+                        data: [7.0, 6.5, 5.0, 4.2], // Datos simulados basados en la meta < 4.5
+                        borderColor: 'rgb(8, 145, 178)',
+                        backgroundColor: 'rgba(8, 145, 178, 0.2)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 6,
+                        pointBackgroundColor: 'white',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `pH: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 3,
+                            max: 8,
+                            title: { display: true, text: 'Nivel de pH' },
+                            grid: { borderDash: [5, 5] }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
