@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simbiótica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #005f73;
+            --secondary-color: #0a9396;
+            --accent-color: #94d2bd;
+            --light-bg: #e9d8a6;
+            --dark-text: #2b2d42;
+            --white: #ffffff;
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Contenedor Principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Tarjetas */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .card-header {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* Sección Calculadora */
+        .calculator-box {
+            background: linear-gradient(to right, #ffffff, #f9fafb);
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            box-sizing: border-box; 
+        }
+
+        .input-group input:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+
+        .calc-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .calc-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .results-table th, .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .results-table th {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        /* Diagrama de Proceso */
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 180px;
+            text-align: center;
+            position: relative;
+            padding: 10px;
+        }
+
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            font-size: 1.5rem;
+        }
+
+        .step h4 {
+            margin: 10px 0;
+            color: var(--primary-color);
+        }
+
+        .step p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Infografía Modo de Acción */
+        .action-card {
+            background-color: #f8fdfe;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .action-card i {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-text);
+            color: #888;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .timeline {
+                flex-direction: column;
+            }
+            .step {
+                border-left: 2px solid var(--accent-color);
+                margin-left: 20px;
+                padding-left: 20px;
+                text-align: left;
+                margin-bottom: 20px;
+            }
+            .step-icon {
+                margin: 0;
+                display: inline-flex;
+                margin-right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><i class="fas fa-leaf"></i> Simbiótica</h1>
+    <p>Tecnología de Pre-digeridos de Harinas</p>
+</header>
+
+<div class="container">
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-bullseye"></i> Metas Técnicas</div>
+            <p>El uso de fermentos busca optimizar la eficiencia biológica del cultivo:</p>
+            <ul>
+                <li><strong>Factor de Conversión (FCR):</strong> Reducción esperada de 1.8 a 1.3 (aprox. 30%).</li>
+                <li><strong>Supervivencia:</strong> Incremento estimado entre 10% y 15%.</li>
+                <li><strong>Calidad de Agua:</strong> Control de algas cianofitas y remediación de fondos.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fas fa-chart-pie"></i> Composición Base (Sólidos)</div>
+            <canvas id="compositionChart" style="max-height: 200px;"></canvas>
+            <p style="text-align: center; font-size: 0.8rem; margin-top: 5px;">Proporción de Harinas</p>
+        </div>
+    </div>
+
+    <div class="card calculator-box" id="calculadora">
+        <div class="card-header"><i class="fas fa-calculator"></i> Calculadora de Producción</div>
+        <p>Ingrese la cantidad total de alimento fermentado (sólido) que desea producir en <strong>Kilogramos (kg)</strong>.</p>
+        
+        <div class="grid-2">
+            <div>
+                <div class="input-group">
+                    <label for="kgInput">Cantidad a Producir (Kg):</label>
+                    <input type="number" id="kgInput" placeholder="Ej: 1000" value="100">
+                </div>
+                <button class="calc-btn" onclick="calculateIngredients()">Calcular Ingredientes</button>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong>Resumen de Lote</strong>
+                    <span id="batchSummary" style="color: var(--secondary-color); font-weight: bold;">--</span>
+                </div>
+                <hr>
+                <small>Cálculo basado en las proporciones del protocolo técnico (con Melaza duplicada), convertido al sistema métrico.</small>
+            </div>
+        </div>
+
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Ingrediente</th>
+                    <th>Cantidad</th>
+                    <th>Unidad</th>
+                </tr>
+            </thead>
+            <tbody id="ingredientsTableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><i class="fas fa-cogs"></i> Flujo de Proceso</div>
+        <div class="timeline">
+            <div class="step">
+                <div class="step-icon"><i class="fas fa-pump-soap"></i></div>
+                <h4>Fase 1: Líquidos</h4>
+                <p>Desinfección: Agua + Melaza (Dosis doble) + Peróxido de Hidrógeno. Esperar 24h.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon"><i class="fas fa-mortar-pestle"></i></div>
+                <h4>Fase 2: Sales</h4>
+                <p>Premezcla de Urea, 12-24-12, Triple 20, Minerales y Vitaminas.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon"><i class="fas fa-bacterium"></i></div>
+                <h4>Fase 3: Activación</h4>
+                <p>Mezcla de "Terminate" + Levadura. Reposo de 20 horas.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon"><i class="fas fa-layer-group"></i></div>
+                <h4>Fase 4: Sólidos</h4>
+                <p>Mezcla de Harinas (Palmiste, Soya, Arroz) con la mezcla líquida. Baches.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon"><i class="fas fa-thermometer-half"></i></div>
+                <h4>Fase 5: Fermentación</h4>
+                <p>Reposo 48h. Monitoreo de temperatura (Aplicar > 35°C).</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-3">
+        <div class="action-card">
+            <i class="fas fa-water"></i>
+            <h3>Remediación</h3>
+            <p>El 60% del fermento decanta, ayudando a desdoblar nitrógeno amoniacal en el fondo.</p>
+        </div>
+        <div class="action-card">
+            <i class="fas fa-tint"></i>
+            <h3>Columna de Agua</h3>
+            <p>Partículas finas en suspensión colonizadas por bacterias controlan algas cianofitas.</p>
+        </div>
+        <div class="action-card">
+            <i class="fas fa-dna"></i>
+            <h3>Probiótico</h3>
+            <p>Alta palatabilidad y colonización intestinal (efecto yogurt) que mejora la digestión.</p>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p><strong>Fuente:</strong> Documento CULTOSA 2025</p>
+    <p>Ing. Agroindustrial Carlos J. Sandoval</p>
+</footer>
+
+<script>
+    // --- Lógica de la Calculadora (Sistema Métrico) ---
+    /* Conversiones basadas en el Protocolo Técnico:
+       - [cite_start]Lote Base: 80 Quintales (QQ) de Sólidos Totales[cite: 26].
+       - Conversión estándar: 1 QQ = 45.36 kg.
+       - Lote Base en Kg = 3628.8 kg.
+
+       Cantidades base del protocolo escaladas a Kg:
+       - [cite_start]Agua: 950 L [cite: 26]
+       - [cite_start]Melaza (Original): 10 L[cite: 26]. NUEVO REQUERIMIENTO: DUPLICAR -> 20 L.
+       - [cite_start]Peróxido: 1 L [cite: 26]
+       - [cite_start]Urea: 10 lbs = 4.54 kg [cite: 26]
+       - [cite_start]12-24-12: 10 lbs = 4.54 kg [cite: 26]
+       - [cite_start]Triple 20: 2 lbs = 0.91 kg [cite: 26]
+       - [cite_start]Terminate: 200 g [cite: 26]
+       - [cite_start]Levadura: 50 g [cite: 26]
+    */
+
+    const BASE_BATCH_KG = 3628.8; // Equivalente a 80 QQ
+
+    // Ratios calculados por Kg de producto final (Sólido)
+    const RECETA = [
+        { name: "Harina de Palmiste (Coquito)", ratio: 0.75, unit: "kg", type: "Sólido" }, // 60 de 80
+        { name: "Pulidura de Arroz", ratio: 0.125, unit: "kg", type: "Sólido" }, // 10 de 80
+        { name: "Harina de Soya", ratio: 0.125, unit: "kg", type: "Sólido" }, // 10 de 80
+        { name: "Agua (para dilución)", ratio: 950 / BASE_BATCH_KG, unit: "L", type: "Líquido" },
+        // MELAZA DUPLICADA: 20L en lugar de 10L base
+        { name: "Melaza (Dosis Doble)", ratio: 20 / BASE_BATCH_KG, unit: "L", type: "Líquido" },
+        { name: "Peróxido de Hidrógeno (50%)", ratio: 1 / BASE_BATCH_KG, unit: "L", type: "Aditivo" },
+        { name: "Urea", ratio: 4.54 / BASE_BATCH_KG, unit: "kg", type: "Sales" },
+        { name: "Fertilizante 12-24-12", ratio: 4.54 / BASE_BATCH_KG, unit: "kg", type: "Sales" },
+        { name: "Triple 20", ratio: 0.91 / BASE_BATCH_KG, unit: "kg", type: "Sales" },
+        { name: "Terminate (Probiótico)", ratio: 200 / BASE_BATCH_KG, unit: "g", type: "Inóculo" }, 
+        { name: "Levadura (S. cerevisiae)", ratio: 50 / BASE_BATCH_KG, unit: "g", type: "Inóculo" }
+    ];
+
+    function calculateIngredients() {
+        const inputKg = parseFloat(document.getElementById('kgInput').value);
+        const tableBody = document.getElementById('ingredientsTableBody');
+        const summary = document.getElementById('batchSummary');
+
+        tableBody.innerHTML = ""; // Limpiar tabla
+
+        if (isNaN(inputKg) || inputKg <= 0) {
+            tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>Por favor ingrese una cantidad válida en Kg.</td></tr>";
+            summary.innerText = "--";
+            return;
+        }
+
+        summary.innerText = `Cálculo para ${inputKg} Kilogramos`;
+
+        RECETA.forEach(item => {
+            let requiredQty;
+            
+            // Calculo directo basado en el ratio por Kg de producto final
+            if (item.unit === "g") {
+                // Si el insumo está en gramos en la receta base pero el ratio fue calculado dividiendo g/kg
+                requiredQty = item.ratio * inputKg;
+            } else {
+                requiredQty = item.ratio * inputKg;
+            }
+
+            // Formato de número: hasta 3 decimales para precisión en sales
+            let displayQty = requiredQty.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+
+            let row = `<tr>
+                <td><span style="font-size:0.8rem; background:#eee; padding:2px 6px; border-radius:4px;">${item.type}</span></td>
+                <td>${item.name}</td>
+                <td style="font-weight:bold; color:var(--primary-color);">${displayQty}</td>
+                <td>${item.unit}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    // Inicializar calculadora al cargar
+    document.addEventListener('DOMContentLoaded', calculateIngredients);
+
+
+    // --- Gráfico de Composición (Donut) ---
+    const ctxComp = document.getElementById('compositionChart').getContext('2d');
+    new Chart(ctxComp, {
+        type: 'doughnut',
+        data: {
+            labels: ['Harina Palmiste (75%)', 'Harina Soya (12.5%)', 'Pulidura Arroz (12.5%)'],
+            datasets: [{
+                data: [75, 12.5, 12.5], 
+                backgroundColor: ['#264653', '#e9c46a', '#e76f51'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
