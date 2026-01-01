@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Tétrada Epidemiológica en Acuicultura</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --host: #2ecc71;
+            --pathogen: #e74c3c;
+            --environment: #f1c40f;
+            --human: #9b59b6;
+            --bg: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 { margin-bottom: 10px; font-size: 1.8rem; }
+        p.subtitle { color: #7f8c8d; margin-bottom: 40px; }
+
+        /* Diagrama de la Tétrada */
+        .tetrad-wrapper {
+            position: relative;
+            height: 450px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* El factor humano envuelve a los demás */
+        .human-circle {
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            border: 4px dashed var(--human);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            background: rgba(155, 89, 182, 0.05);
+            animation: rotate 60s linear infinite;
+        }
+
+        .human-label {
+            color: var(--human);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: white;
+            padding: 5px 15px;
+            border: 2px solid var(--human);
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        /* Triángulo Central */
+        .triad-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .factor {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .factor:hover { transform: scale(1.1); z-index: 20; }
+        .factor span { font-size: 0.8rem; margin-top: 5px; opacity: 0.9; }
+
+        .host { background: var(--host); top: 0; left: 50%; transform: translateX(-50%); }
+        .pathogen { background: var(--pathogen); bottom: 0; left: 0; }
+        .environment { background: var(--environment); bottom: 0; right: 0; color: #2c3e50; }
+
+        /* Centro: El Equilibrio / Enfermedad */
+        .center-point {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 2px solid #34495e;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Detalles Informativos */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .info-card {
+            padding: 15px;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+        }
+
+        .card-host { border-color: var(--host); }
+        .card-pathogen { border-color: var(--pathogen); }
+        .card-env { border-color: var(--environment); }
+        .card-human { border-color: var(--human); }
+
+        .info-card h3 { margin: 0 0 10px 0; font-size: 1rem; }
+        .info-card p { margin: 0; font-size: 0.85rem; line-height: 1.4; }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .tetrad-wrapper { height: 350px; transform: scale(0.8); }
+            .info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>La Tétrada Epidemiológica</h1>
+    <p class="subtitle">Interacción de factores en la salud de organismos acuáticos</p>
+
+    <div class="tetrad-wrapper">
+        <div class="human-circle">
+            <div class="human-label">Factor Antropogénico</div>
+        </div>
+        
+        <div class="triad-container">
+            <div class="factor host">
+                🐟
+                Hospedero
+                <span>Inmunidad/Genética</span>
+            </div>
+            <div class="factor pathogen">
+                🦠
+                Agente
+                <span>Virulencia/Carga</span>
+            </div>
+            <div class="factor environment">
+                💧
+                Ambiente
+                <span>Calidad de Agua</span>
+            </div>
+            <div class="center-point">SALUD O ESTRÉS</div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-card card-host">
+            <h3>El Hospedero</h3>
+            <p>Especie, edad y estado nutricional. Su capacidad de respuesta inmune es la primera línea de defensa.</p>
+        </div>
+        <div class="info-card card-pathogen">
+            <h3>Agente Etiológico</h3>
+            <p>Bacterias, virus o parásitos. Su capacidad de causar daño depende de su virulencia y concentración.</p>
+        </div>
+        <div class="info-card card-env">
+            <h3>Medio Ambiente</h3>
+            <p>Oxígeno, pH, temperatura y amoníaco. Un entorno degradado es el principal detonante de estrés.</p>
+        </div>
+        <div class="info-card card-human">
+            <h3>Manejo (Humano)</h3>
+            <p>Densidad de siembra, alimentación y bioseguridad. Las decisiones técnicas mantienen o rompen el equilibrio.</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
