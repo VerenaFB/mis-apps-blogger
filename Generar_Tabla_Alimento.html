@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bioestadística Acuícola: Simulador de Tilapia</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SheetJS para Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- jsPDF para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aqua: {
+                            900: '#0f172a', // Azul Marino Profundo
+                            800: '#1e293b',
+                            700: '#334155',
+                            600: '#0ea5e9', // Azul Brillante Técnico
+                            500: '#10b981', // Verde Esmeralda
+                            100: '#f1f5f9', // Gris Técnico Claro
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+        }
+        .chart-container {
+            position: relative;
+            height: 40vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans">
+
+    <!-- Navbar -->
+    <nav class="bg-aqua-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-fish text-aqua-500 text-2xl"></i>
+                    <span class="font-bold text-xl tracking-wide">BioStat <span class="text-aqua-500">Aqua</span> Manager</span>
+                </div>
+                <div class="text-sm text-gray-300 hidden md:block">
+                    Simulador de Alimentación & Crecimiento (Tilapia)
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Formulario de Entrada (Dashboard) -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border-t-4 border-aqua-600">
+            <h2 class="text-lg font-bold text-aqua-900 mb-4 border-b pb-2"><i class="fa-solid fa-sliders mr-2"></i>Parámetros del Ciclo</h2>
+            
+            <form id="simulationForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Datos Generales -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Datos de Granja</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Módulo / Lote</label>
+                        <input type="text" id="batchName" value="Lote A-24" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-aqua-500 focus:ring-aqua-500 sm:text-sm p-2 border">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tipo de Alimento</label>
+                        <input type="text" id="feedType" value="Extruido 32% PB" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-aqua-500 focus:ring-aqua-500 sm:text-sm p-2 border">
+                    </div>
+                </div>
+
+                <!-- Población y Tiempo -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Biometría Inicial</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Peso Inicial (g)</label>
+                            <input type="number" id="initialWeight" value="5" step="0.1" class="mt-1 w-full rounded-md border-gray-300 p-2 border focus:ring-aqua-500 focus:border-aqua-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Peso Meta (g)</label>
+                            <input type="number" id="finalWeight" value="500" step="1" class="mt-1 w-full rounded-md border-gray-300 p-2 border focus:ring-aqua-500 focus:border-aqua-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Peces (Unid)</label>
+                            <input type="number" id="initialFish" value="10000" step="100" class="mt-1 w-full rounded-md border-gray-300 p-2 border focus:ring-aqua-500 focus:border-aqua-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Duración (Días)</label>
+                            <input type="number" id="days" value="120" step="1" class="mt-1 w-full rounded-md border-gray-300 p-2 border focus:ring-aqua-500 focus:border-aqua-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estrategia Nutricional -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Estrategia Nutricional</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700" title="Factor de Conversión Alimenticia">FCR Objetivo</label>
+                        <input type="number" id="targetFCR" value="1.4" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-aqua-500 focus:ring-aqua-500 sm:text-sm p-2 border">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700" title="% del peso vivo a alimentar el día 1">% Tasa Alimentación Inicial</label>
+                        <div class="relative rounded-md shadow-sm">
+                            <input type="number" id="initialFeedRate" value="8.0" step="0.1" class="block w-full rounded-md border-gray-300 pr-10 focus:border-aqua-500 focus:ring-aqua-500 sm:text-sm p-2 border">
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span class="text-gray-500 sm:text-sm">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mortalidad -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider" title="% de la siembra inicial que muere en cada fase. La suma de las tres fases es la mortalidad total del ciclo.">Mortalidad (% de siembra, por fase)</h3>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Fase 1<br>(Inicio)</label>
+                            <input type="number" id="mort1" value="2" step="0.1" class="mt-1 w-full text-center rounded-md border-gray-300 p-2 border border-red-200 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Fase 2<br>(Medio)</label>
+                            <input type="number" id="mort2" value="1" step="0.1" class="mt-1 w-full text-center rounded-md border-gray-300 p-2 border border-red-200 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Fase 3<br>(Final)</label>
+                            <input type="number" id="mort3" value="1" step="0.1" class="mt-1 w-full text-center rounded-md border-gray-300 p-2 border border-red-200 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="calculateSimulation()" class="bg-aqua-600 hover:bg-aqua-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i> Generar Tabla
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultados (Oculto inicialmente) -->
+        <div id="resultsContainer" class="hidden animate-fade-in-up">
+            
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-aqua-500">
+                    <div class="text-sm text-gray-500 font-bold uppercase">Biomasa Cosechada</div>
+                    <div class="text-2xl font-bold text-gray-800" id="kpiBiomass">0 kg</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+                    <div class="text-sm text-gray-500 font-bold uppercase">Total Alimento</div>
+                    <div class="text-2xl font-bold text-gray-800" id="kpiFeed">0 kg</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-indigo-500">
+                    <div class="text-sm text-gray-500 font-bold uppercase">FCR Real / Objetivo</div>
+                    <div class="text-2xl font-bold text-gray-800" id="kpiFCR">0.00</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-emerald-500">
+                    <div class="text-sm text-gray-500 font-bold uppercase">SGR (Tasa Crecimiento)</div>
+                    <div class="text-2xl font-bold text-gray-800" id="kpiSGR">0.00 %</div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Gráfico 1: Rendimiento Biológico -->
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h3 class="text-lg font-bold text-gray-700 mb-4">Rendimiento Biológico (g/pez)</h3>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 2: Crecimiento y Consumo (Logística) -->
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h3 class="text-lg font-bold text-gray-700 mb-4">Proyección de Crecimiento vs. Consumo Total</h3>
+                    <div class="chart-container">
+                        <canvas id="growthFeedChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Exportación -->
+            <div class="flex justify-end gap-4 mb-4 no-print">
+                 <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Descargar Reporte PDF
+                </button>
+            </div>
+
+            <!-- Tabla de Datos -->
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <div class="p-4 border-b bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h3 class="text-lg font-bold text-gray-700">Tabla Maestra de Alimentación</h3>
+                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded shadow text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-file-excel"></i> Descargar Excel
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200" id="dataTable">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Día</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Peso Prom.<br>(g)</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo<br>Peces</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Biomasa<br>(kg)</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% Alim.<br>Diario</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ración<br>(kg/día)</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-blue-50">Alim.<br>Acum(kg)</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Gramos<br>/Pez</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">FCR<br>Diario</th>
+                                <th class="px-3 py-3 text-right text-xs font-medium text-gray-900 uppercase tracking-wider bg-yellow-50">FCR<br>Acum.</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200 text-sm" id="tableBody">
+                            <!-- Rows generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-aqua-900 text-gray-400 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+            <p>&copy; 2024 Bioestadística Acuícola. Herramienta de uso técnico.</p>
+        </div>
+    </footer>
+
+    <script>
+        let performanceChartInstance = null;
+        let growthFeedChartInstance = null;
+        let globalData = []; // Para exportar a Excel
+
+        function calculateSimulation() {
+            // 1. Obtener Entradas
+            const inputs = {
+                w0: parseFloat(document.getElementById('initialWeight').value),
+                wf: parseFloat(document.getElementById('finalWeight').value),
+                n0: parseInt(document.getElementById('initialFish').value),
+                days: parseInt(document.getElementById('days').value),
+                fcrTarget: parseFloat(document.getElementById('targetFCR').value),
+                feedRateStart: parseFloat(document.getElementById('initialFeedRate').value) / 100,
+                mort1: parseFloat(document.getElementById('mort1').value) / 100,
+                mort2: parseFloat(document.getElementById('mort2').value) / 100,
+                mort3: parseFloat(document.getElementById('mort3').value) / 100,
+                batch: document.getElementById('batchName').value,
+                feedType: document.getElementById('feedType').value
+            };
+
+            // Validaciones básicas
+            if (inputs.w0 >= inputs.wf) return alert("El peso final debe ser mayor al inicial.");
+            if (inputs.days <= 0) return alert("La duración debe ser mayor a 0.");
+            const totalMort = inputs.mort1 + inputs.mort2 + inputs.mort3;
+            if (totalMort >= 1) return alert(`La mortalidad total (${(totalMort*100).toFixed(1)}%) no puede ser ≥ 100%. Revise los porcentajes por fase.`);
+
+            // 2. Modelo de Crecimiento Cúbico (DGC Simplificado)
+            const w0_root = Math.pow(inputs.w0, 1/3);
+            const wf_root = Math.pow(inputs.wf, 1/3);
+            const growthRate = (wf_root - w0_root) / inputs.days;
+            
+            // Calculamos un SGR promedio solo para KPI de referencia
+            const sgr_avg = ((Math.log(inputs.wf) - Math.log(inputs.w0)) / inputs.days) * 100;
+
+
+            // 3. Configuración de Fases de Mortalidad
+            const phaseLength = Math.floor(inputs.days / 3);
+            const phases = [
+                { start: 1, end: phaseLength, mort: inputs.mort1 },
+                { start: phaseLength + 1, end: phaseLength * 2, mort: inputs.mort2 },
+                { start: (phaseLength * 2) + 1, end: inputs.days, mort: inputs.mort3 }
+            ];
+
+            function getPopulation(day) {
+                // Las mortalidades se expresan siempre como % de la SIEMBRA INICIAL (n0),
+                // no como % de los sobrevivientes de cada fase.
+                // Ej.: mort1=5%, mort2=3%, mort3=2% → muertes totales = 10% de n0.
+                const n0 = inputs.n0;
+                let cumulativeDeaths = 0;
+
+                for (let i = 0; i < phases.length; i++) {
+                    let phase = phases[i];
+                    let phaseDuration = phase.end - phase.start + 1;
+                    let phaseDeathsTotal = n0 * phase.mort;  // Siempre sobre siembra inicial
+                    let dailyDeaths = phaseDeathsTotal / phaseDuration;
+
+                    if (day >= phase.start && day <= phase.end) {
+                        let daysIntoPhase = day - phase.start + 1;
+                        return Math.max(0, n0 - cumulativeDeaths - (dailyDeaths * daysIntoPhase));
+                    }
+
+                    cumulativeDeaths += phaseDeathsTotal;
+                }
+                return Math.max(0, n0 - cumulativeDeaths);
+            }
+
+            // 4. Algoritmo Iterativo: Alimentación Alométrica (Dependiente del Peso)
+            // Modelo: Rate = Rate_Inicial * (W_actual / W_inicial)^beta
+            // beta < 0: La tasa baja a medida que el peso sube
+            // Esto garantiza bajada rápida al inicio (cuando el peso se multiplica rápido) y lenta al final
+            
+            let decayExponent = -0.3; // Valor inicial "beta"
+            let minExp = -1.5; // Muy empinado
+            let maxExp = 0.0;  // Plano
+            let iterations = 0;
+            let calculatedFCR = 0;
+            let bestData = [];
+            
+            while (iterations < 100) {
+                let totalFeed = 0;
+                let currentBiomass = (inputs.w0 * inputs.n0) / 1000;
+                let initialBiomass = currentBiomass;
+                let tempData = [];
+
+                for (let t = 1; t <= inputs.days; t++) {
+                    // Cálculo de Peso según Modelo Cúbico
+                    let w_prev_root = w0_root + (growthRate * (t - 1));
+                    let w_prev = Math.pow(w_prev_root, 3);
+                    
+                    let w_curr_root = w0_root + (growthRate * t);
+                    let w_curr = Math.pow(w_curr_root, 3);
+                    
+                    let n_curr = getPopulation(t);
+                    let b_curr = (w_curr * n_curr) / 1000;
+                    
+                    // --- NUEVA LÓGICA DE ALIMENTACIÓN ---
+                    // Tasa basada en relación de peso (Alometría)
+                    let weightRatio = w_curr / inputs.w0;
+                    // Evitar división por cero o bases raras, aunque w_curr siempre >= w0
+                    let dailyFeedRate = inputs.feedRateStart * Math.pow(weightRatio, decayExponent);
+                    
+                    let feedAmount = b_curr * dailyFeedRate;
+                    let weightGain = w_curr - w_prev;
+                    
+                    totalFeed += feedAmount;
+
+                    let currentNetGain = b_curr - initialBiomass;
+                    let accFCR = (currentNetGain > 0.001) ? (totalFeed / currentNetGain) : 0;
+                    
+                    tempData.push({
+                        day: t,
+                        weight: w_curr,
+                        pop: n_curr,
+                        biomass: b_curr,
+                        feedRatePct: dailyFeedRate * 100,
+                        feedAmount: feedAmount,
+                        accFeed: totalFeed, 
+                        weightGain: weightGain,
+                        dailyFCR: weightGain > 0 ? (feedAmount*1000 / n_curr) / weightGain : 0,
+                        accFCR: accFCR
+                    });
+                }
+
+                let finalBiomass = tempData[tempData.length - 1].biomass;
+                let netBiomassGain = finalBiomass - initialBiomass;
+                calculatedFCR = totalFeed / netBiomassGain;
+
+                if (Math.abs(calculatedFCR - inputs.fcrTarget) < 0.001) {
+                    bestData = tempData;
+                    break; 
+                }
+
+                // Ajuste de Búsqueda Binaria para el Exponente
+                // Si FCR Calc > FCR Meta => Estamos dando mucho alimento => Necesitamos que baje más rápido
+                // => beta debe ser más negativo (menor)
+                if (calculatedFCR > inputs.fcrTarget) {
+                    maxExp = decayExponent;
+                    decayExponent = (minExp + maxExp) / 2;
+                } else {
+                    // Si FCR Calc < FCR Meta => Falta alimento => Necesitamos curva más plana
+                    // => beta debe ser menos negativo (mayor, hacia 0)
+                    minExp = decayExponent;
+                    decayExponent = (minExp + maxExp) / 2;
+                }
+                iterations++;
+                bestData = tempData;
+            }
+
+            globalData = bestData;
+
+            // 5. Renderizar
+            renderKPIs(inputs, globalData, calculatedFCR, sgr_avg);
+            renderTable(globalData);
+            renderPerformanceChart(globalData);
+            renderGrowthFeedChart(globalData);
+
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderKPIs(inputs, data, fcr, sgr) {
+            const final = data[data.length - 1];
+            const totalFeed = data.reduce((acc, row) => acc + row.feedAmount, 0);
+            
+            document.getElementById('kpiBiomass').innerText = final.biomass.toLocaleString('es-CO', {maximumFractionDigits: 0}) + " kg";
+            document.getElementById('kpiFeed').innerText = totalFeed.toLocaleString('es-CO', {maximumFractionDigits: 0}) + " kg";
+            document.getElementById('kpiFCR').innerText = fcr.toFixed(2) + " / " + inputs.fcrTarget;
+            document.getElementById('kpiSGR').innerText = sgr.toFixed(2) + " % (Prom)";
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = row.day % 2 === 0 ? 'bg-white' : 'bg-gray-50 hover:bg-blue-50 transition-colors';
+                const gPerFish = (row.feedAmount * 1000) / row.pop;
+
+                tr.innerHTML = `
+                    <td class="px-3 py-2 whitespace-nowrap font-medium text-gray-900">${row.day}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right">${row.weight.toFixed(1)}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right">${Math.round(row.pop)}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right font-medium text-blue-800">${row.biomass.toFixed(1)}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right">${row.feedRatePct.toFixed(2)}%</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right font-bold text-emerald-600">${row.feedAmount.toFixed(1)}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right font-bold text-blue-600 bg-blue-50">${row.accFeed.toFixed(1)}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right text-xs text-gray-500">${gPerFish.toFixed(1)} g</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right text-xs">${row.dailyFCR.toFixed(2)}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right font-bold text-gray-800 bg-yellow-50">${row.accFCR.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderPerformanceChart(data) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            if (performanceChartInstance) performanceChartInstance.destroy();
+
+            const labels = data.map(d => `Día ${d.day}`);
+            const weightData = data.map(d => d.weightGain); 
+            const feedData = data.map(d => (d.feedAmount * 1000) / d.pop);
+
+            performanceChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.filter((_, i) => i % 5 === 0),
+                    datasets: [
+                        {
+                            label: 'Incremento de Peso (g/día)',
+                            data: weightData.filter((_, i) => i % 5 === 0),
+                            borderColor: '#0ea5e9',
+                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                            yAxisID: 'y',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Alimento Suministrado (g/pez)',
+                            data: feedData.filter((_, i) => i % 5 === 0),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            yAxisID: 'y1',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Crecimiento (g)' } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Alimento (g)' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+        }
+
+        function renderGrowthFeedChart(data) {
+            const ctx = document.getElementById('growthFeedChart').getContext('2d');
+            if (growthFeedChartInstance) growthFeedChartInstance.destroy();
+
+            const labels = data.map(d => `Día ${d.day}`);
+            const avgWeightData = data.map(d => d.weight); 
+            const totalFeedData = data.map(d => d.feedAmount); 
+
+            growthFeedChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.filter((_, i) => i % 5 === 0),
+                    datasets: [
+                        {
+                            label: 'Peso Promedio (g)',
+                            data: avgWeightData.filter((_, i) => i % 5 === 0),
+                            borderColor: '#0f172a', 
+                            backgroundColor: 'rgba(15, 23, 42, 0.0)', 
+                            borderWidth: 3,
+                            type: 'line',
+                            yAxisID: 'y',
+                            pointRadius: 1
+                        },
+                        {
+                            label: 'Consumo Total Diario (kg)',
+                            data: totalFeedData.filter((_, i) => i % 5 === 0),
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)', 
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { 
+                            type: 'linear', 
+                            display: true, 
+                            position: 'left', 
+                            title: { display: true, text: 'Peso (g)' } 
+                        },
+                        y1: { 
+                            type: 'linear', 
+                            display: true, 
+                            position: 'right', 
+                            title: { display: true, text: 'Alimento Total (kg)' }, 
+                            grid: { drawOnChartArea: false } 
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportToExcel() {
+            if (globalData.length === 0) return alert("Primero genere la tabla.");
+            const exportData = globalData.map(row => ({
+                Día: row.day,
+                "Peso Promedio (g)": parseFloat(row.weight.toFixed(2)),
+                "Población": Math.round(row.pop),
+                "Biomasa (kg)": parseFloat(row.biomass.toFixed(2)),
+                "% Alimentación": parseFloat(row.feedRatePct.toFixed(2)),
+                "Ración Diaria (kg)": parseFloat(row.feedAmount.toFixed(2)),
+                "Alimento Acumulado (kg)": parseFloat(row.accFeed.toFixed(2)),
+                "Gramos/Pez": parseFloat(((row.feedAmount * 1000) / row.pop).toFixed(2)),
+                "Conversión Diaria": parseFloat(row.dailyFCR.toFixed(2)),
+                "Conversión Acumulada": parseFloat(row.accFCR.toFixed(2))
+            }));
+
+            const batch = document.getElementById('batchName').value;
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Tabla Alimentación");
+            XLSX.writeFile(wb, `Tabla_Alimentacion_${batch}.xlsx`);
+        }
+
+        async function exportToPDF() {
+            if (!globalData.length) return alert("Primero genere la simulación.");
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            const batchName = document.getElementById('batchName').value;
+            const dateStr = new Date().toLocaleDateString();
+
+            // Título
+            doc.setFontSize(18);
+            doc.text(`Reporte Técnico: ${batchName}`, 15, 15);
+            doc.setFontSize(12);
+            doc.text(`Fecha: ${dateStr} - Tipo de Alimento: ${document.getElementById('feedType').value}`, 15, 22);
+
+            // Resumen de KPIs
+            const biomass = document.getElementById('kpiBiomass').innerText;
+            const feed = document.getElementById('kpiFeed').innerText;
+            const fcr = document.getElementById('kpiFCR').innerText;
+            
+            doc.setFontSize(10);
+            doc.text(`Biomasa Final: ${biomass} | Alimento Total: ${feed} | FCR Global: ${fcr}`, 15, 30);
+
+            // Capturar Gráfico 1
+            const canvas1 = document.getElementById('performanceChart');
+            const tempCanvas1 = document.createElement('canvas');
+            tempCanvas1.width = canvas1.width;
+            tempCanvas1.height = canvas1.height;
+            const ctx1 = tempCanvas1.getContext('2d');
+            ctx1.fillStyle = '#FFFFFF';
+            ctx1.fillRect(0, 0, tempCanvas1.width, tempCanvas1.height);
+            ctx1.drawImage(canvas1, 0, 0);
+            const imgData1 = tempCanvas1.toDataURL('image/jpeg', 1.0);
+            
+            doc.setFontSize(14);
+            doc.text("1. Rendimiento Biológico (g/pez)", 15, 45);
+            doc.addImage(imgData1, 'JPEG', 15, 50, 260, 100);
+
+            doc.addPage();
+            
+            // Capturar Gráfico 2
+            const canvas2 = document.getElementById('growthFeedChart');
+            const tempCanvas2 = document.createElement('canvas');
+            tempCanvas2.width = canvas2.width;
+            tempCanvas2.height = canvas2.height;
+            const ctx2 = tempCanvas2.getContext('2d');
+            ctx2.fillStyle = '#FFFFFF';
+            ctx2.fillRect(0, 0, tempCanvas2.width, tempCanvas2.height);
+            ctx2.drawImage(canvas2, 0, 0);
+            const imgData2 = tempCanvas2.toDataURL('image/jpeg', 1.0);
+
+            doc.text(`2. Crecimiento y Consumo Total (${batchName})`, 15, 15);
+            doc.addImage(imgData2, 'JPEG', 15, 25, 260, 100);
+
+            doc.save(`Reporte_Bioestadistica_${batchName}.pdf`);
+        }
+    </script>
+</body>
+</html>
