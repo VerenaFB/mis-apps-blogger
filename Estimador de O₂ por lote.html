@@ -1,0 +1,221 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Estimador de O₂ por lote</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: herramienta de dos columnas (entradas | resultados), se apila en móvil; bloque de transporte debajo */
+:root{
+  --bg:#eef3f3; --surface:#ffffff; --fg:#13232a; --muted:#566a71; --line:#d2dee0;
+  --a:#2f5f9e; --b:#b8562c; --accent:#0e7a7e; --ok:#2e7d4f; --warn:#a66a00; --bad:#b3261e;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Public Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d161a; --surface:#152228; --fg:#e3edef; --muted:#93a7ad; --line:#2a3b42;
+  --a:#86abe2; --b:#ec9a73; --accent:#4cc3c6; --ok:#6fcf97; --warn:#e5b45a; --bad:#f08a80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d161a; --surface:#152228; --fg:#e3edef; --muted:#93a7ad; --line:#2a3b42;
+  --a:#86abe2; --b:#ec9a73; --accent:#4cc3c6; --ok:#6fcf97; --warn:#e5b45a; --bad:#f08a80; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:18px;padding-block:24px 48px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(26px,4.5vw,38px)}
+h2{font-size:19px}
+p{margin:0;max-width:70ch}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+.cap{font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:13px;font-weight:600}
+.row{display:flex;gap:8px;align-items:center}
+input[type=number]{font:inherit;font-size:16px;font-family:var(--mono);font-variant-numeric:tabular-nums;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--fg);width:100%;min-width:0}
+.unit{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;min-width:52px}
+input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{font-size:12px;color:var(--muted)}
+.methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:560px){.methods{grid-template-columns:1fr}}
+.m{border:1px solid var(--line);border-radius:9px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.m h3{font-size:15px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13.5px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.headline{font-family:var(--display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.headline small{font-size:13px;font-weight:600;color:var(--muted);font-family:var(--body)}
+.flag{font-family:var(--mono);font-size:11.5px;color:var(--warn)}
+.design{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:baseline;border-top:1px solid var(--line);padding-top:12px}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat .v{font-family:var(--display);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;border:1px solid currentColor;width:fit-content}
+.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}
+.tgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:980px){.tgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.tgrid{grid-template-columns:1fr}}
+.meter{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.meter>span{display:block;height:100%;background:var(--accent);transition:width .2s}
+@media (prefers-reduced-motion:reduce){.meter>span{transition:none}}
+details{font-size:13.5px}
+details summary{cursor:pointer;font-weight:600}
+details ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:5px;max-width:78ch}
+code{font-family:var(--mono);font-size:12.5px}
+</style>
+
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:8px">
+  <span class="eyebrow">Tilapia · consumo de rutina · mg O₂ kg⁻¹ h⁻¹</span>
+  <h1>Estimador de oxígeno por lote</h1>
+  <p class="muted">Ingrese el lote y la temperatura. La herramienta calcula el consumo con dos ecuaciones publicadas y la biomasa que soporta un suministro de oxígeno puro durante el transporte. Los valores de ejemplo corresponden a un lote ficticio.</p>
+</header>
+
+<div class="grid">
+  <form class="card" id="f" novalidate>
+    <span class="eyebrow">Datos del lote</span>
+    <div class="field"><label for="n">Número de peces</label><div class="row"><input id="n" type="number" inputmode="decimal" min="1" step="100" value="5000"><span class="unit">peces</span></div></div>
+    <div class="field"><label for="w">Peso promedio</label><div class="row"><input id="w" type="number" inputmode="decimal" min="1" step="5" value="120"><span class="unit">g</span></div></div>
+    <div class="field"><label for="t">Temperatura del agua</label><div class="row"><input id="t" type="number" inputmode="decimal" min="15" max="35" step="0.5" value="28"><span class="unit">°C</span></div></div>
+    <div class="cap" id="biomasa">Biomasa: —</div>
+  </form>
+
+  <div class="card">
+    <span class="eyebrow">Consumo estimado del lote</span>
+    <div class="methods">
+      <div class="m">
+        <span class="tag" style="color:var(--a)">Método A · ecuación multivariada</span>
+        <h3>Mariluz-Fernández et al. 2023</h3>
+        <div class="headline" id="aH">—</div>
+        <dl class="kv">
+          <dt>Por kg de biomasa</dt><dd id="aK">—</dd>
+          <dt>Por pez</dt><dd id="aP">—</dd>
+          <dt>Por día (24 h)</dt><dd id="aD">—</dd>
+        </dl>
+        <span class="flag" id="aF"></span>
+        <span class="hint"><code>log Y = 0,492 − 0,243 log P + 1,68 log T</code> · medido en 24–251 g y 20–30 °C</span>
+      </div>
+      <div class="m">
+        <span class="tag" style="color:var(--b)">Método B · curvas peso–temperatura</span>
+        <h3>Valbuena &amp; Cruz-Casallas 2006</h3>
+        <div class="headline" id="bH">—</div>
+        <dl class="kv">
+          <dt>Por kg de biomasa</dt><dd id="bK">—</dd>
+          <dt>Por pez</dt><dd id="bP">—</dd>
+          <dt>Por día (24 h)</dt><dd id="bD">—</dd>
+        </dl>
+        <span class="flag" id="bF"></span>
+        <span class="hint">Potencial en peso y exponencial en temperatura, ajustada a los extremos publicados · 25–800 g y 18–30 °C</span>
+      </div>
+    </div>
+    <div class="design">
+      <div class="stat"><span class="cap">Promedio de ambos métodos</span><span class="v" id="avg">—</span></div>
+      <div class="stat"><span class="cap">Valor de diseño (el mayor)</span><span class="v" id="des">—</span></div>
+      <div class="stat"><span class="cap">Diferencia entre métodos</span><span class="v" id="dif">—</span></div>
+    </div>
+  </div>
+</div>
+
+<section class="card">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span class="eyebrow">Transporte</span>
+    <h2>Densidad según el suministro de oxígeno</h2>
+    <p class="cap">Calcula cuánta biomasa puede sostener el flujo de oxígeno puro, usando el valor de diseño multiplicado por un factor de estrés por manejo.</p>
+  </div>
+  <div class="tgrid">
+    <div class="field"><label for="q">Suministro de oxígeno puro</label><div class="row"><input id="q" type="number" inputmode="decimal" min="0" step="0.5" value="4"><span class="unit">L/min</span></div><span class="hint">Lectura del flujómetro del cilindro o concentrador.</span></div>
+    <div class="field"><label for="u">Pureza del oxígeno</label><div class="row"><input id="u" type="number" inputmode="decimal" min="21" max="100" step="0.5" value="99.5"><span class="unit">% O₂</span></div><span class="hint">Pipeta comercial: ~99,5 %. Generador o concentrador: suele dar 85–95 %; verifique con un analizador.</span></div>
+    <div class="field"><label for="v">Volumen de agua del tanque</label><div class="row"><input id="v" type="number" inputmode="decimal" min="0.1" step="0.1" value="2"><span class="unit">m³</span></div><span class="hint">Volumen útil de agua, no capacidad total.</span></div>
+    <div class="field"><label for="h">Duración del viaje</label><div class="row"><input id="h" type="number" inputmode="decimal" min="0.5" step="0.5" value="4"><span class="unit">h</span></div><span class="hint">Para estimar el oxígeno total a cargar.</span></div>
+    <div class="field"><label for="e">Eficiencia de transferencia del difusor</label><div class="row"><input id="e" type="number" inputmode="decimal" min="1" max="100" step="1" value="15"><span class="unit">%</span></div><span class="hint">Fracción del O₂ que se disuelve. Difusor fino en tanque poco profundo: ~10–30 %.</span></div>
+    <div class="field"><label for="s">Factor de estrés por manejo</label><div class="row"><input id="s" type="number" inputmode="decimal" min="1" max="4" step="0.1" value="2"><span class="unit">×</span></div><span class="hint">Multiplica el consumo de rutina. Use 1,5–2,5 según ayuno y manejo.</span></div>
+    <div class="field"><label for="p">Temperatura del agua de transporte</label><div class="row"><input id="p" type="number" inputmode="decimal" min="15" max="35" step="0.5" value="26"><span class="unit">°C</span></div><span class="hint">Enfriar el agua reduce el consumo.</span></div>
+  </div>
+
+  <div class="design" style="gap:16px 32px">
+    <div class="stat"><span class="cap">Oxígeno disuelto aportado</span><span class="v" id="o2in">—</span></div>
+    <div class="stat"><span class="cap">Consumo por kg en transporte</span><span class="v" id="ctr">—</span></div>
+    <div class="stat"><span class="cap">Biomasa máxima soportada</span><span class="v" id="bmax">—</span></div>
+    <div class="stat"><span class="cap">Densidad máxima por O₂</span><span class="v" id="dmax">—</span></div>
+    <div class="stat"><span class="cap">Peces por m³</span><span class="v" id="pm3">—</span></div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span class="pill" id="st">—</span>
+      <span class="cap" id="need">—</span>
+    </div>
+    <div class="meter" aria-hidden="true"><span id="bar" style="width:0"></span></div>
+    <span class="cap" id="lote">—</span>
+    <span class="cap" id="tot">—</span>
+  </div>
+</section>
+
+<details class="card">
+  <summary>Supuestos y límites del cálculo</summary>
+  <ul>
+    <li>Ambas ecuaciones describen consumo de rutina en peces en ayuno, medido en respirómetros cerrados. No incluyen la demanda extra por alimentación; por eso, para estanques use el valor de diseño con margen.</li>
+    <li>1 L de O₂ gaseoso pesa ~1,31 g (25 °C, 1 atm). Oxígeno disuelto aportado = flujo × pureza × 60 × 1,31 g × eficiencia.</li>
+    <li>La pureza reduce el oxígeno aportado en proporción directa. Es una aproximación conservadora a medias: con gas de menor pureza también baja la presión parcial de O₂ en las burbujas, así que la eficiencia real del difusor puede ser algo menor que con oxígeno de pipeta.</li>
+    <li>La densidad mostrada es el límite impuesto solo por el oxígeno. En viajes largos el CO₂, el amonio y la temperatura limitan antes; ayune los peces 24–48 h antes de cargar.</li>
+    <li>Fuera del rango de peso o temperatura medido, la herramienta extrapola y lo marca en ámbar.</li>
+    <li>Fuentes: Mariluz-Fernández et al. (2023), LACCEI; Valbuena-Villarreal &amp; Cruz-Casallas (2006), Orinoquia 10(1):57–63.</li>
+  </ul>
+</details>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const nf=(v,d=0)=>isFinite(v)?v.toLocaleString("es-CO",{maximumFractionDigits:d,minimumFractionDigits:d}):"—";
+const O2_G_PER_L=1.31;
+function mA(W,T){return Math.pow(10,0.492-0.243*Math.log10(W)+1.68*Math.log10(T))}
+function mB(W,T){const f=(T-18)/12;const a=176*Math.pow(508/176,f),c=96*Math.pow(237/96,f);return a*Math.pow(W/25,Math.log(c/a)/Math.log(32))}
+const num=id=>{const v=parseFloat($(id).value);return isFinite(v)?v:NaN};
+function fill(p,cpk,B,N){
+  const kgh=cpk*B/1e6;
+  $(p+"H").innerHTML=nf(kgh,kgh<1?3:2)+" <small>kg O₂/h</small>";
+  $(p+"K").textContent=nf(cpk)+" mg/kg/h";
+  $(p+"P").textContent=nf(kgh*1e6/N,1)+" mg/h";
+  $(p+"D").textContent=nf(kgh*24,1)+" kg O₂";
+}
+function upd(){
+  const N=num("n"),W=num("w"),T=num("t");
+  const ok=N>0&&W>0&&T>0;
+  if(!ok){$("biomasa").textContent="Ingrese número de peces, peso y temperatura mayores que cero.";return}
+  const B=N*W/1000;
+  $("biomasa").textContent="Biomasa: "+nf(B,1)+" kg";
+  const a=mA(W,T),b=mB(W,T);
+  fill("a",a,B,N);fill("b",b,B,N);
+  $("aF").textContent=(W<24||W>251||T<20||T>30)?"Fuera del rango medido: extrapolación":"";
+  $("bF").textContent=(W<25||W>800||T<18||T>30)?"Fuera del rango medido: extrapolación":"";
+  const avg=(a+b)/2,des=Math.max(a,b);
+  $("avg").textContent=nf(avg*B/1e6,2)+" kg O₂/h";
+  $("des").textContent=nf(des)+" mg/kg/h";
+  $("dif").textContent=nf(Math.abs(a-b)/Math.min(a,b)*100)+" %";
+
+  // Transporte
+  const Q=num("q"),V=num("v"),H=num("h"),E=num("e")/100,S=num("s"),TP=num("p"),PU=Math.min(100,Math.max(0,num("u")))/100;
+  const ctr=Math.max(mA(W,TP),mB(W,TP))*S;
+  const o2=Q*PU*60*O2_G_PER_L*E*1000; // mg/h disuelto
+  const bmax=o2/ctr;
+  $("o2in").textContent=nf(o2/1000)+" g/h";
+  $("ctr").textContent=nf(ctr)+" mg/kg/h";
+  $("bmax").textContent=nf(bmax)+" kg";
+  $("dmax").textContent=V>0?nf(bmax/V)+" kg/m³":"—";
+  $("pm3").textContent=V>0?nf(bmax/V/(W/1000)):"—";
+  const ratio=B/bmax;
+  const st=$("st");
+  st.className="pill "+(ratio<=0.8?"ok":ratio<=1?"warn":"bad");
+  st.textContent=ratio<=0.8?"El lote cabe con margen":ratio<=1?"El lote cabe, sin margen":"El suministro no alcanza para el lote";
+  $("bar").style.width=Math.min(100,ratio*100)+"%";
+  const qNeed=B*ctr/(PU*60*O2_G_PER_L*E*1000);
+  $("need").textContent="Flujo necesario para todo el lote: "+nf(qNeed,1)+" L/min a "+nf(PU*100,1)+" % de pureza";
+  $("lote").textContent="El lote completo ("+nf(B)+" kg) usa el "+nf(ratio*100)+" % de la capacidad del oxígeno"+(V>0?"; en este tanque quedaría a "+nf(B/V)+" kg/m³.":".");
+  $("tot").textContent="Oxígeno gaseoso a llevar para "+nf(H,1)+" h al flujo indicado: "+nf(Q*60*H)+" L (≈ "+nf(Q*60*H/1000,2)+" m³) de gas, que equivalen a "+nf(Q*PU*60*H)+" L de O₂ puro, más reserva.";
+}
+document.querySelectorAll("input").forEach(i=>i.addEventListener("input",upd));
+$("f").addEventListener("submit",e=>e.preventDefault());
+upd();
+</script>
+
+</body></html>
