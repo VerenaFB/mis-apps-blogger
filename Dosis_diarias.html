@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Dosificación Acuícola Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para gráficos dinámicos e interactivos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx.full.min.js) para exportación nativa a Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
+
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Encabezado Principal -->
+        <header class="bg-slate-800/80 border border-slate-700/50 rounded-2xl p-6 mb-8 shadow-xl shadow-slate-950/20">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
+                        Calculador Técnico de Dosificación Acuícola
+                    </h1>
+                    <p class="text-slate-400 mt-1 text-xs md:text-sm">
+                        Planificación biológica de tratamientos considerando el crecimiento de biomasa y la mortalidad acumulada.
+                    </p>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-700 px-4 py-2.5 rounded-xl text-xs flex items-center gap-3">
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-slate-300 font-medium">Motor de Cálculo Activo</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenedor de Alertas Dinámicas (Sin alertas invasivas del navegador) -->
+        <div id="alertBox" class="hidden mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs sm:text-sm flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <span id="alertMessage"></span>
+            </div>
+            <button onclick="cerrarAlerta()" class="text-rose-400 hover:text-rose-200 font-bold ml-4">✕</button>
+        </div>
+
+        <!-- Contenedor de Alertas de Éxito / Operación Copiado -->
+        <div id="successBox" class="hidden mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs sm:text-sm flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span id="successMessage"></span>
+            </div>
+            <button onclick="cerrarAlertaExito()" class="text-emerald-400 hover:text-emerald-200 font-bold ml-4">✕</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Panel Lateral Izquierdo: Formulario de Parámetros -->
+            <section class="bg-slate-800/40 border border-slate-700/60 p-6 rounded-2xl shadow-lg backdrop-blur-md h-fit">
+                <h2 class="text-lg font-bold text-cyan-400 mb-5 pb-3 border-b border-slate-700/60 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Variables del Tratamiento
+                </h2>
+                
+                <form id="calcForm" class="space-y-4 text-xs sm:text-sm" onsubmit="event.preventDefault(); calcularTratamiento();">
+                    
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">Dosis Principio Activo (g / Ton biomasa)</label>
+                        <input type="number" id="dosisPA" step="0.01" value="100" required class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                        <span class="text-slate-500 text-[10px] mt-0.5 block">Requerimiento neto de principio activo por tonelada.</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">Inclusión de P.A. en Producto Comercial (%)</label>
+                        <input type="number" id="porcentajePA" min="0.01" max="100" step="0.01" value="50" required class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                        <span class="text-slate-500 text-[10px] mt-0.5 block">Porcentaje de ingrediente activo en el empaque del producto.</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">Duración del Tratamiento (Días)</label>
+                        <input type="number" id="dias" min="1" step="1" value="10" required class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                    </div>
+
+                    <div class="border-t border-slate-700/50 pt-3 my-2"></div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-300 font-semibold mb-1">Peces Iniciales</label>
+                            <input type="number" id="pecesIni" min="1" step="1" value="25000" required class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 font-semibold mb-1">Peces Finales</label>
+                            <input type="number" id="pecesFin" min="1" step="1" value="24500" required class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                        </div>
+                    </div>
+                    <span class="text-slate-500 text-[10px] block -mt-1">Diferencia para estimar la tasa diaria de mortalidad.</span>
+
+                    <div class="grid grid-cols-2 gap-3 mt-2">
+                        <div>
+                            <label class="block text-slate-300 font-semibold mb-1">Peso Inicial (g)</label>
+                            <input type="number" id="pesoInicial" step="0.01" value="150" required class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 font-semibold mb-1">Peso Final (g)</label>
+                            <input type="number" id="pesoFinal" step="0.01" value="180" required class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Botón de Ejecución -->
+                    <button type="submit" class="w-full mt-4 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-cyan-500/10 uppercase tracking-wider text-xs">
+                        Actualizar Planificación
+                    </button>
+                </form>
+            </section>
+
+            <!-- Panel Derecho: Gráficos, KPI y Tablas -->
+            <section class="lg:col-span-2 space-y-6">
+                
+                <!-- Cuadro de Resumen Técnico e Indicadores Biológicos (KPI) -->
+                <div id="resumenInformativo" class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-800/20 p-4 rounded-2xl border border-slate-800">
+                    <div class="p-3 bg-slate-950/40 rounded-xl border border-slate-800">
+                        <span class="block text-[10px] text-slate-400 uppercase font-semibold">Mortalidad</span>
+                        <span id="txtMortalidad" class="text-lg font-bold text-rose-400">-</span>
+                    </div>
+                    <div class="p-3 bg-slate-950/40 rounded-xl border border-slate-800">
+                        <span class="block text-[10px] text-slate-400 uppercase font-semibold">Biomasa Inicial</span>
+                        <span id="txtBiomasaIni" class="text-lg font-bold text-cyan-400">-</span>
+                    </div>
+                    <div class="p-3 bg-slate-950/40 rounded-xl border border-slate-800">
+                        <span class="block text-[10px] text-slate-400 uppercase font-semibold">Biomasa Final</span>
+                        <span id="txtBiomasaFin" class="text-lg font-bold text-emerald-400">-</span>
+                    </div>
+                    <div class="p-3 bg-slate-950/40 rounded-xl border border-slate-800">
+                        <span class="block text-[10px] text-slate-400 uppercase font-semibold">Total Producto</span>
+                        <span id="txtTotalProducto" class="text-lg font-bold text-amber-400">-</span>
+                    </div>
+                </div>
+
+                <!-- Visualización de Gráfico Lineal de Crecimiento y Suministro -->
+                <div class="bg-slate-800/30 p-6 rounded-2xl border border-slate-800 h-80 flex flex-col justify-center relative shadow-inner">
+                    <canvas id="graficoDosis"></canvas>
+                </div>
+
+                <!-- Tabla de Dosificación Diaria -->
+                <div class="bg-slate-800/40 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl">
+                    <div class="p-5 border-b border-slate-700/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-800/80">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-200">
+                                Cronograma de Aplicación Diaria
+                            </h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Suministrar diariamente la dosis indicada de acuerdo a la biomasa calculada.</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            <!-- Botón Principal y Único: Copiar para Excel directo en portapapeles sin restricciones de descarga -->
+                            <button id="btnCopy" onclick="copiarDatosClipboard()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                Copiar Datos para Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto max-h-[28rem]">
+                        <table class="w-full text-left border-collapse" id="tablaResultados">
+                            <thead class="bg-slate-900/80 text-slate-400 text-[10px] uppercase tracking-wider sticky top-0 border-b border-slate-700 z-10">
+                                <tr>
+                                    <th class="py-3 px-4">Día</th>
+                                    <th class="py-3 px-4">Peces Estimados</th>
+                                    <th class="py-3 px-4">Peso Promedio (g)</th>
+                                    <th class="py-3 px-4">Biomasa Estimada (kg)</th>
+                                    <th class="py-3 px-4">Dosis P.A. (g)</th>
+                                    <th class="py-3 px-4 text-right text-cyan-400">P. Comercial (g)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 text-xs text-slate-300">
+                                <!-- Filas autogeneradas vía JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+        let datosCalculados = []; // Almacena el dataset estructurado para la exportación
+
+        // Alerta personalizada y estilizada en la UI (no invasiva)
+        function mostrarAlerta(mensaje) {
+            const alertBox = document.getElementById('alertBox');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.innerText = mensaje;
+            alertBox.classList.remove('hidden');
+            document.getElementById('successBox').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Alerta de éxito personalizada
+        function mostrarAlertaExito(mensaje) {
+            const successBox = document.getElementById('successBox');
+            const successMessage = document.getElementById('successMessage');
+            successMessage.innerText = mensaje;
+            successBox.classList.remove('hidden');
+            document.getElementById('alertBox').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Cierra el módulo de alerta de la UI
+        function cerrarAlerta() {
+            document.getElementById('alertBox').classList.add('hidden');
+        }
+
+        function cerrarAlertaExito() {
+            document.getElementById('successBox').classList.add('hidden');
+        }
+
+        function calcularTratamiento() {
+            cerrarAlerta();
+            cerrarAlertaExito();
+
+            // Extracción de parámetros
+            const dosisPA = parseFloat(document.getElementById('dosisPA').value);
+            const porcentajePA = parseFloat(document.getElementById('porcentajePA').value) / 100;
+            const totalDias = parseInt(document.getElementById('dias').value);
+            const pecesIni = parseInt(document.getElementById('pecesIni').value);
+            const pecesFin = parseInt(document.getElementById('pecesFin').value);
+            const pesoIni = parseFloat(document.getElementById('pesoInicial').value);
+            const pesoFin = parseFloat(document.getElementById('pesoFinal').value);
+
+            // Validaciones iniciales
+            if (isNaN(dosisPA) || isNaN(porcentajePA) || isNaN(totalDias) || isNaN(pecesIni) || isNaN(pecesFin) || isNaN(pesoIni) || isNaN(pesoFin)) {
+                mostrarAlerta("Error técnico: Por favor, ingrese valores numéricos válidos en todos los campos.");
+                return;
+            }
+            if (pesoFin < pesoIni) {
+                mostrarAlerta("Error técnico: El peso promedio final no puede ser inferior al peso inicial.");
+                return;
+            }
+            if (pecesFin > pecesIni) {
+                mostrarAlerta("Advertencia: El número de peces finales supera al inicial. El sistema modelará un crecimiento de población (poco común en condiciones clínicas).");
+            }
+            if (porcentajePA <= 0 || porcentajePA > 1) {
+                mostrarAlerta("Error técnico: La inclusión comercial debe estar comprendida entre 0.01% y 100%.");
+                return;
+            }
+
+            // Cálculo de incrementos diarios (Modelo Lineal de crecimiento y supervivencia)
+            const idp = totalDias > 1 ? (pesoFin - pesoIni) / (totalDias - 1) : 0;
+            const tasaPeces = totalDias > 1 ? (pecesFin - pecesIni) / (totalDias - 1) : 0;
+
+            datosCalculados = [];
+            let labelsGrafico = [];
+            let dataComercialGrafico = [];
+            let dataBiomasaGrafico = [];
+            let totalProductoAcumulado = 0;
+
+            const tbody = document.querySelector('#tablaResultados tbody');
+            tbody.innerHTML = '';
+
+            for (let d = 1; d <= totalDias; d++) {
+                // Población estimada para el día 'd'
+                const pecesDia = Math.round(pecesIni + (tasaPeces * (d - 1)));
+                
+                // Peso unitario estimado para el día 'd'
+                const pesoPromedioDia = pesoIni + (idp * (d - 1));
+
+                // Biomasa total del estanque en kg
+                const biomasaKg = (pecesDia * pesoPromedioDia) / 1000;
+                const biomasaTon = biomasaKg / 1000;
+
+                // Requerimiento teórico de Principio Activo puro (g)
+                const dosisPADiaria = dosisPA * biomasaTon;
+
+                // Requerimiento comercial compensando pureza
+                const dosisProductoComercial = dosisPADiaria / porcentajePA;
+                totalProductoAcumulado += dosisProductoComercial;
+
+                // Redondeo exacto a un decimal para exportación y uso numérico coherente
+                const dosisPADiariaRedondeada = parseFloat(dosisPADiaria.toFixed(1));
+                const dosisProductoComercialRedondeada = parseFloat(dosisProductoComercial.toFixed(1));
+
+                // Inserción en el dataset de exportación
+                datosCalculados.push({
+                    "Día": d,
+                    "Peces Estimados": pecesDia,
+                    "Peso Promedio (g)": parseFloat(pesoPromedioDia.toFixed(2)),
+                    "Biomasa Estimada (kg)": parseFloat(biomasaKg.toFixed(1)),
+                    "Dosis P.A. Diaria (g)": dosisPADiariaRedondeada,
+                    "Cantidad Producto Comercial (g)": dosisProductoComercialRedondeada
+                });
+
+                // Set de datos para los gráficos
+                labelsGrafico.push(`Día ${d}`);
+                dataComercialGrafico.push(dosisProductoComercialRedondeada);
+                dataBiomasaGrafico.push(parseFloat(biomasaKg.toFixed(1)));
+
+                // Representación en filas HTML (con formato estricto de 1 decimal para las dosis)
+                const fila = document.createElement('tr');
+                fila.className = "hover:bg-slate-800/30 transition-colors";
+                fila.innerHTML = `
+                    <td class="py-3.5 px-4 font-semibold text-slate-400 text-center sm:text-left">${d}</td>
+                    <td class="py-3.5 px-4 font-medium">${pecesDia.toLocaleString()}</td>
+                    <td class="py-3.5 px-4">${Math.round(pesoPromedioDia * 100) / 100} g</td>
+                    <td class="py-3.5 px-4 font-medium text-slate-200">${Math.round(biomasaKg).toLocaleString()} kg</td>
+                    <td class="py-3.5 px-4 text-slate-400 font-mono">${dosisPADiaria.toFixed(1)} g</td>
+                    <td class="py-3.5 px-4 text-right font-bold text-cyan-400 bg-cyan-950/10 font-mono">${dosisProductoComercial.toFixed(1)} g</td>
+                `;
+                tbody.appendChild(fila);
+            }
+
+            // Cálculos del resumen superior
+            const tasaMortalidad = pecesIni > 0 ? ((pecesIni - pecesFin) / pecesIni) * 100 : 0;
+            document.getElementById('txtMortalidad').innerText = `${Math.max(0, Math.round(tasaMortalidad * 100) / 100)}%`;
+            document.getElementById('txtBiomasaIni').innerText = Math.round((pecesIni * pesoIni) / 1000).toLocaleString() + " kg";
+            document.getElementById('txtBiomasaFin').innerText = Math.round((pecesFin * pesoFin) / 1000).toLocaleString() + " kg";
+            
+            // Exposición de acumulados generales con un decimal
+            document.getElementById('txtTotalProducto').innerText = totalProductoAcumulado.toLocaleString('es-ES', { 
+                minimumFractionDigits: 1, 
+                maximumFractionDigits: 1 
+            }) + " g";
+
+            // Renderizado de gráfico dinámico
+            renderizarGrafico(labelsGrafico, dataComercialGrafico, dataBiomasaGrafico);
+        }
+
+        function renderizarGrafico(labels, dataComercial, dataBiomasa) {
+            const ctx = document.getElementById('graficoDosis').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Suministro Comercial (g/día)',
+                            data: dataComercial,
+                            borderColor: '#22d3ee',
+                            backgroundColor: 'rgba(34, 211, 238, 0.08)',
+                            borderWidth: 2.5,
+                            tension: 0.1,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Biomasa Total (kg)',
+                            data: dataBiomasa,
+                            borderColor: '#10b981',
+                            borderWidth: 1.5,
+                            borderDash: [4, 4],
+                            tension: 0.1,
+                            fill: false,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#94a3b8', font: { size: 11, family: 'Inter' } },
+                            position: 'top'
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { color: 'rgba(51, 65, 85, 0.4)' }, 
+                            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10 } } 
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: { color: 'rgba(51, 65, 85, 0.4)' },
+                            ticks: { color: '#22d3ee', font: { family: 'Inter', size: 10 } },
+                            title: { display: true, text: 'Gramos de Producto Comercial', color: '#22d3ee', font: { size: 11, weight: 'bold' } }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: '#10b981', font: { family: 'Inter', size: 10 } },
+                            title: { display: true, text: 'Biomasa de Lote (kg)', color: '#10b981', font: { size: 11, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Se eliminaron las funciones 'exportarExcel' y 'exportarComoCSV' debido a restricciones de descarga locales en el navegador.
+
+        function copiarDatosClipboard() {
+            if (datosCalculados.length === 0) {
+                mostrarAlerta("No hay datos disponibles para copiar.");
+                return;
+            }
+
+            try {
+                const headers = Object.keys(datosCalculados[0]);
+                // El formato TSV (Tab separated values) es interpretado por Excel de forma nativa como columnas perfectas al pegar
+                let tsvContent = headers.join("\t") + "\r\n";
+                
+                datosCalculados.forEach(row => {
+                    const values = headers.map(header => {
+                        const val = row[header];
+                        // Usar coma como decimal para garantizar formato numérico nativo en Excel configurado en Español
+                        return typeof val === 'number' ? val.toString().replace('.', ',') : val;
+                    });
+                    tsvContent += values.join("\t") + "\r\n";
+                });
+
+                // Creación de elemento textarea temporal para copiado compatible con entornos iframe restringidos
+                const tempTextArea = document.createElement("textarea");
+                tempTextArea.value = tsvContent;
+                tempTextArea.style.position = "fixed";
+                tempTextArea.style.left = "-9999px";
+                document.body.appendChild(tempTextArea);
+                
+                tempTextArea.select();
+                const success = document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+
+                if (success) {
+                    mostrarAlertaExito("¡Datos de dosificación copiados! Vaya a Microsoft Excel o Google Sheets y presione Ctrl + V (Pegar) para colocar la tabla en columnas perfectas.");
+                } else {
+                    throw new Error("Comando de copiado no soportado");
+                }
+            } catch (err) {
+                mostrarAlerta("Error al copiar automáticamente. Por favor seleccione y copie la tabla del cronograma manualmente.");
+            }
+        }
+
+        // Ejecutar primer modelado al cargar la página con valores iniciales sugeridos
+        window.onload = function() {
+            calcularTratamiento();
+        };
+    </script>
+</body>
+</html>
