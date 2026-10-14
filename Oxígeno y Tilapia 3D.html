@@ -1,0 +1,397 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Oxígeno y Tilapia 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: instrumento de campo — visor 3D grande a la izquierda, consola de controles a la derecha, franja infográfica y gráfica de "tijera" debajo */
+:root{
+  --bg:#edf3f4; --panel:#ffffff; --panel2:#f5f9fa; --ink:#0e2830; --muted:#58737b; --line:#d2e0e3;
+  --accent:#0a8aa0; --tilapia:#cc4566; --scene:#e4edef; --grid:#9fb6bc;
+  --ok:#2a9a67; --sub:#c99a17; --stress:#dd742a; --crit:#c32f3a;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#08171c; --panel:#0f242b; --panel2:#0c1e24; --ink:#e2eef0; --muted:#8eaab1; --line:#1d3a44;
+  --accent:#4fc6d9; --tilapia:#f27c97; --scene:#0b1d23; --grid:#3a5a64;
+  --ok:#4cc48d; --sub:#e8bb40; --stress:#f2934c; --crit:#f05e66; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#08171c; --panel:#0f242b; --panel2:#0c1e24; --ink:#e2eef0; --muted:#8eaab1; --line:#1d3a44;
+  --accent:#4fc6d9; --tilapia:#f27c97; --scene:#0b1d23; --grid:#3a5a64;
+  --ok:#4cc48d; --sub:#e8bb40; --stress:#f2934c; --crit:#f05e66; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 40px}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(26px,3.4vw,40px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 .o2{color:var(--accent)} h1 .fish{color:var(--tilapia)}
+.sub{color:var(--muted);margin:6px 0 0;max-width:62ch}
+.eq{font-family:var(--f-mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:6px 10px;background:var(--panel2)}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px;align-items:start}
+@media (max-width:900px){.app{grid-template-columns:minmax(0,1fr)}}
+
+.viewer{position:relative;background:var(--scene);border:1px solid var(--line);border-radius:14px;overflow:hidden;height:clamp(380px,64vh,660px)}
+#three{position:absolute;inset:0;display:block;width:100%;height:100%;cursor:grab}
+#three:active{cursor:grabbing}
+.vlegend{position:absolute;left:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100% - 24px)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 9px;border-radius:99px;background:var(--panel);border:1px solid var(--line);color:var(--ink)}
+.chip i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.vhint{position:absolute;right:12px;top:12px;font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 9px}
+.vtitle{position:absolute;left:14px;top:12px;font-family:var(--f-display);font-weight:700;font-size:15px}
+.vtitle span{display:block;font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--muted)}
+#tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-family:var(--f-mono);font-size:12px;line-height:1.45;box-shadow:0 6px 18px rgba(0,0,0,.15);min-width:160px}
+
+.console{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.console h2{font-family:var(--f-display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--muted);font-weight:700}
+.ctrl{display:flex;flex-direction:column;gap:4px}
+.ctrl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;font-weight:500}
+.ctrl output{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent);font-weight:500}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=range]:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select{width:100%;font:inherit;font-size:13.5px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink)}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{flex:1;font:inherit;font-size:13px;padding:6px 4px;border:0;background:var(--panel2);color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel);font-weight:600}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:inherit;font-size:12px;padding:4px 9px;border-radius:99px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer}
+.presets button:hover{border-color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.r{background:var(--panel2);border-radius:10px;padding:9px 11px;min-width:0}
+.r b{display:block;font-family:var(--f-mono);font-size:20px;font-variant-numeric:tabular-nums;font-weight:500;line-height:1.2}
+.r small{font-size:11.5px;color:var(--muted);display:block;line-height:1.3}
+.r.wide{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;color:#fff;white-space:nowrap}
+.diag{font-size:13px;margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;color:var(--ink)}
+
+.lower{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px}
+@media (max-width:900px){.lower{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.card h3{font-family:var(--f-display);font-size:19px;margin:0 0 2px;font-weight:700}
+.card p.lead{color:var(--muted);margin:0 0 10px;font-size:13.5px}
+#scissors{width:100%;height:280px;display:block}
+
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.facts{grid-template-columns:1fr}}
+.fact{border-top:3px solid var(--accent);padding-top:8px}
+.fact.t{border-color:var(--tilapia)}
+.fact .big{font-family:var(--f-display);font-weight:800;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.fact .lbl{font-size:12.5px;color:var(--muted);margin-top:4px}
+.zones{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.zone{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:center;font-size:13px}
+.zone span:first-child{font-family:var(--f-mono);font-weight:500;padding:2px 8px;border-radius:6px;color:#fff;text-align:center}
+footer{font-size:12px;color:var(--muted);max-width:110ch}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1><span class="o2">Oxígeno disuelto</span>, temperatura y salinidad en <span class="fish">tilapia</span></h1>
+      <p class="sub">La superficie muestra el OD disponible para cada combinación de temperatura y salinidad. La consola calcula cuánto oxígeno consume el pez en esas mismas condiciones.</p>
+    </div>
+    <div class="eq">C* = f(T, S, P) · Benson &amp; Krause (APHA 4500-O)</div>
+  </header>
+
+  <section class="app">
+    <div class="viewer" id="viewer">
+      <canvas id="three" aria-label="Superficie 3D de oxígeno disuelto según temperatura y salinidad"></canvas>
+      <div class="vtitle">OD disponible (mg/L)<span id="vsub">al 80 % de saturación · nivel del mar</span></div>
+      <div class="vhint">Arrastre para girar · rueda para acercar</div>
+      <div class="vlegend">
+        <span class="chip"><i style="background:var(--ok)"></i>≥ 5 óptimo</span>
+        <span class="chip"><i style="background:var(--sub)"></i>3–5 subóptimo</span>
+        <span class="chip"><i style="background:var(--stress)"></i>2–3 estrés</span>
+        <span class="chip"><i style="background:var(--crit)"></i>&lt; 2 crítico</span>
+        <span class="chip"><i style="background:var(--grid)"></i>sombra: fuera de tolerancia</span>
+        <span class="chip"><i style="background:var(--tilapia);border-radius:50%"></i>su condición</span>
+      </div>
+      <div id="tip" hidden></div>
+    </div>
+
+    <aside class="console">
+      <h2>Condiciones del agua</h2>
+      <div class="presets" aria-label="Sitios de ejemplo">
+        <button data-p="betania">Embalse Betania · 560 m</button>
+        <button data-p="guajaro">El Guájaro · 5 m</button>
+        <button data-p="estuario">Estuario 15 g/kg</button>
+        <button data-p="ola">Ola de calor 33 °C</button>
+      </div>
+      <div class="ctrl"><label for="T">Temperatura <output id="oT"></output></label><input id="T" type="range" min="15" max="40" step="0.5" value="29"></div>
+      <div class="ctrl"><label for="S">Salinidad <output id="oS"></output></label><input id="S" type="range" min="0" max="40" step="0.5" value="0"></div>
+      <div class="ctrl"><label for="P">Saturación de oxígeno <output id="oP"></output></label><input id="P" type="range" min="20" max="150" step="1" value="80"></div>
+      <div class="ctrl"><label for="A">Altitud <output id="oA"></output></label><input id="A" type="range" min="0" max="3000" step="10" value="0"></div>
+      <hr>
+      <h2>El pez</h2>
+      <div class="row2">
+        <div class="ctrl"><label for="sp">Especie</label>
+          <select id="sp"><option value="nil">Tilapia nilótica</option><option value="roja">Tilapia roja</option></select></div>
+        <div class="ctrl"><label>Estado</label>
+          <div class="seg" role="group" aria-label="Estado de alimentación"><button id="fast" aria-pressed="true">Ayuno</button><button id="fed" aria-pressed="false">Alimentado</button></div></div>
+      </div>
+      <div class="ctrl"><label for="W">Peso medio <output id="oW"></output></label><input id="W" type="range" min="5" max="900" step="5" value="250"></div>
+      <div class="ctrl"><label for="B">Biomasa <output id="oB"></output></label><input id="B" type="range" min="0.5" max="80" step="0.5" value="3"></div>
+      <hr>
+      <div class="readout" aria-live="polite">
+        <div class="r"><small>Saturación 100 %</small><b id="rSat"></b><small>mg/L</small></div>
+        <div class="r"><small>OD actual</small><b id="rDO"></b><small>mg/L</small></div>
+        <div class="r wide"><div><small>Estado para la tilapia</small><b id="rZoneTxt" style="font-size:16px"></b></div><span class="pill" id="rZone"></span></div>
+        <div class="r"><small>Consumo del pez</small><b id="rMO2"></b><small>mg O₂/kg/h</small></div>
+        <div class="r"><small>P<sub>crit</sub> estimada</small><b id="rPc"></b><small id="rPcs">mg/L</small></div>
+        <div class="r"><small>Caída de OD por los peces</small><b id="rRate"></b><small>mg/L por hora</small></div>
+        <div class="r"><small>Reserva sin aireación</small><b id="rHours"></b><small>hasta 2 mg/L</small></div>
+      </div>
+      <ul class="diag" id="diag"></ul>
+    </aside>
+  </section>
+
+  <section class="lower">
+    <div class="card">
+      <h3>La tijera del oxígeno</h3>
+      <p class="lead">Al subir la temperatura el agua retiene menos oxígeno y el pez consume más. Las curvas usan su salinidad, saturación, altitud y peso actuales.</p>
+      <canvas id="scissors" aria-label="Gráfica de oferta y demanda de oxígeno contra temperatura"></canvas>
+    </div>
+    <div class="card">
+      <h3>Datos clave en sus condiciones</h3>
+      <p class="lead">Se recalculan con cada ajuste de la consola.</p>
+      <div class="facts">
+        <div class="fact"><div class="big" id="fT"></div><div class="lbl">de OD en saturación por cada +5 °C</div></div>
+        <div class="fact"><div class="big" id="fS"></div><div class="lbl">de OD en saturación por cada +10 g/kg de salinidad</div></div>
+        <div class="fact t"><div class="big">×2</div><div class="lbl">consumo de O₂ por cada +10 °C (Q₁₀ ≈ 2)</div></div>
+        <div class="fact t"><div class="big">+60 %</div><div class="lbl">consumo tras alimentar, por 4–6 h (acción dinámica específica)</div></div>
+      </div>
+      <div class="zones">
+        <div class="zone"><span style="background:var(--ok)">≥ 5 mg/L</span><span>Crecimiento y conversión alimenticia normales.</span></div>
+        <div class="zone"><span style="background:var(--sub)">3–5 mg/L</span><span>Menor consumo de alimento y crecimiento más lento.</span></div>
+        <div class="zone"><span style="background:var(--stress)">2–3 mg/L</span><span>Estrés, inmunodepresión, más brotes de estreptococosis.</span></div>
+        <div class="zone"><span style="background:var(--crit)">&lt; 2 mg/L</span><span>Boqueo en superficie; riesgo de mortalidad si se prolonga.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Solubilidad: ecuación de Benson &amp; Krause (1984), APHA 4500-O, con corrección por presión barométrica según altitud. Demanda del pez: modelo alométrico ilustrativo (MO₂ ≈ 230 mg/kg/h para 100 g a 28 °C, exponente de masa −0,2, Q₁₀ = 2, costo osmorregulador mínimo cerca de 10–12 g/kg). Umbrales de OD según Popma &amp; Masser (SRAC 282) y El-Sayed (2006). La reserva sin aireación solo considera la respiración de los peces; en estanques el plancton y el sedimento pueden duplicar o triplicar la demanda nocturna. Calibre con sus propias mediciones.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const nf=(v,d=1)=>v.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* ---------- Modelo físico ---------- */
+function cStar(T,S){const K=T+273.15;
+  const ln=-139.34411+1.575701e5/K-6.642308e7/K**2+1.243800e10/K**3-8.621949e11/K**4
+    -S*(1.7674e-2-10.754/K+2140.7/K**2);return Math.exp(ln);}
+function pAtm(h){return Math.pow(1-2.25577e-5*h,5.25588);}
+function satDO(T,S,h){const P=pAtm(h),K=T+273.15,C=cStar(T,S);
+  const Pwv=Math.exp(11.8571-3840.70/K-216961/K**2);
+  const th=0.000975-1.426e-5*T+6.436e-8*T*T;
+  return C*P*((1-Pwv/P)*(1-th*P))/((1-Pwv)*(1-th));}
+const SP={nil:{name:'nilótica',sOk:15,salF:S=>1+0.0005*(S-10)**2+(S>15?0.002*(S-15)**2:0)},
+          roja:{name:'roja',sOk:25,salF:S=>1+0.0004*(S-12)**2+(S>25?0.002*(S-25)**2:0)}};
+function mo2(T,S,W,sp,fed){return 230*Math.pow(W/100,-0.2)*Math.pow(2,(T-28)/10)*SP[sp].salF(S)*(fed?1.6:1);}
+function pcritPct(T,fed){return Math.min(45,Math.max(12,22+0.9*(T-25)+(fed?4:0)));}
+function inTol(T,S,sp){return T>=22&&T<=34&&S<=SP[sp].sOk;}
+function zone(d){if(d>=5)return['ok','Óptimo'];if(d>=3)return['sub','Subóptimo'];if(d>=2)return['stress','Estrés'];return['crit','Crítico'];}
+
+/* ---------- Estado ---------- */
+const st={T:29,S:0,P:80,A:0,W:250,B:3,sp:'nil',fed:false};
+const ids=['T','S','P','A','W','B'];
+
+/* ---------- Tokens de tema ---------- */
+let tok={};
+function readTok(){const cs=getComputedStyle(document.documentElement);
+  ['ink','muted','line','accent','tilapia','scene','grid','ok','sub','stress','crit','panel'].forEach(k=>tok[k]=cs.getPropertyValue('--'+k).trim());}
+readTok();
+
+/* ---------- Escena 3D ---------- */
+const canvas=$('three'),viewer=$('viewer');
+let renderer,scene,camera,controls,surf,ghost,marker,mline,floorDot,labels=[],frame,planes=[];
+const X=T=>(T-15)/25*10-5, Z=S=>5-S/40*10, Y=d=>d/16*6;
+const N=56;
+function lerpC(a,b,t){return a.clone().lerp(b,t);}
+function zoneCol(d){const c=k=>new THREE.Color(tok[k]);
+  if(d<1.5)return c('crit'); if(d<2.5)return lerpC(c('crit'),c('stress'),(d-1.5));
+  if(d<3.5)return lerpC(c('stress'),c('sub'),(d-2.5)); if(d<5)return lerpC(c('sub'),c('ok'),(d-3.5)/1.5); return c('ok');}
+
+function makeLabel(text,color,px){
+  const c=document.createElement('canvas'),g=c.getContext('2d'),f=`500 ${px*4}px "IBM Plex Mono", monospace`;
+  g.font=f;const w=Math.ceil(g.measureText(text).width)+8,h=px*5;c.width=w;c.height=h;
+  g.font=f;g.fillStyle=color;g.textBaseline='middle';g.fillText(text,4,h/2);
+  const tex=new THREE.CanvasTexture(c);tex.minFilter=THREE.LinearFilter;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
+  const k=0.0105*px/14*3.2;s.scale.set(w/h*k*1.25,k*1.25,1);return s;}
+
+function buildStatic(){
+  labels.forEach(l=>{scene.remove(l);l.material.map.dispose();l.material.dispose();});labels=[];
+  if(frame)scene.remove(frame);
+  const pts=[];const Ymax=Y(16);
+  const box=[[-5,0,-5],[5,0,-5],[5,0,5],[-5,0,5]];
+  for(let i=0;i<4;i++){const a=box[i],b=box[(i+1)%4];pts.push(...a,...b);}
+  pts.push(-5,0,-5,-5,Ymax,-5, 5,0,-5,5,Ymax,-5, -5,0,5,-5,Ymax,5);
+  for(let d=4;d<=16;d+=4){pts.push(-5,Y(d),-5,5,Y(d),-5, -5,Y(d),-5,-5,Y(d),5);}
+  for(let t=20;t<40;t+=5)pts.push(X(t),0,-5,X(t),0,5);
+  for(let s=10;s<40;s+=10)pts.push(-5,0,Z(s),5,0,Z(s));
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  frame=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:tok.grid,transparent:true,opacity:.55}));scene.add(frame);
+  const add=(txt,x,y,z,col,px)=>{const l=makeLabel(txt,col||tok.muted,px||13);l.position.set(x,y,z);scene.add(l);labels.push(l);};
+  for(let t=15;t<=40;t+=5)add(t+'°',X(t),-0.35,5.7);
+  for(let s=0;s<=40;s+=10)add(String(s),5.75,-0.3,Z(s));
+  for(let d=0;d<=16;d+=4)add(String(d),-5.6,Y(d),-5.4);
+  add('Temperatura (°C)',0,-1.05,6.6,tok.ink,15);
+  add('Salinidad (g/kg)',6.9,-0.9,0,tok.ink,15);
+  add('OD (mg/L)',-5.6,Y(16)+0.6,-5.4,tok.ink,15);
+  planes.forEach((p,i)=>{p.material.color.set(i?tok.sub:tok.ok);p.children[0].material.color.set(i?tok.sub:tok.ok);});
+}
+
+function initThree(){
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(38,1,0.1,200);camera.position.set(13.5,9.5,14.5);
+  controls=new THREE.OrbitControls(camera,canvas);controls.target.set(0,1.6,0);controls.enableDamping=true;
+  controls.minDistance=9;controls.maxDistance=40;controls.maxPolarAngle=Math.PI*0.495;controls.update();
+  scene.add(new THREE.AmbientLight(0xffffff,0.62));
+  const dl=new THREE.DirectionalLight(0xffffff,0.55);dl.position.set(6,12,8);scene.add(dl);
+
+  const geo=new THREE.BufferGeometry();const n=(N+1)*(N+1);
+  geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));
+  geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(n*3),3));
+  const idx=[];for(let i=0;i<N;i++)for(let j=0;j<N;j++){const a=i*(N+1)+j,b=a+1,c=a+N+1,d=c+1;idx.push(a,c,b,b,c,d);}
+  geo.setIndex(idx);
+  surf=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide}));scene.add(surf);
+  const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));gg.setIndex(idx);
+  ghost=new THREE.Mesh(gg,new THREE.MeshBasicMaterial({wireframe:true,transparent:true,opacity:.18,color:0x888888}));scene.add(ghost);
+
+  [5,3].forEach(d=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(10,10),new THREE.MeshBasicMaterial({transparent:true,opacity:.09,side:THREE.DoubleSide,depthWrite:false}));
+    p.rotation.x=-Math.PI/2;p.position.y=Y(d);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(10,10)),new THREE.LineDashedMaterial({dashSize:.25,gapSize:.18,transparent:true,opacity:.8}));
+    e.computeLineDistances();p.add(e);scene.add(p);planes.push(p);});
+
+  marker=new THREE.Mesh(new THREE.SphereGeometry(0.2,24,16),new THREE.MeshLambertMaterial({color:tok.tilapia,emissive:tok.tilapia,emissiveIntensity:.35}));scene.add(marker);
+  const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+  mline=new THREE.Line(lg,new THREE.LineBasicMaterial({color:tok.tilapia}));scene.add(mline);
+  floorDot=new THREE.Mesh(new THREE.RingGeometry(0.14,0.24,28),new THREE.MeshBasicMaterial({color:tok.tilapia,side:THREE.DoubleSide}));floorDot.rotation.x=-Math.PI/2;scene.add(floorDot);
+
+  buildStatic();applySceneTheme();
+  new ResizeObserver(resize).observe(viewer);resize();
+  (function loop(){controls.update();renderer.render(scene,camera);requestAnimationFrame(loop);})();
+
+  const ray=new THREE.Raycaster(),m=new THREE.Vector2(),tip=$('tip');
+  canvas.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();
+    m.x=(e.clientX-r.left)/r.width*2-1;m.y=-(e.clientY-r.top)/r.height*2+1;ray.setFromCamera(m,camera);
+    const h=ray.intersectObject(surf)[0];if(!h){tip.hidden=true;return;}
+    const T=(h.point.x+5)/10*25+15,S=(5-h.point.z)/10*40;const sat=satDO(T,S,st.A),d=sat*st.P/100,z=zone(d);
+    tip.innerHTML=`T ${nf(T)} °C · S ${nf(S)} g/kg<br>Sat. 100 %: ${nf(sat,2)} mg/L<br>OD (${st.P} %): <b style="color:var(--${z[0]})">${nf(d,2)} mg/L</b><br>${inTol(T,S,st.sp)?'Dentro de tolerancia':'Fuera de tolerancia'}`;
+    tip.hidden=false;let x=e.clientX-r.left+14,y=e.clientY-r.top+14;
+    if(x+180>r.width)x-=200;if(y+90>r.height)y-=110;tip.style.left=x+'px';tip.style.top=y+'px';});
+  canvas.addEventListener('pointerleave',()=>tip.hidden=true);
+}
+function resize(){const w=viewer.clientWidth,h=viewer.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+  camera.position.setLength(w<520?24:19.5);camera.updateProjectionMatrix();}
+function applySceneTheme(){renderer.setClearColor(tok.scene);ghost.material.color.set(tok.muted);
+  marker.material.color.set(tok.tilapia);marker.material.emissive.set(tok.tilapia);mline.material.color.set(tok.tilapia);floorDot.material.color.set(tok.tilapia);}
+
+function updateSurface(){
+  const pos=surf.geometry.attributes.position,col=surf.geometry.attributes.color,gp=ghost.geometry.attributes.position;
+  const shade=new THREE.Color(tok.grid);
+  for(let i=0;i<=N;i++)for(let j=0;j<=N;j++){const k=i*(N+1)+j,T=15+25*j/N,S=40*i/N;
+    const sat=satDO(T,S,st.A),d=sat*st.P/100;
+    pos.setXYZ(k,X(T),Y(d),Z(S));gp.setXYZ(k,X(T),Y(sat),Z(S));
+    let c=zoneCol(d);if(!inTol(T,S,st.sp))c=lerpC(c,shade,.62);col.setXYZ(k,c.r,c.g,c.b);}
+  pos.needsUpdate=col.needsUpdate=gp.needsUpdate=true;surf.geometry.computeVertexNormals();surf.geometry.computeBoundingSphere();
+  ghost.visible=st.P!==100;
+  const sat=satDO(st.T,st.S,st.A),d=sat*st.P/100;
+  marker.position.set(X(st.T),Y(d),Z(st.S));
+  const a=mline.geometry.attributes.position;a.setXYZ(0,X(st.T),0,Z(st.S));a.setXYZ(1,X(st.T),Y(d),Z(st.S));a.needsUpdate=true;
+  floorDot.position.set(X(st.T),0.01,Z(st.S));
+}
+
+/* ---------- Consola ---------- */
+function update(){
+  $('oT').textContent=nf(st.T)+' °C';$('oS').textContent=nf(st.S)+' g/kg';$('oP').textContent=st.P+' %';
+  $('oA').textContent=st.A.toLocaleString('es-CO')+' m';$('oW').textContent=st.W+' g';$('oB').textContent=nf(st.B)+' kg/m³';
+  $('vsub').textContent=`al ${st.P} % de saturación · ${st.A?st.A.toLocaleString('es-CO')+' m s. n. m.':'nivel del mar'} · tilapia ${SP[st.sp].name}`;
+  const sat=satDO(st.T,st.S,st.A),d=sat*st.P/100,z=zone(d),m=mo2(st.T,st.S,st.W,st.sp,st.fed);
+  const pc=pcritPct(st.T,st.fed),pcm=pc/100*sat,rate=st.B*m/1000,hrs=(d-2)/rate;
+  $('rSat').textContent=nf(sat,2);$('rDO').textContent=nf(d,2);$('rDO').style.color=`var(--${z[0]})`;
+  $('rZone').textContent=z[1];$('rZone').style.background=`var(--${z[0]})`;$('rZoneTxt').textContent=`Tilapia ${SP[st.sp].name}`;
+  $('rMO2').textContent=Math.round(m);$('rPc').textContent=nf(pcm,2);$('rPcs').textContent=`mg/L (≈ ${Math.round(pc)} % sat.)`;
+  $('rRate').textContent=nf(rate,2);
+  $('rHours').textContent=d<=2?'0 h':(hrs>48?'> 48 h':(hrs<1?Math.round(hrs*60)+' min':nf(hrs,1)+' h'));
+  $('rHours').style.color=d<=2||hrs<2?'var(--crit)':hrs<6?'var(--stress)':'var(--ink)';
+
+  const msgs=[];
+  if(st.T>32)msgs.push('Temperatura sobre el óptimo (27–30 °C): menos oxígeno y más consumo a la vez.');
+  else if(st.T<22)msgs.push('Agua fría: bajo apetito y crecimiento lento aunque sobre oxígeno.');
+  if(st.S>SP[st.sp].sOk)msgs.push(`Salinidad sobre ${SP[st.sp].sOk} g/kg: el costo osmorregulador eleva la demanda de O₂.`);
+  if(d<pcm)msgs.push('OD por debajo de la Pcrit: el pez ya no sostiene su metabolismo aeróbico.');
+  else if(d<3)msgs.push('Encienda aireación de emergencia y suspenda la alimentación.');
+  else if(d<5)msgs.push('Reduzca la ración y vigile el OD al amanecer.');
+  if(d>2&&hrs<8)msgs.push(`Con esta biomasa el OD llega a 2 mg/L en ${nf(hrs,1)} h sin aireación.`);
+  if(st.P>110)msgs.push('Sobresaturación típica de tardes con fitoplancton denso; anticipa una caída nocturna fuerte.');
+  if(st.A>300)msgs.push(`A ${st.A.toLocaleString('es-CO')} m la presión baja la saturación ${nf((1-satDO(st.T,st.S,st.A)/satDO(st.T,st.S,0))*100,0)} % frente al nivel del mar.`);
+  if(!msgs.length)msgs.push('Condición favorable: oxígeno suficiente con margen sobre la demanda.');
+  $('diag').innerHTML=msgs.map(x=>`<li>${x}</li>`).join('');
+
+  const s0=satDO(st.T,st.S,st.A);
+  $('fT').textContent='−'+nf((1-satDO(Math.min(40,st.T+5),st.S,st.A)/s0)*100,0)+' %';
+  $('fS').textContent='−'+nf((1-satDO(st.T,Math.min(40,st.S+10),st.A)/s0)*100,0)+' %';
+  if(renderer)updateSurface();
+  drawScissors();
+}
+
+/* ---------- Gráfica tijera ---------- */
+function drawScissors(){
+  const c=$('scissors'),dpr=Math.min(2,window.devicePixelRatio||1),w=c.clientWidth,h=c.clientHeight;
+  if(!w)return;c.width=w*dpr;c.height=h*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+  const L=44,R=w-50,T0=16,B=h-36;const xs=t=>L+(t-15)/25*(R-L);
+  const supply=t=>satDO(t,st.S,st.A)*st.P/100,dem=t=>mo2(t,st.S,st.W,st.sp,st.fed);
+  let maxS=0,maxD=0;for(let t=15;t<=40;t+=.5){maxS=Math.max(maxS,supply(t));maxD=Math.max(maxD,dem(t));}
+  maxS=Math.ceil(maxS/2)*2;maxD=Math.ceil(maxD/100)*100;
+  const yS=v=>B-v/maxS*(B-T0),yD=v=>B-v/maxD*(B-T0);
+  g.font='11px "IBM Plex Mono", monospace';g.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=T0+(B-T0)*i/4;g.strokeStyle=tok.line;g.beginPath();g.moveTo(L,y);g.lineTo(R,y);g.stroke();
+    g.fillStyle=tok.accent;g.textAlign='right';g.fillText(nf(maxS*(1-i/4),0),L-6,y+4);
+    g.fillStyle=tok.tilapia;g.textAlign='left';g.fillText(Math.round(maxD*(1-i/4)),R+6,y+4);}
+  g.fillStyle=tok.muted;g.textAlign='center';for(let t=15;t<=40;t+=5)g.fillText(t+' °C',xs(t),B+16);
+  g.fillStyle=tok.ok;g.globalAlpha=.07;g.fillRect(xs(27),T0,xs(30)-xs(27),B-T0);g.globalAlpha=1;
+  g.fillStyle=tok.muted;g.fillText('óptimo 27–30 °C',(xs(27)+xs(30))/2,T0+12);
+  [[5,'ok'],[3,'sub']].forEach(([v,k])=>{if(v>maxS)return;g.setLineDash([4,4]);g.strokeStyle=tok[k];g.beginPath();g.moveTo(L,yS(v));g.lineTo(R,yS(v));g.stroke();g.setLineDash([]);
+    g.fillStyle=tok[k];g.textAlign='left';g.fillText(v+' mg/L',L+4,yS(v)-4);});
+  const line=(f,y,col)=>{g.strokeStyle=col;g.lineWidth=2.5;g.beginPath();for(let t=15;t<=40;t+=.25){const X1=xs(t),Y1=y(f(t));t===15?g.moveTo(X1,Y1):g.lineTo(X1,Y1);}g.stroke();};
+  line(supply,yS,tok.accent);line(dem,yD,tok.tilapia);
+  g.lineWidth=1;g.strokeStyle=tok.muted;g.setLineDash([2,3]);g.beginPath();g.moveTo(xs(st.T),T0);g.lineTo(xs(st.T),B);g.stroke();g.setLineDash([]);
+  [[supply(st.T),yS,tok.accent],[dem(st.T),yD,tok.tilapia]].forEach(([v,y,c])=>{g.fillStyle=tok.panel;g.beginPath();g.arc(xs(st.T),y(v),5.5,0,7);g.fill();g.strokeStyle=c;g.lineWidth=2.5;g.stroke();});
+  g.font='600 12px "IBM Plex Sans", sans-serif';g.textAlign='left';
+  g.fillStyle=tok.accent;g.fillText('Oferta: OD (mg/L)',L+4,B-8);
+  g.fillStyle=tok.tilapia;g.textAlign='right';g.fillText('Demanda: mg O₂/kg/h',R-4,T0+28);
+}
+
+/* ---------- Eventos ---------- */
+ids.forEach(k=>$(k).addEventListener('input',e=>{st[k]=parseFloat(e.target.value);update();}));
+$('sp').addEventListener('change',e=>{st.sp=e.target.value;update();});
+const setFed=f=>{st.fed=f;$('fed').setAttribute('aria-pressed',f);$('fast').setAttribute('aria-pressed',!f);update();};
+$('fed').onclick=()=>setFed(true);$('fast').onclick=()=>setFed(false);
+const PRE={betania:{T:27,S:0,P:85,A:560},guajaro:{T:30.5,S:0.5,P:75,A:5},estuario:{T:29,S:15,P:80,A:0},ola:{T:33,S:0,P:70,A:0}};
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{Object.assign(st,PRE[b.dataset.p]);['T','S','P','A'].forEach(k=>$(k).value=st[k]);update();});
+window.addEventListener('resize',drawScissors);
+const retheme=()=>{readTok();if(renderer){buildStatic();applySceneTheme();}update();};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',retheme);
+new MutationObserver(retheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+try{if(window.THREE&&THREE.OrbitControls)initThree();else throw 0;}catch(e){$('vsub').textContent='No se pudo cargar el visor 3D; los cálculos siguen activos.';}
+update();
+if(document.fonts)document.fonts.ready.then(()=>{if(renderer)buildStatic();drawScissors();});
+})();
+</script>
+
+</body></html>
