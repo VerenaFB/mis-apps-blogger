@@ -1,0 +1,1105 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Estrés en peces 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: escena 3D a sangre (izquierda) + panel-infografía de lectura (derecha); en móvil se apilan. */
+:root{
+  --bg:#E9F0EF; --panel:#F7FAF9; --fg:#12302F; --muted:#4D6A69; --line:#C6D6D3;
+  --accent:#0F7C6C; --amber:#B06A0C; --coral:#B83A30; --plum:#7E3570; --water:#2B7598;
+  --stage1:#F3F8F7; --stage2:#D3E3E0;
+  --f-display:'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --f-body:'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --f-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0B1A1C; --panel:#0F2326; --fg:#DCEBE8; --muted:#8FAEAB; --line:#244140;
+  --accent:#3CC4A8; --amber:#F0A93A; --coral:#F07468; --plum:#CF86BE; --water:#6FB9DA;
+  --stage1:#123236; --stage2:#071315; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0B1A1C; --panel:#0F2326; --fg:#DCEBE8; --muted:#8FAEAB; --line:#244140;
+  --accent:#3CC4A8; --amber:#F0A93A; --coral:#F07468; --plum:#CF86BE; --water:#6FB9DA;
+  --stage1:#123236; --stage2:#071315; color-scheme:dark }
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 410px;height:100%}
+.stage{position:relative;min-height:0;min-width:0;overflow:hidden;
+  background:radial-gradient(120% 90% at 40% 35%, var(--stage1), var(--stage2))}
+.stage canvas.gl,.labels{position:absolute;inset:0;width:100%!important;height:100%!important}
+.labels{z-index:2;touch-action:none;cursor:grab}
+.labels:active{cursor:grabbing}
+.hud{position:absolute;z-index:3;top:0;left:0;right:0;pointer-events:none;
+  padding-top:16px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.hud h1{font-family:var(--f-display);font-weight:700;font-size:clamp(20px,2.4vw,30px);line-height:1.05;margin:4px 0 0;text-wrap:balance;max-width:16ch}
+.hint{font-size:11.5px;color:var(--muted);margin-top:6px}
+.nav{position:absolute;z-index:3;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;
+  padding-bottom:max(12px, env(safe-area-inset-bottom, 0px));padding-top:10px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  background:linear-gradient(to top, color-mix(in srgb, var(--stage2) 85%, transparent), transparent)}
+.chips{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:thin;padding-block:2px}
+.chip{flex:none;border:1px solid var(--line);background:color-mix(in srgb, var(--panel) 80%, transparent);color:var(--fg);
+  border-radius:999px;padding:6px 11px;font:500 12px var(--f-body);cursor:pointer;display:flex;gap:7px;align-items:baseline}
+.chip .n{font-family:var(--f-mono);font-size:10.5px;color:var(--muted)}
+.chip[aria-current="true"]{background:var(--fg);color:var(--panel);border-color:var(--fg)}
+.chip[aria-current="true"] .n{color:color-mix(in srgb, var(--panel) 70%, transparent)}
+.ibtn{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--fg);font-size:17px;cursor:pointer;line-height:1}
+.tour{flex:none;border:1px solid var(--accent);color:var(--accent);background:var(--panel);border-radius:999px;padding:7px 12px;font:600 12px var(--f-body);cursor:pointer}
+.tour[aria-pressed="true"]{background:var(--accent);color:var(--panel)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* etiquetas 3D */
+.lw{pointer-events:none}
+.lw.r,.lw.l{width:0;height:0;position:relative}
+.lw.r>.lbl{position:absolute;left:8px;top:0;transform:translateY(-50%)}
+.lw.l>.lbl{position:absolute;right:8px;top:0;transform:translateY(-50%)}
+.lbl{font:500 11.5px/1.25 var(--f-body);color:var(--fg);white-space:nowrap;
+  background:color-mix(in srgb, var(--panel) 84%, transparent);border:1px solid var(--line);border-radius:4px;padding:3px 7px}
+.lbl b{font-weight:600}
+.lbl.sm{font-size:10.5px;padding:2px 6px}
+.lbl.eu{border-left:3px solid var(--accent)} .lbl.am{border-left:3px solid var(--amber)}
+.lbl.co{border-left:3px solid var(--coral)} .lbl.pl{border-left:3px solid var(--plum)} .lbl.wa{border-left:3px solid var(--water)}
+.lbl.ax{background:none;border:0;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.lbl.ttl{background:none;border:0;font:700 15px var(--f-display);letter-spacing:.01em}
+.lbl.q{border-color:var(--plum);color:var(--plum);font-weight:600}
+.lw.dn{width:0;height:0;position:relative}
+.lw.dn>.lbl{position:absolute;top:4px;left:0;transform:translateX(-50%)}
+.lbl.vert{writing-mode:vertical-rl;background:none;border:0;font-size:10.5px;color:var(--muted);padding:0}
+.lbl.vert.on{color:var(--fg);font-weight:600}
+
+/* panel */
+.panel{overflow-y:auto;min-width:0;border-left:1px solid var(--line);background:var(--panel);
+  padding-block:22px 34px;padding-left:24px;padding-right:max(20px, env(safe-area-inset-right, 0px))}
+.sec{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.panel h2{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.08;margin:6px 0 10px;text-wrap:balance}
+.panel h3{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+.panel p{font-size:14.5px;line-height:1.55;margin:0 0 10px;max-width:62ch}
+.lede{font-size:15.5px!important;color:var(--fg)}
+.quote{border-left:3px solid var(--accent);padding:8px 12px;margin:12px 0;background:color-mix(in srgb, var(--accent) 7%, transparent);font-size:14px;line-height:1.5}
+.quote cite{display:block;font:500 11px var(--f-mono);color:var(--muted);margin-top:4px;font-style:normal}
+.ctrl{display:grid;gap:12px;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.row label{font-size:13px;font-weight:500}
+.row output{font:500 12px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.row small{grid-column:1/-1;color:var(--muted);font-size:11.5px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--fg);background:var(--fg);color:var(--panel);border-radius:6px;padding:8px 12px;font:600 12.5px var(--f-body);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:6px;padding:6px 9px;font:500 12px var(--f-body);cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, var(--panel));font-weight:600}
+.status{border-radius:8px;padding:10px 12px;font-size:13.5px;line-height:1.45;border:1px solid var(--line);background:var(--bg)}
+.status b{font-family:var(--f-display);font-size:16px;display:block;margin-bottom:2px}
+.status.eu{border-color:var(--accent)} .status.am{border-color:var(--amber)} .status.co{border-color:var(--coral)} .status.pl{border-color:var(--plum)}
+.steps{list-style:none;padding:0;margin:8px 0;display:flex;flex-wrap:wrap;gap:6px}
+.steps li{font-size:12px;padding:5px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.steps li.on{color:var(--panel);background:var(--fg);border-color:var(--fg)}
+.steps li .t{font-family:var(--f-mono);font-size:10.5px;opacity:.8;margin-left:4px}
+.facts{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.facts li{display:grid;grid-template-columns:10px 1fr;gap:10px;font-size:13.5px;line-height:1.45}
+.facts li::before{content:"";width:8px;height:8px;border-radius:2px;margin-top:6px;background:var(--c,var(--accent))}
+.facts .ref{color:var(--muted);font-size:12px}
+.eq{font-family:var(--f-mono);font-size:12px;line-height:1.7;padding:10px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);overflow-x:auto}
+.eq .v{color:var(--accent);font-weight:500}
+.eq .neg{color:var(--plum);font-weight:500}
+.bars{display:grid;gap:7px}
+.bar{display:grid;grid-template-columns:150px 1fr 40px;gap:8px;align-items:center;font-size:12.5px}
+.bar .tr{height:9px;border-radius:5px;background:var(--line);overflow:hidden}
+.bar .fl{height:100%;border-radius:5px;background:var(--c,var(--accent));transition:width .25s}
+.bar .vv{font:500 11.5px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.res{display:flex;flex-wrap:wrap;gap:6px}
+.res span{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);display:flex;gap:6px;align-items:center}
+.res i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12.5px;margin:6px 0}
+.legend span{display:flex;gap:6px;align-items:center}
+.legend i{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.tab{display:grid;gap:4px}
+.tab .tr2{display:grid;grid-template-columns:118px 1fr;gap:10px;padding:7px 8px;border-radius:6px;font-size:12.5px;line-height:1.4;cursor:pointer;border:1px solid transparent}
+.tab .tr2:hover{background:var(--bg)}
+.tab .tr2.on{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--panel))}
+.tab .s{font-weight:600}
+.tab .cl{color:var(--muted)}
+.tab .ct{color:var(--fg)}
+.tab .new{color:var(--accent);font-weight:600}
+.unk{counter-reset:u;list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.unk li{font-size:13.5px;line-height:1.45;padding-left:28px;position:relative}
+.unk li::before{content:"?";position:absolute;left:0;top:0;width:19px;height:19px;border-radius:50%;border:1.5px solid var(--plum);color:var(--plum);font:700 11px/16px var(--f-mono);text-align:center}
+.foot{margin-top:26px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+
+@media (max-width: 860px){
+  html,body{height:auto}
+  .app{grid-template-columns:1fr;grid-template-rows:62vh auto;height:auto}
+  .panel{border-left:0;border-top:1px solid var(--line);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  .hint{display:none}
+  .bar{grid-template-columns:120px 1fr 36px}
+  .lbl{font-size:10px;padding:2px 5px}.lbl.sm{font-size:9.5px}
+}
+@media (prefers-reduced-motion: reduce){ .bar .fl{transition:none} }
+</style>
+
+<div class="app">
+  <section class="stage" id="stage" aria-label="Escena 3D interactiva">
+    <header class="hud">
+      <div class="eyebrow">Schreck &amp; Tort (2016) · Fish Physiology 35 · Cap. 1</div>
+      <h1>El concepto de estrés en peces</h1>
+      <div class="hint">Arrastra para girar · rueda o pellizco para acercar</div>
+    </header>
+    <nav class="nav" aria-label="Escenas">
+      <button class="ibtn" id="prev" aria-label="Escena anterior">‹</button>
+      <div class="chips" id="chips"></div>
+      <button class="ibtn" id="next" aria-label="Escena siguiente">›</button>
+      <button class="tour" id="tour" aria-pressed="false">Recorrido</button>
+    </nav>
+  </section>
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+(function(){
+'use strict';
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const stage = document.getElementById('stage');
+const panel = document.getElementById('panel');
+
+/* ---------- motor ---------- */
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.domElement.className = 'gl';
+stage.prepend(renderer.domElement);
+const labelR = new THREE.CSS2DRenderer();
+labelR.domElement.className = 'labels';
+renderer.domElement.after(labelR.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 300);
+camera.position.set(0, 5, 12);
+const controls = new THREE.OrbitControls(camera, labelR.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 3; controls.maxDistance = 45;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x2f5552, 0.85));
+const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(6, 11, 8); scene.add(dl);
+const dl2 = new THREE.DirectionalLight(0x9fd4ff, 0.35); dl2.position.set(-7, 3, -6); scene.add(dl2);
+
+const COL = {cat:0xD2493F, cort:0xE39A2D, eu:0x1FA58B, dis:0x9A4A8A, water:0x3E93B8, crh:0x8A73D6,
+             acth:0x4C7FD6, neutral:0x8FA3A6, fish:0x6FA9B5, light:0xBFD3D0, spark:0xF4D35E};
+
+/* tema */
+const inkMats = [];
+function tok(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function applyTheme(){ let c; try{ c = new THREE.Color(tok('--fg') || '#12302F'); }catch(e){ c = new THREE.Color(0x12302F); } inkMats.forEach(m => m.color.copy(c)); }
+try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); }catch(e){}
+new MutationObserver(applyTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+function inkLine(op=1){ const m = new THREE.LineBasicMaterial({color:0x12302F, transparent:true, opacity:op}); inkMats.push(m); return m; }
+function inkBasic(op=1){ const m = new THREE.MeshBasicMaterial({color:0x12302F, transparent:true, opacity:op}); inkMats.push(m); return m; }
+
+/* utilidades */
+const V = (x,y,z) => new THREE.Vector3(x,y,z);
+const clamp = (x,a=0,b=1) => Math.min(b, Math.max(a, x));
+const sstep = (a,b,x) => { const t = clamp((x-a)/(b-a)); return t*t*(3-2*t); };
+const lerp = (a,b,t) => a + (b-a)*t;
+const bump = (a,b,x) => sstep(a, a+0.25, x) * (1 - sstep(b-0.35, b, x));
+function std(color, o={}){ return new THREE.MeshStandardMaterial(Object.assign({color, roughness:0.5, metalness:0.05}, o)); }
+function sphere(r, color, o){ return new THREE.Mesh(new THREE.SphereGeometry(r, 28, 18), std(color, o)); }
+function polyline(pts, mat){ return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat); }
+function lbl(html, cls='', pos, anchor){
+  const w = document.createElement('div'); w.className = 'lw' + (anchor ? ' '+anchor : '');
+  const d = document.createElement('div'); d.className = 'lbl ' + cls; d.innerHTML = html; w.appendChild(d);
+  const o = new THREE.CSS2DObject(w); if (pos) o.position.set(pos[0], pos[1], pos[2]); o.inner = d; return o;
+}
+function arrowObj(len, color, r=0.07){
+  const a = new THREE.Group(); const m = std(color, {emissive:color, emissiveIntensity:0.25});
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len*0.75, 12), m); c.rotation.z = -Math.PI/2; c.position.x = len*0.375;
+  const h = new THREE.Mesh(new THREE.ConeGeometry(r*2.6, len*0.25, 16), m); h.rotation.z = -Math.PI/2; h.position.x = len*0.875;
+  a.add(c, h); return a;
+}
+const tmpC = new THREE.Color(), cA = new THREE.Color(), cB = new THREE.Color();
+function mix3(hexes, t){ // gradiente por tramos
+  t = clamp(t); const n = hexes.length - 1; const i = Math.min(n-1, Math.floor(t*n)); const f = t*n - i;
+  return tmpC.copy(cA.setHex(hexes[i])).lerp(cB.setHex(hexes[i+1]), f);
+}
+
+/* pez estilizado (cabeza hacia +x) */
+function makeFish(op=0.2){
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({color:COL.fish, transparent:true, opacity:op, roughness:0.35, depthWrite:false, side:THREE.DoubleSide});
+  const geo = new THREE.SphereGeometry(1, 48, 32);
+  const body = new THREE.Mesh(geo, mat); body.scale.set(3, 1.25, 0.72); g.add(body);
+  const wf = new THREE.Mesh(geo, inkBasic(0.06)); wf.material.wireframe = true; wf.scale.copy(body.scale); g.add(wf);
+  const finMat = new THREE.MeshStandardMaterial({color:COL.fish, transparent:true, opacity:op+0.12, side:THREE.DoubleSide, depthWrite:false});
+  const ts = new THREE.Shape(); ts.moveTo(0,0); ts.lineTo(-1.5,1.15); ts.quadraticCurveTo(-1.05,0,-1.5,-1.15); ts.lineTo(0,0);
+  const tail = new THREE.Mesh(new THREE.ShapeGeometry(ts), finMat); const tailPivot = new THREE.Group(); tailPivot.position.x = -2.75; tailPivot.add(tail); g.add(tailPivot);
+  const ds = new THREE.Shape(); ds.moveTo(-1.6,0); ds.quadraticCurveTo(-0.6,1.05,1.0,0); ds.lineTo(-1.6,0);
+  const dorsal = new THREE.Mesh(new THREE.ShapeGeometry(ds), finMat); dorsal.position.y = 1.08; g.add(dorsal);
+  const as = new THREE.Shape(); as.moveTo(-1.5,0); as.quadraticCurveTo(-0.9,-0.6,-0.2,0); as.lineTo(-1.5,0);
+  const anal = new THREE.Mesh(new THREE.ShapeGeometry(as), finMat); anal.position.y = -1.0; g.add(anal);
+  const eyeM = std(0x1d2b2b, {roughness:0.2});
+  [-1,1].forEach(s => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), eyeM); e.position.set(2.42, 0.36, 0.46*s); g.add(e); });
+  return {group:g, tail:tailPivot, mat};
+}
+
+/* flujo continuo de partículas a lo largo de una curva */
+function stream(curve, color, n, speed, size=0.06){
+  const g = new THREE.Group(); const mat = new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.95});
+  const geo = new THREE.SphereGeometry(size, 10, 8); const ps = [];
+  for (let i=0;i<n;i++){ const m = new THREE.Mesh(geo, mat); g.add(m); ps.push({m, t:i/n}); }
+  return {g, update(dt){ ps.forEach(p => { p.t = (p.t + speed*dt) % 1; curve.getPointAt(p.t, p.m.position); }); }};
+}
+function curve3(a, b, lift){ const m = a.clone().lerp(b, 0.5).add(lift || V(0,0.6,0)); return new THREE.CatmullRomCurve3([a.clone(), m, b.clone()]); }
+
+/* ================= ESCENAS ================= */
+const S = [];
+
+/* 1 · Estresor, estrés y homeostasis */
+S.push({
+  sec:'1.1.1 · 1.1.3', nav:'Estrés y homeostasis', cam:[0,4.6,8.4], tgt:[0,0.9,0],
+  init(g){
+    this.st = {x:0, v:0, eq:0, peak:0, acc:0, since:0, status:'rest', last:'', out:false, outT:0, vy:0, hit:-1, applied:false, sev:0.5};
+    const pts = []; for (let i=0;i<=40;i++){ const r = i/40*3; pts.push(new THREE.Vector2(r, 0.22*r*r)); }
+    const geo = new THREE.LatheGeometry(pts, 72);
+    g.add(new THREE.Mesh(geo, std(COL.water, {transparent:true, opacity:0.26, side:THREE.DoubleSide, depthWrite:false})));
+    const wf = new THREE.Mesh(geo, inkBasic(0.07)); wf.material.wireframe = true; g.add(wf);
+    const ring = (r, color, tube=0.03) => { const m = new THREE.Mesh(new THREE.TorusGeometry(r, tube, 8, 120), new THREE.MeshBasicMaterial({color})); m.rotation.x = Math.PI/2; m.position.y = 0.22*r*r + 0.01; g.add(m); };
+    ring(0.9, COL.eu); ring(2.0, COL.cort); ring(3.0, COL.dis, 0.045);
+    const a = 0.72;
+    g.add(lbl('Rango homeostático', 'eu sm', [-0.9*a, 0.22*0.81+0.05, 0.9*a]));
+    g.add(lbl('Sobrecarga homeostática', 'am sm', [-2.0*a, 0.22*4+0.05, 2.0*a]));
+    g.add(lbl('Límite: agotamiento / muerte', 'pl sm', [-3*a, 0.22*9+0.05, 3*a]));
+    this.ball = sphere(0.32, 0xF3F6F5, {roughness:0.3}); g.add(this.ball);
+    this.ball.add(lbl('Estado interno', 'sm', [0, 0.75, 0]));
+    this.arrow = arrowObj(1.6, COL.cat, 0.08); this.arrow.visible = false; g.add(this.arrow);
+    this.arrowL = lbl('<b>Estresor</b> (la fuerza)', 'co sm', [0.6, 0.45, 0]); this.arrow.add(this.arrowL); this.arrowL.visible = false;
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(3.6, 64), inkBasic(0.04)); floor.rotation.x = -Math.PI/2; floor.position.y = -0.02; g.add(floor);
+  },
+  apply(){ const s = this.st; if (s.out) return; s.hit = 0; s.applied = false; },
+  reset(){ const s = this.st; Object.assign(s, {x:0, v:0, eq:0, peak:0, status:'rest', out:false, hit:-1}); this.arrow.visible = false; this.arrowL.visible = false; },
+  update(dt, t){
+    const s = this.st;
+    if (s.hit >= 0){
+      s.hit += dt; const len = 1.6; const k = Math.min(1, s.hit/0.45);
+      const tip = lerp(-6, s.x - 0.34, k*k);
+      this.arrow.visible = this.arrowL.visible = s.hit < 1.1;
+      this.arrow.position.set(tip - len, 0.22*s.x*s.x + 0.32, 0);
+      if (k >= 1 && !s.applied){ s.v += s.sev*8.6; s.applied = true; s.peak = 0; s.since = 0; s.status = 'alarm'; }
+      if (s.hit > 1.1){ s.hit = -1; }
+    }
+    if (!s.out){
+      const target = s.eq + 0.09*Math.sin(t*1.6);
+      const a = -3*(s.x - target) - 1.25*s.v; s.v += a*dt; s.x += s.v*dt; s.acc = a;
+      s.peak = Math.max(s.peak, Math.abs(s.x)); s.since += dt;
+      if (Math.abs(s.x) > 3){ s.out = true; s.outT = 0; s.vy = 1.8; s.status = 'exhaust'; }
+      else if (s.status === 'alarm' && s.since > 0.3) s.status = 'resist';
+      else if (s.status === 'resist' && s.since > 2.2 && Math.abs(s.v) < 0.3){
+        if (s.peak > 2.0){ s.eq = 0.6; s.status = 'comp'; } else if (s.peak > 0.9) s.status = 'recov'; else s.status = 'within';
+      }
+      this.ball.position.set(s.x, 0.22*s.x*s.x + 0.32, 0);
+      const sq = Math.min(0.38, Math.abs(s.acc)*0.035); this.ball.scale.set(1-sq, 1+sq*0.5, 1+sq*0.5);
+      const ax = Math.abs(s.x); this.ball.material.color.copy(ax < 0.9 ? mix3([0xF3F6F5, 0xBFE6DC], ax/0.9) : mix3([0xBFE6DC, COL.cort, COL.dis], (ax-0.9)/2.1));
+    } else {
+      s.outT += dt; s.x += Math.sign(s.x||1)*2.2*dt; s.vy -= 9.8*dt;
+      this.ball.position.x = s.x; this.ball.position.y += s.vy*dt;
+      if (s.outT > 3){ this.reset(); }
+    }
+    if (s.status !== s.last){ s.last = s.status; this.renderStatus(); }
+    if (tour.on){ this.tourT = (this.tourT||0) + dt; if (this.tourT > 4.5){ this.tourT = 0; const seq=[0.35,0.62,0.95]; this.ti=((this.ti||0)+1)%3; s.sev = seq[this.ti]; const el=document.getElementById('s1sev'); if(el){el.value=s.sev; document.getElementById('s1sevo').textContent=Math.round(s.sev*100)+' %';} this.apply(); } }
+  },
+  renderStatus(){
+    const M = {
+      rest:['eu','En reposo','El estado interno oscila dentro del rango: la homeostasis es dinámica y se mantiene por retroalimentación.'],
+      alarm:['co','Alarma','El estresor desplaza el estado interno. Se activan los sistemas de lucha, huida y afrontamiento.'],
+      resist:['am','Resistencia','Los mecanismos reguladores intentan devolver el estado interno a sus normas.'],
+      within:['eu','Sin sobrecarga','El desvío no salió del rango homeostático.'],
+      recov:['eu','Recuperación','El estado interno vuelve al rango homeostático tras salir de él.'],
+      comp:['am','Compensación','Se establece un estado estable cercano pero distinto al original (heterostasis, en términos de Selye).'],
+      exhaust:['pl','Agotamiento','El pez no logra resistir el estresor: muerte.']};
+    const m = M[this.st.status]; const el = document.getElementById('s1status');
+    if (el){ el.className = 'status ' + m[0]; el.innerHTML = '<b>' + m[1] + '</b>' + m[2]; }
+    const map = {alarm:0, resist:1, recov:2, within:2, comp:3, exhaust:4};
+    document.querySelectorAll('#s1steps li').forEach((li,i) => li.classList.toggle('on', map[this.st.status] === i));
+  },
+  panel(){ return `
+    <div class="sec">Sección 1.1 · ¿Qué es el estrés?</div>
+    <h2>Estresor, estrés y homeostasis</h2>
+    <p class="lede">El estresor es el factor que amenaza al pez. El estrés es la respuesta fisiológica del pez a ese factor.</p>
+    <div class="quote">«La cascada fisiológica de eventos que ocurre cuando el organismo intenta resistir la muerte o restablecer las normas homeostáticas frente a una agresión.»<cite>Schreck (2000) · definición usada en todo el libro</cite></div>
+    <p>En física, <i>stress</i> es la fuerza aplicada y <i>strain</i> la deformación que produce. Los autores señalan que Selye debió llamar <i>strain</i> a la respuesta. En la escena, la flecha es la fuerza y el aplastamiento de la esfera es la deformación.</p>
+    <div class="ctrl">
+      <div class="row"><label for="s1sev">Severidad del estresor</label><output id="s1sevo">50 %</output>
+        <input type="range" id="s1sev" min="0.1" max="1" step="0.01" value="0.5"></div>
+      <div class="btns"><button class="btn" id="s1go">Aplicar estresor</button><button class="btn ghost" id="s1rs">Reiniciar</button></div>
+      <div id="s1status" class="status eu"></div>
+    </div>
+    <h3>Etapas de la respuesta (Selye 1950; Schreck 2000)</h3>
+    <ol class="steps" id="s1steps"><li>Alarma</li><li>Resistencia</li><li>Recuperación</li><li>Compensación</li><li>Agotamiento</li></ol>
+    <h3>Ideas clave</h3>
+    <ul class="facts">
+      <li style="--c:var(--accent)"><span>Con niveles bajos, los elementos de la respuesta forman parte de la homeostasis: el cortisol basal sostiene crecimiento, inmunidad, desarrollo y aprendizaje.</span></li>
+      <li style="--c:var(--amber)"><span>Después de un estresor crónico o muy severo, el pez puede no recuperar exactamente la misma homeostasis: compensación.</span></li>
+      <li style="--c:var(--coral)"><span>Sin percepción de una amenaza no se inicia la respuesta clásica. Algunos tóxicos (cadmio) o la anestesia matan sin una respuesta tipo SGA.</span></li>
+      <li style="--c:var(--plum)"><span>«Agudo» y «crónico» se definen por la duración de las consecuencias, no del estresor <span class="ref">(Boonstra 2013)</span>.</span></li>
+      <li style="--c:var(--water)"><span>Para Selye, la ausencia total de estrés es la muerte.</span></li>
+    </ul>`; },
+  bind(){
+    const r = document.getElementById('s1sev'), o = document.getElementById('s1sevo');
+    r.value = this.st.sev; o.textContent = Math.round(this.st.sev*100)+' %';
+    r.addEventListener('input', () => { this.st.sev = +r.value; o.textContent = Math.round(r.value*100)+' %'; });
+    document.getElementById('s1go').addEventListener('click', () => this.apply());
+    document.getElementById('s1rs').addEventListener('click', () => this.reset());
+    this.st.last = ''; this.renderStatus();
+  }
+});
+
+/* 2 · Cascada primaria → secundaria → terciaria (Fig. 1.1) */
+S.push({
+  sec:'1.1.2 · 1.2.1', nav:'Cascada de respuesta', cam:[2.5,7.5,11.5], tgt:[0,0,0],
+  init(g){
+    this.tt = 0; this.paused = false; this.fired = {}; this.phase = -1;
+    const f = makeFish(0.2); g.add(f.group); this.f = f;
+    const O = this.O = {brain:V(2.0,0.5,0), pit:V(1.78,0.1,0), ir:V(0.9,0.28,0), chr:V(0.72,0.5,0.2)};
+    this.nodes = {};
+    const mk = (k, r, c, html, off, cls) => { const m = sphere(r, c, {emissive:c, emissiveIntensity:0.15}); m.position.copy(O[k]); g.add(m); m.add(lbl(html, 'sm '+cls, off)); this.nodes[k] = m; };
+    mk('brain', 0.24, 0xB9A7D9, 'Hipotálamo · <b>CRH</b>', [0.2,0.62,0], 'pl');
+    mk('pit', 0.11, COL.acth, 'Hipófisis · <b>ACTH</b>', [0.75,-0.42,0], 'wa');
+    mk('ir', 0.17, COL.cort, 'Interrenal (riñón cefálico) · <b>cortisol</b>', [-0.3,-0.62,0], 'am');
+    mk('chr', 0.13, COL.cat, 'Cromafín · <b>catecolaminas</b>', [-0.9,0.62,0], 'co');
+    this.cur = {
+      neural: new THREE.CatmullRomCurve3([O.brain.clone(), V(1.45,0.85,0.12), O.chr.clone()]),
+      crh: new THREE.CatmullRomCurve3([O.brain.clone(), V(1.95,0.28,0.06), O.pit.clone()]),
+      acth: new THREE.CatmullRomCurve3([O.pit.clone(), V(1.4,-0.25,0), V(1.1,0.02,0), O.ir.clone()])
+    };
+    [['neural',COL.spark],['crh',COL.crh],['acth',COL.acth]].forEach(([k,c]) => g.add(polyline(this.cur[k].getPoints(30), new THREE.LineBasicMaterial({color:c, transparent:true, opacity:0.45}))));
+    // estresor
+    this.shell = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 24), new THREE.MeshBasicMaterial({color:COL.cat, transparent:true, opacity:0, wireframe:true, depthWrite:false}));
+    g.add(this.shell);
+    this.shellL = lbl('<b>Estresor</b> percibido', 'co', [0,3.1,0]); g.add(this.shellL);
+    // partículas en ráfaga
+    this.pool = []; const pg = new THREE.SphereGeometry(0.055, 8, 6);
+    for (let i=0;i<120;i++){ const m = new THREE.Mesh(pg, new THREE.MeshBasicMaterial({color:0xffffff, transparent:true})); m.visible = false; g.add(m); this.pool.push({m, active:false}); }
+    // anillos
+    const ring = (R, color, items, cls) => {
+      const grp = new THREE.Group(); g.add(grp);
+      const tor = new THREE.Mesh(new THREE.TorusGeometry(R, 0.028, 8, 180), new THREE.MeshBasicMaterial({color, transparent:true, opacity:0})); tor.rotation.x = Math.PI/2; grp.add(tor);
+      const ls = [], ns = [];
+      items.forEach((txt, i) => { const ang = i/items.length*Math.PI*2 + 0.4; const p = V(Math.cos(ang)*R, 0, Math.sin(ang)*R);
+        const n = new THREE.Mesh(new THREE.SphereGeometry(0.11, 14, 10), new THREE.MeshBasicMaterial({color, transparent:true, opacity:0})); n.position.copy(p); grp.add(n); ns.push(n);
+        const L = lbl(txt, 'sm '+cls, [p.x, 0.42, p.z]); L.visible = false; grp.add(L); ls.push(L); });
+      return {grp, tor, ls, ns};
+    };
+    this.sec2 = ring(4.4, COL.water, ['<b>Energía</b> · glucosa, lactato, AGL, proteínas','<b>Cardiorrespiratoria</b> · gasto cardíaco, ventilación, lamelas','<b>Hidromineral</b> · agua, Na⁺, K⁺, vascularización branquial','<b>Inmune</b> · redistribución, supresión'], 'wa');
+    this.ter = ring(6.6, COL.dis, ['<b>Crecimiento</b> · hipertrofia, hiperplasia, apoptosis','<b>Reproducción</b> · acelerada o inhibida, fecundidad','<b>Resistencia a enfermedad</b> · anticuerpos','<b>Desarrollo</b> · retardado','<b>Conducta</b> · aprendizaje, evasión de depredadores, migración'], 'pl');
+    this.ringT = [lbl('SECUNDARIAS', 'ax', [0,0.05,-4.4]), lbl('TERCIARIAS · organismo completo', 'ax', [0,0.05,-6.6])];
+    this.ringT.forEach(l => { l.visible = false; g.add(l); });
+  },
+  randBody(){ let p; do { p = V(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1); } while (p.lengthSq() > 1); return V(p.x*2.5 - 0.1, p.y*0.95, p.z*0.58); },
+  spawn(factory, n, color, speed, linger, spread){
+    let c = 0; for (const p of this.pool){ if (p.active) continue; Object.assign(p, {active:true, curve:factory(), t:-(c*spread), speed, linger, age:0}); p.m.material.color.setHex(color); p.m.material.opacity = 1; if (++c >= n) break; }
+  },
+  toBody(src){ return () => { const end = this.randBody(); const mid = src.clone().lerp(end, 0.5).add(V(0, (Math.random()-0.5)*0.6, (Math.random()-0.5)*0.4)); return new THREE.CatmullRomCurve3([src.clone(), mid, end]); }; },
+  resetCycle(){ this.tt = 0; this.fired = {}; this.pool.forEach(p => { p.active = false; p.m.visible = false; }); },
+  update(dt, t){
+    if (!this.paused) this.tt += dt; if (this.tt > 15) this.resetCycle();
+    const tt = this.tt, O = this.O;
+    this.f.tail.rotation.y = Math.sin(t*3) * 0.25;
+    const sr = lerp(9, 3.3, clamp(tt/1.0)); this.shell.scale.setScalar(sr); this.shell.material.opacity = tt < 1.05 ? 0.35*(1 - tt/1.1) : 0;
+    this.shellL.visible = tt < 1.4;
+    const ev = [[1.0, () => this.spawn(() => this.cur.neural, 7, COL.spark, 1.8, 0.2, 0.12)],
+                [1.7, () => this.spawn(this.toBody(O.chr), 30, COL.cat, 0.95, 1.4, 0.02)],
+                [2.6, () => this.spawn(() => this.cur.crh, 10, COL.crh, 0.8, 0.2, 0.08)],
+                [3.9, () => this.spawn(() => this.cur.acth, 12, COL.acth, 0.7, 0.2, 0.07)],
+                [5.2, () => this.spawn(this.toBody(O.ir), 48, COL.cort, 0.35, 8, 0.03)]];
+    ev.forEach(([at, fn], i) => { if (tt >= at && !this.fired[i]){ this.fired[i] = true; fn(); } });
+    for (const p of this.pool){ if (!p.active) continue; if (!this.paused) p.t += p.speed*dt; if (p.t < 0){ p.m.visible = false; continue; } p.m.visible = true;
+      if (p.t < 1) p.curve.getPointAt(p.t, p.m.position); else { if (!this.paused) p.age += dt; p.m.material.opacity = Math.max(0, 1 - p.age/p.linger); if (p.age > p.linger){ p.active = false; p.m.visible = false; } } }
+    const N = this.nodes;
+    N.brain.material.emissiveIntensity = 0.15 + 1.1*Math.max(bump(0.8,1.8,tt), bump(2.4,3.1,tt));
+    N.chr.material.emissiveIntensity = 0.15 + 1.2*bump(1.4,2.6,tt);
+    N.pit.material.emissiveIntensity = 0.15 + 1.2*bump(3.4,4.7,tt);
+    N.ir.material.emissiveIntensity = 0.15 + 1.0*bump(4.8,8.5,tt);
+    const o2 = sstep(7, 8.4, tt), o3 = sstep(10, 11.4, tt);
+    [[this.sec2, o2], [this.ter, o3]].forEach(([r, o], k) => { r.tor.material.opacity = o*0.7; r.ns.forEach(n => n.material.opacity = o); r.ls.forEach(l => l.visible = o > 0.3); this.ringT[k].visible = o > 0.3; r.grp.rotation.y += dt*0.04*(k?-1:1); });
+    this.ringT.forEach((l,k) => { const r = k ? this.ter : this.sec2; l.position.set(0, 0.05, 0); l.position.copy(V(0,0.05,-(k?6.6:4.4)).applyAxisAngle(V(0,1,0), r.grp.rotation.y)); });
+    const ph = tt < 0.8 ? 0 : tt < 1.6 ? 1 : tt < 2.6 ? 2 : tt < 5.2 ? 3 : tt < 7 ? 4 : tt < 10 ? 5 : 6;
+    if (ph !== this.phase){ this.phase = ph; document.querySelectorAll('#s2steps li').forEach((li,i) => li.classList.toggle('on', i === ph)); }
+    const pb = document.getElementById('s2bar'); if (pb) pb.style.width = (tt/15*100).toFixed(1) + '%';
+  },
+  panel(){ return `
+    <div class="sec">Secciones 1.1.2 y 1.2.1 · Figura 1.1</div>
+    <h2>La cascada del estrés: primaria, secundaria, terciaria</h2>
+    <p class="lede">Dos sistemas hormonales controlan la respuesta. Uno es rápido (catecolaminas, en segundos) y el otro más lento y duradero (cortisol, en minutos, y dura horas).</p>
+    <ol class="steps" id="s2steps">
+      <li>Estresor</li><li>Percepción</li><li>Catecolaminas<span class="t">s</span></li><li>CRH → ACTH<span class="t">min</span></li><li>Cortisol<span class="t">min–h</span></li><li>Secundarias</li><li>Terciarias</li></ol>
+    <div class="bar" style="grid-template-columns:1fr"><div class="tr"><div class="fl" id="s2bar" style="width:0;transition:none"></div></div></div>
+    <div class="btns" style="margin:12px 0"><button class="btn" id="s2p">Pausar</button><button class="btn ghost" id="s2r">Repetir desde el estresor</button></div>
+    <div class="legend">
+      <span style="--c:#F4D35E"><i></i>Señal neural</span><span style="--c:#D2493F"><i></i>Catecolaminas</span>
+      <span style="--c:#8A73D6"><i></i>CRH</span><span style="--c:#4C7FD6"><i></i>ACTH</span><span style="--c:#E39A2D"><i></i>Cortisol</span></div>
+    <h3>Qué muestra cada nivel</h3>
+    <ul class="facts">
+      <li style="--c:var(--coral)"><span><b>Primaria.</b> La señal neural hace que el tejido cromafín libere adrenalina y noradrenalina. El hipotálamo libera CRH, la hipófisis ACTH y el interrenal cortisol.</span></li>
+      <li style="--c:var(--water)"><span><b>Secundaria.</b> Glucogenólisis hepática (glucosa para el músculo), más gasto cardíaco y ventilación, y reclutamiento de lamelas. También desequilibrio hidromineral e inmunosupresión.</span></li>
+      <li style="--c:var(--plum)"><span><b>Terciaria.</b> Efectos en el organismo completo: se deterioran crecimiento, reproducción, resistencia a enfermedades, aprendizaje y evasión de depredadores.</span></li>
+      <li style="--c:var(--amber)"><span><b>Compromiso osmorrespiratorio.</b> Más superficie branquial significa más O₂ pero también más flujo de agua. En agua dulce el pez gana agua y peso; en agua de mar la pierde.</span></li>
+    </ul>
+    <h3>Cómo se frena la cascada</h3>
+    <ul class="facts">
+      <li style="--c:var(--accent)"><span>Retroalimentación negativa de casi todos los factores endocrinos.</span></li>
+      <li style="--c:var(--accent)"><span>Regulación al alza o a la baja de los propios receptores.</span></li>
+      <li style="--c:var(--accent)"><span>Depuración: enzimas hepáticas inactivan la hormona (el cortisol pasa a cortisona).</span></li>
+      <li style="--c:var(--accent)"><span>Proteínas transportadoras de alta capacidad y baja afinidad. Podrían proteger a los huevos lipofílicos del cortisol materno.</span></li>
+    </ul>
+    <p class="foot">Corticosteroide principal: 11-desoxicortisol en lampreas, 1α-hidroxicorticosterona en elasmobranquios, cortisol en condrósteos y teleósteos. Las proteínas de choque térmico (HSP) son una respuesta celular protectora que no encaja en el paradigma del SGA.</p>`; },
+  bind(){
+    const p = document.getElementById('s2p');
+    p.textContent = this.paused ? 'Continuar' : 'Pausar';
+    p.addEventListener('click', () => { this.paused = !this.paused; p.textContent = this.paused ? 'Continuar' : 'Pausar'; });
+    document.getElementById('s2r').addEventListener('click', () => { this.resetCycle(); this.paused = false; p.textContent = 'Pausar'; });
+    this.phase = -1;
+  },
+  enter(){ this.resetCycle(); }
+});
+
+/* 3 · Energética y carga alostática */
+S.push({
+  sec:'1.1.4', nav:'Energía y alostasis', cam:[6,5.5,10.5], tgt:[0,2.1,0],
+  init(g){
+    this.L = 0.3; this.type = 2;
+    const mk = (color, x) => { const m = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1, 1.7), std(color, {roughness:0.6})); m.scale.y = 0.001; m.position.x = x; g.add(m); return m; };
+    this.left = {stored:mk(0xB7791F, -2.4), food:mk(0xE3B04B, -2.4)};
+    this.rkeys = ['std','sda','waste','allo','act','gam','som'];
+    const rc = {std:0x6F8286, sda:0x93A4A7, waste:0xB7C3C5, allo:COL.dis, act:COL.water, gam:0xD9776A, som:COL.eu};
+    this.right = {}; this.rkeys.forEach(k => this.right[k] = mk(rc[k], 1.4));
+    this.h = {}; ['stored','food',...this.rkeys].forEach(k => this.h[k] = 0);
+    const names = {stored:'E almacenada', food:'E alimento', std:'E STD · metabolismo estándar', sda:'E SDA · digestión', waste:'E desechos', allo:'<b>E alostasis</b> · costo del estrés', act:'E actividad', gam:'E crecimiento gamético', som:'E crecimiento somático'};
+    this.lb = {};
+    ['stored','food'].forEach(k => { this.lb[k] = lbl(names[k], 'sm am', [-3.3, 0, 0.85], 'l'); g.add(this.lb[k]); });
+    const cls = {std:'', sda:'', waste:'', allo:'pl', act:'wa', gam:'co', som:'eu'};
+    this.rkeys.forEach(k => { this.lb[k] = lbl(names[k], 'sm '+cls[k], [2.3, 0, 0.85], 'r'); g.add(this.lb[k]); });
+    g.add(lbl('Disponible', 'ttl', [-2.4, -0.45, 1.3]));
+    g.add(lbl('Destino de la energía', 'ttl', [1.4, -0.45, 1.3]));
+    this.avail = polyline([V(-3.4,0,0.9), V(2.4,0,0.9)], new THREE.LineDashedMaterial({color:COL.cat, dashSize:0.15, gapSize:0.1}));
+    this.avail.computeLineDistances(); g.add(this.avail);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(9, 5), inkBasic(0.05)); floor.rotation.x = -Math.PI/2; floor.position.set(-0.5,-0.01,0); g.add(floor);
+    const grid = new THREE.GridHelper(9, 18); grid.material = inkLine(0.08); grid.position.x = -0.5; g.add(grid);
+    this.compute();
+  },
+  compute(){
+    const L = this.L, t1 = this.type === 1;
+    const stored = 4, food = 6*(t1 ? 1-0.75*L : 1-0.25*L);
+    const std = 2.4, sda = 0.15*food, waste = 0.12*food, allo = (t1 ? 3.2 : 8.4)*L;
+    const avail = stored + food; let rem = avail - std - sda - waste - allo;
+    const act = clamp(rem, 0, 1.8); const rest = Math.max(0, rem - act);
+    this.v = {stored, food, std, sda, waste, allo, act, gam:rest*0.4, som:rest*0.6, avail, rem};
+  },
+  update(dt){
+    const k = 1 - Math.pow(0.002, dt), U = 0.42;
+    Object.keys(this.h).forEach(n => this.h[n] = lerp(this.h[n], this.v[n]*U, k));
+    let y = 0; ['stored','food'].forEach(n => { const m = this.left[n]; const h = Math.max(0.001, this.h[n]); m.scale.y = h; m.position.y = y + h/2; this.lb[n].position.y = y + h/2; y += h; });
+    y = 0; this.rkeys.forEach(n => { const m = this.right[n]; const h = Math.max(0.001, this.h[n]); m.scale.y = h; m.position.y = y + h/2; m.visible = h > 0.01; this.lb[n].position.y = y + h/2; this.lb[n].visible = h > 0.06; y += h; });
+    this.avail.position.y = (this.h.stored + this.h.food);
+  },
+  readout(){
+    const v = this.v, f = x => x.toFixed(1);
+    document.getElementById('s3eq').innerHTML =
+      `<span class="v">${f(v.som)}</span> somático + <span class="v">${f(v.gam)}</span> gamético + <span class="v">${f(v.act)}</span> actividad<br>= (<span class="v">${f(v.stored)}</span> almacenada + <span class="v">${f(v.food)}</span> alimento)<br>− (${f(v.std)} STD + ${f(v.sda)} SDA + ${f(v.waste)} desechos + <span class="neg">${f(v.allo)} alostasis</span>)`;
+    const pct = Math.round(v.allo / v.avail * 100);
+    let m;
+    if (v.rem < 0) m = ['pl', 'Déficit energético', 'La carga alostática supera la energía disponible. Sin energía para actividad, el pez no puede responder a un depredador o a una infección.'];
+    else if (v.gam + v.som < 0.05 && v.act < 1.79) m = ['pl', 'Actividad comprometida', 'Crecimiento y reproducción están apagados y la actividad general se reduce. La muerte por otros desafíos se vuelve más probable.'];
+    else if (v.gam + v.som < 0.05) m = ['co', 'Crecimiento y reproducción apagados', 'La energía apenas cubre el metabolismo estándar, la alostasis y la actividad.'];
+    else if (v.allo > 1.2) m = ['am', 'Crecimiento y reproducción reducidos', 'Acomodarse al estresor desvía energía de otros procesos vitales.'];
+    else m = ['eu', 'Costo tolerable', 'La alostasis no interfiere de forma importante con crecimiento, reproducción o migración.'];
+    const st = document.getElementById('s3st'); st.className = 'status ' + m[0];
+    st.innerHTML = `<b>${m[1]}</b>${m[2]}<br><span style="font-family:var(--f-mono);font-size:12px">La alostasis usa el ${pct} % de la energía disponible</span>`;
+  },
+  panel(){ return `
+    <div class="sec">Sección 1.1.4 · Estrés y energética</div>
+    <h2>El precio de afrontar: carga alostática</h2>
+    <p class="lede">Alostasis es «lograr estabilidad mediante el cambio». Su costo energético se resta de lo que el pez podría invertir en crecer, reproducirse y moverse.</p>
+    <div class="eq" id="s3eq"></div>
+    <div class="ctrl">
+      <div class="row"><label for="s3L">Carga alostática</label><output id="s3Lo">30 %</output>
+        <input type="range" id="s3L" min="0" max="1" step="0.01" value="0.3"></div>
+      <div class="seg" role="group" aria-label="Tipo de carga">
+        <button id="s3t1" aria-pressed="false">Tipo 1 · agudo, emergencia</button>
+        <button id="s3t2" aria-pressed="true">Tipo 2 · crónico, afrontamiento</button></div>
+      <div id="s3st" class="status"></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted)">Valores en unidades relativas. El modelo es conceptual: los autores no dan cifras para cada término.</p>
+    <h3>Lo que dicen los autores</h3>
+    <ul class="facts">
+      <li style="--c:var(--amber)"><span>En el estrés agudo el pez vive casi solo de su energía almacenada: se interrumpe la alimentación y la glucólisis produce ATP más rápido que la fosforilación oxidativa.</span></li>
+      <li style="--c:var(--plum)"><span>El estrés crónico impone una carga alostática total mucho mayor que el agudo, porque la demanda se prolonga.</span></li>
+      <li style="--c:var(--coral)"><span>Una manipulación breve puede costar entre el 12 y el 30 % del alcance metabólico <span class="ref">(Davis &amp; Schreck 1997)</span>.</span></li>
+      <li style="--c:var(--water)"><span>Muerte aguda: falla cardiovascular durante el estresor o poco después. Muerte una semana o más después: enfermedad secundaria por la inmunosupresión del cortisol.</span></li>
+    </ul>
+    <p class="foot">Tipo 1 y tipo 2 de carga alostática según McEwen &amp; Wingfield (2003). STD: metabolismo estándar instantáneo. SDA: acción dinámica específica.</p>`; },
+  bind(){
+    const r = document.getElementById('s3L'), o = document.getElementById('s3Lo'), b1 = document.getElementById('s3t1'), b2 = document.getElementById('s3t2');
+    const sync = () => { r.value = this.L; o.textContent = Math.round(this.L*100)+' %'; b1.setAttribute('aria-pressed', this.type===1); b2.setAttribute('aria-pressed', this.type===2); this.compute(); this.readout(); };
+    r.addEventListener('input', () => { this.L = +r.value; sync(); });
+    b1.addEventListener('click', () => { this.type = 1; sync(); });
+    b2.addEventListener('click', () => { this.type = 2; sync(); });
+    sync();
+  }
+});
+
+/* 4 · Paisaje de estados (Fig. 1.3) */
+S.push({
+  sec:'1.2 · Fig. 1.3', nav:'Paisaje de estados', cam:[0,7.5,19], tgt:[0,-1.2,0],
+  init(g){
+    this.sev = 0.45; this.dur = 0.5; this.cond = 0.6; this.balls = []; this.results = [];
+    this.tilt = 0;
+    const geo = this.geo = new THREE.PlaneGeometry(14, 18, 70, 90); geo.rotateX(-Math.PI/2);
+    geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geo.attributes.position.count*3), 3));
+    this.mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({vertexColors:true, roughness:0.85, side:THREE.DoubleSide})); g.add(this.mesh);
+    const wf = new THREE.Mesh(geo, inkBasic(0.07)); wf.material.wireframe = true; g.add(wf);
+    // continuo inferior
+    const bg = new THREE.PlaneGeometry(14, 0.4, 40, 1); const bc = new Float32Array(bg.attributes.position.count*3);
+    for (let i=0;i<bg.attributes.position.count;i++){ const c = mix3([COL.eu, 0xA9CFC6, COL.cort, COL.dis], (bg.attributes.position.getX(i)+7)/14); bc.set([c.r,c.g,c.b], i*3); }
+    bg.setAttribute('color', new THREE.BufferAttribute(bc, 3));
+    const bar = new THREE.Mesh(bg, new THREE.MeshBasicMaterial({vertexColors:true})); bar.position.set(0, -4.9, 9.8); g.add(bar);
+    const ar = (dir) => { const c = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.55, 3), new THREE.MeshBasicMaterial({color: dir<0?COL.eu:COL.dis})); c.rotation.z = dir<0 ? Math.PI/2 : -Math.PI/2; c.position.set(7.25*dir, -4.9, 9.8); g.add(c); };
+    ar(-1); ar(1);
+    g.add(lbl('Eustrés máximo', 'eu sm', [-6, -5.55, 9.8]));
+    g.add(lbl('Similar al estado previo', 'sm', [-1.6, -5.55, 9.8]));
+    g.add(lbl('Agotamiento · salud muy pobre', 'pl sm', [5.2, -5.55, 9.8]));
+    g.add(lbl('Inicio del estresor', 'ax', [0, 5.0, -9]));
+    this.reshape();
+  },
+  h(x, z){ const s = (z+9)/18; return -0.42*z + (0.38*Math.cos(1.5*x + 0.4*z) + 0.2*Math.cos(3.2*x - 0.6*z + 1.3))*(0.35 + 0.65*s) + this.tilt*x*s; },
+  dhdx(x, z){ const e = 0.02; return (this.h(x+e, z) - this.h(x-e, z)) / (2*e); },
+  reshape(){
+    this.tilt = 0.34*(this.cond - 0.5)*2;
+    const p = this.geo.attributes.position, c = this.geo.attributes.color;
+    for (let i=0;i<p.count;i++){ const x = p.getX(i), z = p.getZ(i); const y = this.h(x, z); p.setY(i, y);
+      const col = mix3([COL.eu, 0xA9CFC6, COL.cort, COL.dis], (x+7)/14); const sh = 0.82 + 0.18*clamp((y+4)/8); c.setXYZ(i, col.r*sh, col.g*sh, col.b*sh); }
+    p.needsUpdate = true; c.needsUpdate = true; this.geo.computeVertexNormals();
+  },
+  drop(sev){
+    if (this.balls.length >= 14){ const o = this.balls.shift(); this.g.remove(o.m); this.g.remove(o.trail); }
+    const r = 0.16 + 0.34*sev; const m = sphere(r, 0xF4F7F6, {roughness:0.3});
+    const x = (Math.random()-0.5)*0.8 - 0.4, z = lerp(4, -8.4, this.dur);
+    const tg = new THREE.BufferGeometry(); tg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(600*3), 3)); tg.setDrawRange(0, 0);
+    const trail = new THREE.Line(tg, inkLine(0.45));
+    const b = {m, trail, r, x, z, y:this.h(x,z) + 5, vx:0, vy:0, sev, phase:'fall', n:0};
+    m.position.set(x, b.y, z); this.g.add(m); this.g.add(trail); this.balls.push(b);
+  },
+  classify(x){
+    if (x < -3.5) return ['Eustrés', '#1FA58B'];
+    if (x < -0.8) return ['Similar al estado previo', '#7FB9AC'];
+    if (x < 2) return ['Distrés moderado', '#E39A2D'];
+    if (x < 4.5) return ['Distrés severo', '#C2733F'];
+    return ['Agotamiento', '#9A4A8A'];
+  },
+  update(dt){
+    for (const b of this.balls){
+      if (b.phase === 'fall'){ b.vy -= 14*dt; b.y += b.vy*dt; const gy = this.h(b.x, b.z) + b.r; if (b.y <= gy){ b.y = gy; b.phase = 'roll'; } }
+      else if (b.phase === 'roll'){
+        const vz = 1.9; b.z += vz*dt;
+        const ax = -this.dhdx(b.x, b.z)*5 + (b.sev - 0.35)*2.3 + (Math.random()-0.5)*3.2;
+        b.vx += ax*dt; b.vx *= Math.pow(0.25, dt); b.x = clamp(b.x + b.vx*dt, -6.8, 6.8);
+        b.y = this.h(b.x, b.z) + b.r; b.m.rotation.x += vz*dt/b.r;
+        if (b.n < 600){ b.trail.geometry.attributes.position.setXYZ(b.n, b.x, b.y - b.r + 0.03, b.z); b.n++; b.trail.geometry.setDrawRange(0, b.n); b.trail.geometry.attributes.position.needsUpdate = true; }
+        if (b.z >= 8.7){ b.phase = 'done'; const c = this.classify(b.x); b.m.material.color.set(c[1]); this.results.unshift({sev:b.sev, c}); this.results = this.results.slice(0, 8); this.renderRes(); }
+      }
+      b.m.position.set(b.x, b.y, b.z);
+    }
+    if (tour.on){ this.tk = (this.tk||0) + dt; if (this.tk > 2.2){ this.tk = 0; this.drop(clamp(this.sev + (Math.random()-0.5)*0.5)); } }
+  },
+  renderRes(){
+    const el = document.getElementById('s4res'); if (!el) return;
+    el.innerHTML = this.results.length ? this.results.map(r => `<span style="--c:${r.c[1]}"><i></i>${r.c[0]} <span style="color:var(--muted);font-family:var(--f-mono);font-size:11px">${Math.round(r.sev*100)} %</span></span>`).join('') : '<span style="border:0;color:var(--muted);padding:0">Todavía no ha caído ninguna bola.</span>';
+  },
+  clear(){ this.balls.forEach(b => { this.g.remove(b.m); this.g.remove(b.trail); }); this.balls = []; this.results = []; this.renderRes(); },
+  panel(){ return `
+    <div class="sec">Sección 1.2 · Figura 1.3</div>
+    <h2>Un paisaje para el estado final del pez</h2>
+    <p class="lede">Cada bola es el estado fisiológico de un pez que rueda por un terreno irregular. Donde termina abajo representa su bienestar después del estresor.</p>
+    <div class="legend"><span style="--c:#F4F7F6"><i style="border:1px solid var(--line)"></i>Masa de la bola = severidad</span><span style="--c:var(--muted)"><i></i>Punto de caída = duración</span><span style="--c:var(--accent)"><i></i>Forma del paisaje = condición inicial</span></div>
+    <div class="ctrl">
+      <div class="row"><label for="s4s">Severidad del estresor</label><output id="s4so"></output><input type="range" id="s4s" min="0" max="1" step="0.01"></div>
+      <div class="row"><label for="s4d">Duración del estresor</label><output id="s4do"></output><input type="range" id="s4d" min="0" max="1" step="0.01"><small>Más corta: la bola cae más cerca del final de la pendiente.</small></div>
+      <div class="row"><label for="s4c">Condición inicial del pez</label><output id="s4co"></output><input type="range" id="s4c" min="0" max="1" step="0.01"><small>Genética, salud, historia nutricional, experiencia previa, etapa de vida.</small></div>
+      <div class="btns"><button class="btn" id="s4b1">Soltar una bola</button><button class="btn ghost" id="s4b6">Soltar 6 (variación individual)</button><button class="btn ghost" id="s4bc">Limpiar</button></div>
+    </div>
+    <h3>Estados finales</h3>
+    <div class="res" id="s4res"></div>
+    <h3>Qué cambia la dinámica de la respuesta</h3>
+    <ul class="facts">
+      <li style="--c:var(--accent)"><span><b>Genética.</b> Grandes diferencias entre taxones; la heredabilidad debe ser alta. Hay variación entre individuos y entre sexos.</span></li>
+      <li style="--c:var(--water)"><span><b>Ambiente actual.</b> La temperatura cambia la velocidad de las reacciones (Q10), el O₂ limita la capacidad metabólica, y también influyen la jerarquía social, el estómago lleno o vacío y las infecciones.</span></li>
+      <li style="--c:var(--amber)"><span><b>Experiencia previa.</b> Un pez bien alimentado no responde igual que uno en ayuno. Los estresores previos pueden debilitarlo o «endurecerlo».</span></li>
+      <li style="--c:var(--plum)"><span><b>Epigenética.</b> El estrés de los padres afecta a la progenie, por metilación de ADN e histonas <span class="ref">(McGhee &amp; Bell 2014)</span>.</span></li>
+    </ul>
+    <p class="foot">Por esta variabilidad, interpretar un único muestreo en el tiempo es especialmente problemático. Se pueden describir las formas de las respuestas, pero no asignarles tiempos o magnitudes exactos. La figura se inspira en el paisaje epigenético de Waddington.</p>`; },
+  bind(){
+    const bindR = (id, key, after) => { const r = document.getElementById(id), o = document.getElementById(id+'o'); r.value = this[key]; o.textContent = Math.round(this[key]*100)+' %'; r.addEventListener('input', () => { this[key] = +r.value; o.textContent = Math.round(r.value*100)+' %'; after && after(); }); };
+    bindR('s4s', 'sev'); bindR('s4d', 'dur'); bindR('s4c', 'cond', () => this.reshape());
+    document.getElementById('s4b1').addEventListener('click', () => this.drop(this.sev));
+    document.getElementById('s4b6').addEventListener('click', () => { for (let i=0;i<6;i++) setTimeout(() => this.drop(clamp(this.sev + (Math.random()-0.5)*0.3)), i*260); });
+    document.getElementById('s4bc').addEventListener('click', () => this.clear());
+    this.renderRes();
+  },
+  enter(){ if (!this.balls.length){ [0.15,0.45,0.85].forEach((s,i) => setTimeout(() => { if (S[cur] === this) this.drop(s); }, 600 + i*500)); } }
+});
+
+/* 5 · Ontogenia (Fig. 1.4) */
+const ONT = {
+  T:[-5.8,-4.2,-1.8,2.2,7.2],
+  Tn:['Pigmentación ocular','Eclosión','Inicio de la alimentación exógena','Esmoltificación / metamorfosis','Fin de la reproducción'],
+  stages:[[-8,'Huevo / embrión'],[-4.2,'Larva'],[0,'Juvenil'],[1.5,'Esmolt / metamorfosis'],[3.2,'Adulto'],[5.4,'Maduración'],[7,'Fin de la reproducción']],
+  b(u){ return this.T.reduce((s,ti) => s + Math.exp(-Math.pow((u-ti)/0.5, 2)), 0); },
+  rest(u){ return 0.22 + 0.12*this.b(u); },
+  resp(u){ return this.rest(u) + sstep(-6.6, -5.6, u)*(0.75 + 1.35*this.b(u)); },
+  perf(u){ return 1.0 + 0.95*sstep(-8, 1, u) - 0.22*this.b(u) - 0.35*sstep(6, 8, u); },
+  perfS(u){ return Math.max(0.05, this.perf(u) - (0.3 + 0.85*this.b(u))); }
+};
+S.push({
+  sec:'1.2 · Fig. 1.4', nav:'Ontogenia', cam:[3,4.2,14], tgt:[0,1.9,0],
+  init(g){
+    this.u = -8; this.playing = true; this.lastStage = '';
+    const band = (fTop, fBot, yOff, color, op) => {
+      const sh = new THREE.Shape(); const N = 160;
+      for (let i=0;i<=N;i++){ const u = -8 + 16*i/N; const y = fTop(u) + yOff; i ? sh.lineTo(u, y) : sh.moveTo(u, y); }
+      for (let i=N;i>=0;i--){ const u = -8 + 16*i/N; sh.lineTo(u, fBot(u) + yOff); }
+      const geo = new THREE.ExtrudeGeometry(sh, {depth:0.5, bevelEnabled:false, curveSegments:4});
+      const m = new THREE.Mesh(geo, std(color, {transparent:true, opacity:op, roughness:0.55})); m.position.z = -0.25; g.add(m);
+      const top = [], bot = []; for (let i=0;i<=N;i++){ const u = -8 + 16*i/N; top.push(V(u, fTop(u)+yOff, 0.27)); bot.push(V(u, fBot(u)+yOff, 0.27)); }
+      g.add(polyline(top, new THREE.LineBasicMaterial({color}))); g.add(polyline(bot, inkLine(0.6)));
+    };
+    const Yc = 3.0;
+    band(u => ONT.resp(u), u => ONT.rest(u), Yc, COL.cort, 0.78);
+    band(u => ONT.perf(u), u => ONT.perfS(u), 0, COL.eu, 0.72);
+    g.add(lbl('Cortisol', 'ttl', [-8.2, Yc+1.4, 0], 'l'));
+    g.add(lbl('Desempeño', 'ttl', [-8.2, 1.0, 0], 'l'));
+    g.add(lbl('Respuesta al estrés (distrés)', 'am sm', [3.2, Yc + ONT.resp(3.2) + 0.25, 0.3]));
+    g.add(lbl('En reposo', 'sm', [4.6, Yc + ONT.rest(4.6) - 0.22, 0.3]));
+    g.add(lbl('En reposo', 'eu sm', [4.6, ONT.perf(4.6) + 0.25, 0.3]));
+    g.add(lbl('Bajo estrés', 'sm', [4.6, ONT.perfS(4.6) - 0.25, 0.3]));
+    // eje de ciclo de vida
+    g.add(polyline([V(-8,-0.45,0), V(8,-0.45,0)], inkLine(0.7)));
+    ONT.stages.forEach(([u,n]) => { g.add(polyline([V(u,-0.45,0), V(u,-0.62,0)], inkLine(0.7))); g.add(lbl(n, 'ax', [u+0.05, -0.95, 0], 'r')); });
+    ONT.T.forEach(u => { const p = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 5.4), new THREE.MeshBasicMaterial({color:COL.cat, transparent:true, opacity:0.13, side:THREE.DoubleSide, depthWrite:false})); p.position.set(u, 2.25, 0.3); g.add(p);
+      const d = new THREE.Mesh(new THREE.OctahedronGeometry(0.11), new THREE.MeshBasicMaterial({color:COL.cat})); d.position.set(u, -0.45, 0.05); g.add(d); });
+    g.add(lbl('Transiciones sensibles', 'co sm', [ONT.T[0], 5.2, 0.3]));
+    // cursor y pez
+    this.cursor = new THREE.Mesh(new THREE.BoxGeometry(0.03, 5.8, 0.03), inkBasic(0.5)); this.cursor.position.y = 2.45; g.add(this.cursor);
+    const f = makeFish(0.55); f.group.scale.setScalar(0.17); g.add(f.group); this.fish = f;
+  },
+  update(dt, t){
+    if (this.playing){ this.u += dt*0.65; if (this.u > 8) this.u = -8; }
+    const u = this.u; this.cursor.position.x = u;
+    this.fish.group.position.set(u, -0.18 + Math.sin(t*2)*0.03, 0.2); this.fish.tail.rotation.y = Math.sin(t*6)*0.3;
+    const s = clamp((u+8)/16); this.fish.group.scale.setScalar(0.08 + 0.13*s);
+    const r = document.getElementById('s5u'); if (r && this.playing) r.value = u;
+    this.readout();
+  },
+  readout(){
+    const u = this.u; let st = ONT.stages[0][1]; ONT.stages.forEach(([a,n]) => { if (u >= a) st = n; });
+    let tr = -1, best = 0.65; ONT.T.forEach((ti,i) => { const d = Math.abs(u-ti); if (d < best){ best = d; tr = i; } });
+    const key = st + tr; if (key === this.lastStage && this.lastBars && Math.abs(this.lastBars - u) < 0.05) return; this.lastBars = u;
+    const set = (id, v, max) => { const e = document.getElementById(id); if (e){ e.querySelector('.fl').style.width = clamp(v/max)*100 + '%'; e.querySelector('.vv').textContent = v.toFixed(2); } };
+    set('s5b1', ONT.rest(u), 2.6); set('s5b2', ONT.resp(u), 2.6); set('s5b3', ONT.perf(u), 2.2); set('s5b4', ONT.perfS(u), 2.2);
+    if (key !== this.lastStage){ this.lastStage = key; const el = document.getElementById('s5st'); if (!el) return;
+      const notes = ['El embrión empieza a producir cortisol cuando aparece la pigmentación ocular. El hacinamiento de embriones en esta etapa afecta la secreción y la retroalimentación del cortisol (Ghaedi et al. 2013, 2014).','La eclosión es una transición de alta sensibilidad.','Al comenzar la alimentación per os, la tolerancia a los estresores baja.','Durante la esmoltificación o metamorfosis la respuesta es mayor y la tolerancia menor.','Al final de la reproducción el pez vuelve a ser menos resistente.'];
+      const plain = {'Huevo / embrión':'Antes de la pigmentación ocular el embrión todavía no produce cortisol.','Larva':'Etapa entre transiciones: la respuesta se modera.','Juvenil':'Fuera de transiciones: mayor tolerancia y desempeño creciente.','Esmolt / metamorfosis':'Transformación profunda del organismo.','Adulto':'Etapa de mayor desempeño en reposo.','Maduración':'Las hembras estresadas reparten energía entre recuperarse y madurar huevos de calidad: fecundidad o calidad del huevo pueden bajar.','Fin de la reproducción':'Disminuye el desempeño.'};
+      el.className = 'status ' + (tr >= 0 ? 'co' : 'eu');
+      el.innerHTML = `<b>${st}</b>` + (tr >= 0 ? `<span style="color:var(--coral);font-weight:600">Transición: ${ONT.Tn[tr]}.</span> ${notes[tr]}` : plain[st]); }
+  },
+  panel(){ return `
+    <div class="sec">Sección 1.2 · Figura 1.4</div>
+    <h2>El estrés a lo largo del ciclo de vida</h2>
+    <p class="lede">En cada transición ontogénica el pez es más sensible: la respuesta de cortisol es mayor y la tolerancia menor.</p>
+    <div class="ctrl">
+      <div class="row"><label for="s5u">Posición en el ciclo de vida</label><output></output><input type="range" id="s5u" min="-8" max="8" step="0.01"></div>
+      <div class="btns"><button class="btn" id="s5p">Pausar</button></div>
+      <div id="s5st" class="status"></div>
+      <div class="bars">
+        <div class="bar" id="s5b1" style="--c:#C9B38A"><span>Cortisol en reposo</span><div class="tr"><div class="fl"></div></div><span class="vv"></span></div>
+        <div class="bar" id="s5b2" style="--c:var(--amber)"><span>Cortisol con estrés</span><div class="tr"><div class="fl"></div></div><span class="vv"></span></div>
+        <div class="bar" id="s5b3" style="--c:var(--accent)"><span>Desempeño en reposo</span><div class="tr"><div class="fl"></div></div><span class="vv"></span></div>
+        <div class="bar" id="s5b4" style="--c:var(--plum)"><span>Desempeño bajo estrés</span><div class="tr"><div class="fl"></div></div><span class="vv"></span></div>
+      </div>
+      <small style="color:var(--muted);font-size:11.5px">Unidades relativas de un modelo conceptual. El grosor de cada banda es la magnitud de la diferencia.</small>
+    </div>
+    <h3>Estrategias de la hembra estresada</h3>
+    <ul class="facts">
+      <li style="--c:var(--plum)"><span>No invertir en huevos o retrasar el desove, con riesgo de perder lo ya invertido.</span></li>
+      <li style="--c:var(--amber)"><span>Madurar tantos huevos como sea posible, aunque sean nutricionalmente deficientes: más crías, de menor aptitud.</span></li>
+      <li style="--c:var(--accent)"><span>Dejar que algunos huevos se vuelvan atrésicos e invertir en pocos de mejor calidad.</span></li>
+      <li style="--c:var(--coral)"><span>El cortisol materno puede pasar al huevo antes de la ovulación. Del estrés en machos se sabe muy poco.</span></li>
+    </ul>
+    <p class="foot">El trade-off final es entre la supervivencia de la hembra y su éxito reproductivo de por vida. Los autores comparan este modelo con el hipervolumen del nicho n-dimensional de Hutchinson (1958).</p>`; },
+  bind(){
+    const r = document.getElementById('s5u'), p = document.getElementById('s5p');
+    r.value = this.u; p.textContent = this.playing ? 'Pausar' : 'Reproducir';
+    r.addEventListener('input', () => { this.playing = false; p.textContent = 'Reproducir'; this.u = +r.value; });
+    p.addEventListener('click', () => { this.playing = !this.playing; p.textContent = this.playing ? 'Pausar' : 'Reproducir'; });
+    this.lastStage = ''; this.lastBars = null;
+  }
+});
+
+/* 6 · Estresores agudos, crónicos y múltiples (Figs. 1.5–1.6) */
+function respF(t, s, mode, pat){
+  const R = 2.0, R0 = 0.35;
+  if (pat === 'K'){
+    const dt = t - 1;
+    if (mode === 'phys'){ if (dt <= 0) return R0; let amp = (0.5 + 2.3*s)*(1 - Math.exp(-dt/0.5));
+      if (s < 0.5) amp *= lerp(1, 0.3 + 1.4*s, sstep(1.5, 6, dt));
+      if (s > 0.82) amp *= 1 - 0.85*sstep(3, 7, dt)*((s-0.82)/0.18);
+      return R0 + amp; }
+    if (dt <= 0) return R; let P;
+    if (s < 0.3) P = R - 0.5*s*Math.exp(-dt/1.2) + 0.4*(1 - s/0.3)*sstep(0.5, 4, dt);
+    else { P = R - (0.3 + 1.3*(s-0.3))*sstep(0, 2.5, dt); if (s < 0.5) P += (0.5-s)/0.2*0.25*sstep(2, 7, dt); }
+    if (s > 0.8) P = lerp(P, 0, sstep(2.5, 7.5, dt)*((s-0.8)/0.2));
+    return Math.max(0, P);
+  }
+  const times = pat === 'A' ? [1] : pat === 'B' ? [1, 1.7, 2.4] : [1, 4, 7];
+  const tau = 0.55 + 1.0*s; const g = d => d <= 0 ? 0 : (d/tau)*Math.exp(1 - d/tau);
+  const last = times[times.length-1];
+  if (mode === 'phys'){
+    let y = R0; times.forEach((ti,k) => { y += (0.5 + 2.2*s)*(pat === 'C' ? Math.pow(0.72, k) : 1)*g(t - ti); });
+    return y;
+  }
+  let P = R;
+  times.forEach((ti,k) => { P -= 1.5*s*(pat === 'C' ? Math.pow(0.7, k) : 1)*g(t - ti);
+    if (s < 0.35 && !(pat === 'B' && k > 0)) P += (pat === 'C' ? 0.22 : 0.4)*(1 - s/0.35)*sstep(ti + tau, ti + 3*tau, t); });
+  if (pat === 'C' && s < 0.6) P += 0.12*times.filter(ti => t > ti + 2).length*(1 - s/0.6);
+  const thr = pat === 'B' ? 0.55 : pat === 'C' ? 0.85 : 0.75;
+  if (s > thr) P = lerp(P, 0, sstep(last, last + 3.5*tau, t)*clamp((s - thr)/(1 - thr)*1.6));
+  return Math.max(0, P);
+}
+S.push({
+  sec:'1.2.2 · Figs. 1.5–1.6', nav:'Agudo, crónico, múltiple', cam:[9.5,7.5,10.5], tgt:[0,1.4,0],
+  init(g){
+    this.pat = 'A'; this.mode = 'perf'; this.s = 0.5; this.NX = 90; this.NZ = 36;
+    const NX = this.NX, NZ = this.NZ;
+    const geo = this.geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((NX+1)*(NZ+1)*3), 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array((NX+1)*(NZ+1)*3), 3));
+    const idx = []; for (let j=0;j<NZ;j++) for (let i=0;i<NX;i++){ const a = j*(NX+1)+i, b = a+1, c = a+NX+1, d = c+1; idx.push(a,c,b, b,c,d); }
+    geo.setIndex(idx);
+    g.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({vertexColors:true, side:THREE.DoubleSide, roughness:0.7, transparent:true, opacity:0.93})));
+    const wf = new THREE.Mesh(geo, inkBasic(0.07)); wf.material.wireframe = true; g.add(wf);
+    this.rPlane = new THREE.Mesh(new THREE.PlaneGeometry(12, 7), inkBasic(0.07)); this.rPlane.rotation.x = -Math.PI/2; this.rPlane.material.side = THREE.DoubleSide; this.rPlane.material.depthWrite = false; g.add(this.rPlane);
+    this.rLbl = lbl('R · estado de reposo', 'sm', [6.2, 0, 3.5], 'r'); g.add(this.rLbl);
+    g.add(polyline([V(-6,0,3.6), V(6.3,0,3.6)], inkLine(0.8))); g.add(polyline([V(-6.1,0,3.5), V(-6.1,0,-3.8)], inkLine(0.8)));
+    g.add(lbl('Tiempo →', 'ax', [0, -0.35, 4.1])); g.add(lbl('Severidad →', 'ax', [-6.6, -0.2, 0], 'l'));
+    g.add(lbl('leve', 'ax', [-6.6, 0, 3.4], 'l')); g.add(lbl('extrema', 'ax', [-6.6, 0, -3.5], 'l'));
+    this.yLbl = lbl('', 'ax', [-6.1, 3.6, 3.6]); g.add(this.yLbl); g.add(polyline([V(-6.1,0,3.6), V(-6.1,3.3,3.6)], inkLine(0.8)));
+    this.marks = new THREE.Group(); g.add(this.marks);
+    this.slice = null; this.sliceMat = inkBasic(1);
+    this.build();
+  },
+  X(t){ return -6 + 12*t/10; }, Z(s){ return 3.5 - 7*s; },
+  Y(v){ return this.mode === 'perf' ? v*1.2 : Math.min(v*0.72, 4.2); },
+  build(){
+    const NX = this.NX, NZ = this.NZ, p = this.geo.attributes.position, c = this.geo.attributes.color;
+    for (let j=0;j<=NZ;j++){ const s = j/NZ; for (let i=0;i<=NX;i++){ const t = 10*i/NX; const v = respF(t, s, this.mode, this.pat); const k = j*(NX+1)+i;
+      p.setXYZ(k, this.X(t), this.Y(v), this.Z(s)); const col = this.colFor(v); c.setXYZ(k, col.r, col.g, col.b); } }
+    p.needsUpdate = true; c.needsUpdate = true; this.geo.computeVertexNormals(); this.geo.computeBoundingSphere();
+    const ry = this.mode === 'perf' ? this.Y(2) : this.Y(0.35); this.rPlane.position.set(0, ry, 0); this.rLbl.position.y = ry;
+    this.yLbl.inner.textContent = this.mode === 'perf' ? 'Desempeño del organismo' : 'Factores 1.º/2.º (p. ej., cortisol)';
+    while (this.marks.children.length) this.marks.remove(this.marks.children[0]);
+    const red = new THREE.MeshBasicMaterial({color:COL.cat});
+    if (this.pat === 'K'){ const b = new THREE.Mesh(new THREE.BoxGeometry(this.X(10)-this.X(1), 0.08, 0.12), red); b.position.set((this.X(10)+this.X(1))/2, 0.04, 3.85); this.marks.add(b); }
+    else { const times = this.pat === 'A' ? [1] : this.pat === 'B' ? [1,1.7,2.4] : [1,4,7];
+      times.forEach(ti => { const cn = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.35, 12), red); cn.rotation.x = Math.PI; cn.position.set(this.X(ti), 0.25, 3.85); this.marks.add(cn); }); }
+    this.buildSlice();
+  },
+  colFor(v){ if (this.mode === 'perf'){ const d = v - 2; if (d >= 0) return mix3([COL.light, COL.eu], d/0.5); if (v > 0.6) return mix3([COL.light, COL.cort], -d/1.4); return mix3([COL.cort, COL.dis], (0.6 - v)/0.6); }
+    return mix3([COL.eu, COL.light, COL.cort, COL.dis], (v - 0.35)/3.2); },
+  buildSlice(){
+    if (this.slice){ this.g.remove(this.slice); this.slice.geometry.dispose(); }
+    const pts = []; for (let i=0;i<=120;i++){ const t = 10*i/120; pts.push(V(this.X(t), this.Y(respF(t, this.s, this.mode, this.pat)) + 0.04, this.Z(this.s))); }
+    this.slice = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 240, 0.065, 8), this.sliceMat); this.g.add(this.slice);
+    const Pend = respF(10, this.s, 'perf', this.pat);
+    let m; if (Pend < 0.3) m = ['pl','Agotamiento','El desempeño cae a cero: muerte.'];
+    else if (Pend > 2.08) m = ['eu','Compensación / endurecimiento','El desempeño termina por encima del reposo (eustrés).'];
+    else if (Pend > 1.9) m = ['eu','Recuperación','El desempeño vuelve al estado de reposo R.'];
+    else m = ['am','Distrés','El desempeño queda por debajo del reposo.'];
+    const el = document.getElementById('s6st'); if (el){ el.className = 'status ' + m[0]; el.innerHTML = `<b>${m[1]}</b>${m[2]} <span style="color:var(--muted)">(severidad ${Math.round(this.s*100)} %)</span>`; }
+  },
+  panel(){ return `
+    <div class="sec">Sección 1.2.2 · Figuras 1.5 y 1.6</div>
+    <h2>Agudos, crónicos y múltiples</h2>
+    <p class="lede">La superficie es una «familia de curvas»: para cada severidad (profundidad) muestra la respuesta en el tiempo. La línea resaltada es la severidad elegida.</p>
+    <div class="ctrl">
+      <div class="seg" role="group" aria-label="Patrón del estresor">
+        <button data-p="A">A · agudo único</button><button data-p="B">B · secuencial, intervalos cortos</button>
+        <button data-p="C">C · secuencial, intervalos largos</button><button data-p="K">Crónico continuo</button></div>
+      <div class="seg" role="group" aria-label="Variable">
+        <button data-m="perf">Desempeño del organismo</button><button data-m="phys">Factores primarios y secundarios</button></div>
+      <div class="row"><label for="s6s">Severidad (línea resaltada)</label><output id="s6so"></output><input type="range" id="s6s" min="0" max="1" step="0.01"></div>
+      <div id="s6st" class="status"></div>
+    </div>
+    <h3>Lo que se sabe y lo que no</h3>
+    <ul class="facts">
+      <li style="--c:var(--coral)"><span>Estresores agudos separados por pocas horas tienen efectos casi aditivos, al menos hasta tres exposiciones. Se desconoce el intervalo mínimo para que dos estresores se perciban como eventos distintos.</span></li>
+      <li style="--c:var(--accent)"><span><b>Endurecimiento.</b> Peces que recibieron alimento como recompensa tras estresores leves diarios toleraron mejor el O₂ bajo, la salinidad y las enfermedades <span class="ref">(Schreck et al. 1995)</span>.</span></li>
+      <li style="--c:var(--amber)"><span><b>Falso negativo.</b> Con hacinamiento crónico moderado el cortisol puede igualar al de peces no estresados porque aumenta su depuración, pero la resistencia a otros desafíos cae <span class="ref">(Patiño et al. 1986)</span>.</span></li>
+      <li style="--c:var(--plum)"><span><b>Estresores concurrentes</b> (hacinamiento con O₂ bajo): uno reduce la tolerancia al otro. No hay que confundir una baja regulada de la respuesta con el agotamiento.</span></li>
+    </ul>
+    <p class="foot">Los peces de agua dulce pueden sufrir estresores crónicos (calor, caudales bajos, contaminantes) con más frecuencia que los animales terrestres, a diferencia de lo que plantea Boonstra (2013). La fase de alarma es la más estereotipada.</p>`; },
+  bind(){
+    const r = document.getElementById('s6s'), o = document.getElementById('s6so');
+    const sync = () => { r.value = this.s; o.textContent = Math.round(this.s*100)+' %';
+      panel.querySelectorAll('[data-p]').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === this.pat));
+      panel.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === this.mode)); };
+    r.addEventListener('input', () => { this.s = +r.value; o.textContent = Math.round(this.s*100)+' %'; this.buildSlice(); });
+    panel.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { this.pat = b.dataset.p; sync(); this.build(); }));
+    panel.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { this.mode = b.dataset.m; sync(); this.build(); }));
+    sync(); this.buildSlice();
+  },
+  update(dt){ if (tour.on){ this.tk = (this.tk||0) + dt; this.s = 0.5 + 0.48*Math.sin(this.tk*0.6); this.buildSlice(); const r = document.getElementById('s6s'); if (r){ r.value = this.s; document.getElementById('s6so').textContent = Math.round(this.s*100)+' %'; } } }
+});
+
+/* 7 · Eustrés vs distrés (hormesis, Fig. 1.2) */
+const imm = s => 1 + 0.55*Math.exp(-Math.pow((s-0.2)/0.11, 2)) - 0.85*sstep(0.38, 0.95, s);
+S.push({
+  sec:'1.3 · Fig. 1.2', nav:'Eustrés y distrés', cam:[0.8,3.6,12], tgt:[0.4,1.9,0],
+  init(g){
+    this.s = 0.2;
+    const X = s => -6 + 10*s, Y = s => imm(s)*2;
+    this.X = X; this.Y = Y;
+    const zone = (a, b, color) => { const pts = []; for (let i=0;i<=40;i++){ const s = lerp(a, b, i/40); pts.push(V(X(s), Y(s), 0)); }
+      g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 80, 0.09, 10), std(color, {emissive:color, emissiveIntensity:0.2})));
+      const f = new THREE.Mesh(new THREE.PlaneGeometry(X(b)-X(a), 2.4), new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.18, side:THREE.DoubleSide, depthWrite:false}));
+      f.rotation.x = -Math.PI/2; f.position.set((X(a)+X(b))/2, 0, 0); g.add(f); };
+    zone(0, 0.34, COL.eu); zone(0.34, 0.5, COL.cort); zone(0.5, 1, COL.dis);
+    g.add(lbl('Eustrés', 'eu', [X(0.17), 0.05, 1.5])); g.add(lbl('Resiliencia', 'am', [X(0.42), 0.05, 1.5])); g.add(lbl('Distrés', 'pl', [X(0.75), 0.05, 1.5]));
+    const base = polyline([V(X(0), 2, 0), V(X(1), 2, 0)], new THREE.LineDashedMaterial({color:COL.neutral, dashSize:0.18, gapSize:0.12})); base.computeLineDistances(); g.add(base);
+    g.add(lbl('Inmunocompetencia antes del estrés', 'ax', [X(0.86), 2.25, 0]));
+    g.add(polyline([V(X(0), 0.01, 1.3), V(X(1)+0.3, 0.01, 1.3)], inkLine(0.7)));
+    g.add(lbl('Severidad del estresor · cortisol ↑ →', 'ax', [X(0.5), -0.35, 1.9]));
+    g.add(lbl('Capacidad inmune', 'ax', [X(0)-0.2, 3.4, 0], 'l'));
+    this.ball = sphere(0.24, 0xFFFFFF, {roughness:0.25}); g.add(this.ball);
+    this.drop = polyline([V(0,0,0), V(0,1,0)], inkLine(0.5)); g.add(this.drop);
+    // Fig. 1.2: vector de desempeño
+    const gx = 6.4, H = 4.4; this.gx = gx; this.H = H;
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, H, 32, 1, true), new THREE.MeshStandardMaterial({color:COL.light, transparent:true, opacity:0.18, side:THREE.DoubleSide, depthWrite:false})).translateX(gx).translateY(H/2));
+    this.fill = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1, 32), std(COL.eu)); this.fill.position.x = gx; g.add(this.fill);
+    const tick = (v, html, cls) => { g.add(polyline([V(gx-0.5, v*H, 0), V(gx+0.5, v*H, 0)], inkLine(0.8))); g.add(lbl(html, 'sm '+cls, [gx+0.55, v*H, 0], 'r')); };
+    tick(1, '<b>1</b> · potencial genético (ambiente óptimo)', 'eu'); tick(0.62, 'Realizado sin estrés (reposo)', ''); tick(0, '<b>0</b> · muerte', 'pl');
+    this.cur = lbl('', 'sm', [gx-0.5, 0, 0], 'l'); g.add(this.cur);
+    g.add(lbl('Capacidad de desempeño', 'ax', [gx, H+0.55, 0]));
+  },
+  update(dt, t){
+    if (tour.on){ this.tk = (this.tk||0) + dt; this.s = 0.5 + 0.5*Math.sin(this.tk*0.5 - 1.5); const r = document.getElementById('s7s'); if (r) r.value = this.s; this.readout(); }
+    const s = this.s, x = this.X(s), y = this.Y(s);
+    this.ball.position.set(x, y + 0.02 + Math.sin(t*3)*0.03, 0);
+    const p = this.drop.geometry.attributes.position; p.setXYZ(0, x, 0, 0); p.setXYZ(1, x, y, 0); p.needsUpdate = true;
+    const real = clamp(0.62 + (imm(s) - 1.02)*0.55); const h = Math.max(0.01, real*this.H);
+    this.fill.scale.y = lerp(this.fill.scale.y, h, 0.15); this.fill.position.y = this.fill.scale.y/2;
+    const col = s < 0.34 ? COL.eu : s < 0.5 ? COL.cort : COL.dis; this.fill.material.color.setHex(col); this.ball.material.color.setHex(col);
+    this.cur.position.y = this.fill.scale.y; this.cur.inner.innerHTML = 'Realizado: <b>' + real.toFixed(2) + '</b>';
+  },
+  readout(){
+    const s = this.s; const z = s < 0.34 ? ['eu','Eustrés','Un cortisol apenas elevado favorece el redespliegue de leucocitos, la inmunidad innata, la función efectora y la inmunidad celular. Aumenta la resistencia a infecciones y cáncer.'] : s < 0.5 ? ['am','Resiliencia','El sistema inmune oscila: los efectos positivos desaparecen y empiezan a aparecer los negativos.'] : ['pl','Distrés','Todos los factores inmunes anteriores se suprimen. Baja la resistencia a infecciones y cáncer.'];
+    const el = document.getElementById('s7st'); if (el){ el.className = 'status ' + z[0]; el.innerHTML = `<b>${z[1]}</b>${z[2]}`; }
+    const o = document.getElementById('s7so'); if (o) o.textContent = Math.round(s*100) + ' %';
+  },
+  panel(){ return `
+    <div class="sec">Sección 1.3 · Figura 1.2</div>
+    <h2>Eustrés y distrés: una respuesta bimodal</h2>
+    <p class="lede">Una severidad baja puede tener el efecto contrario al de una alta. Esto es hormesis, y la respuesta inmune es el ejemplo clásico.</p>
+    <div class="ctrl">
+      <div class="row"><label for="s7s">Severidad del estresor</label><output id="s7so"></output><input type="range" id="s7s" min="0" max="1" step="0.01"></div>
+      <div id="s7st" class="status"></div>
+    </div>
+    <h3>El vector de desempeño (Fig. 1.2)</h3>
+    <p>La columna de la derecha va de 0 (muerte) a 1 (lo máximo que la genética permitiría en un ambiente óptimo). Como el ambiente nunca es perfecto, el pez sin estrés rinde menos que ese potencial. El eustrés aumenta el desempeño realizado y el distrés lo reduce.</p>
+    <ul class="facts">
+      <li style="--c:var(--accent)"><span>El desempeño realizado en reposo depende del ambiente, la historia y la epigenética del pez.</span></li>
+      <li style="--c:var(--amber)"><span>Como ambiente y estresores cambian con el tiempo, el desempeño realizado también cambia.</span></li>
+      <li style="--c:var(--plum)"><span>No se sabe dónde está el punto de inflexión entre eustrés y distrés (sección 1.6).</span></li>
+    </ul>
+    <p class="foot">La forma de la curva es conceptual, según Dhabhar (2008), Dhabhar &amp; McEwen (2001) y Schreck (2010).</p>`; },
+  bind(){ const r = document.getElementById('s7s'); r.value = this.s; r.addEventListener('input', () => { this.s = +r.value; this.readout(); }); this.readout(); }
+});
+
+/* 8 · Percepción y rutas sensoriales */
+S.push({
+  sec:'1.4', nav:'Percepción', cam:[3,4.5,13.5], tgt:[0.3,0,0],
+  init(g){
+    this.mode = 'both';
+    const f = makeFish(0.2); g.add(f.group); this.f = f;
+    const brain = V(2.0, 0.5, 0), ir = V(0.9, 0.28, 0);
+    const bm = sphere(0.24, 0xB9A7D9, {emissive:0xB9A7D9, emissiveIntensity:0.4}); bm.position.copy(brain); g.add(bm);
+    bm.add(lbl('Hipotálamo', 'sm pl', [0.3, 0.55, 0]));
+    const im = sphere(0.16, COL.cort, {emissive:COL.cort, emissiveIntensity:0.4}); im.position.copy(ir); g.add(im);
+    im.add(lbl('Eje HPI → cortisol', 'sm am', [-0.6, -0.5, 0]));
+    this.bm = bm; this.im = im;
+    this.groups = {classic:new THREE.Group(), non:new THREE.Group()}; g.add(this.groups.classic, this.groups.non);
+    this.streams = [];
+    const addStream = (grp, c, color, n, sp, sz) => { const st = stream(c, color, n, sp, sz); grp.add(st.g); this.streams.push(st);
+      grp.add(polyline(c.getPoints(30), new THREE.LineBasicMaterial({color, transparent:true, opacity:0.3}))); };
+    const classic = [['Visión', V(6.5,2.6,3.2), V(2.42,0.38,0.5)], ['Audición', V(5.2,3.6,-3), V(1.9,0.35,-0.35)], ['Tacto', V(3.6,-3,3.6), V(2.1,-0.45,0.55)], ['Olfato', V(7.4,0.6,-1.2), V(2.85,0.22,-0.18)], ['Gusto', V(6.8,-1.9,1.2), V(2.95,-0.15,0.1)]];
+    const sg = new THREE.OctahedronGeometry(0.22);
+    classic.forEach(([n, src, tgt]) => { const m = new THREE.Mesh(sg, std(COL.water, {emissive:COL.water, emissiveIntensity:0.3})); m.position.copy(src); this.groups.classic.add(m);
+      m.add(lbl(n, 'wa sm', [0, 0.45, 0]));
+      addStream(this.groups.classic, curve3(src, tgt, V(0, 0.5, 0)), COL.water, 9, 0.35, 0.055);
+      addStream(this.groups.classic, curve3(tgt, brain, V(0, 0.15, 0)), COL.spark, 4, 0.9, 0.045); });
+    const sites = {gill:V(1.4,-0.05,0.62), gill2:V(1.35,-0.05,-0.62), skin:V(-0.6,0.25,0.7), skin2:V(-1.1,-0.3,-0.68), gut:V(0.2,-0.45,0)};
+    this.siteMeshes = [];
+    const siteL = {gill:'Branquias', skin:'Piel', gut:'Intestino'};
+    Object.entries(sites).forEach(([k, p]) => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.2, 18, 12), new THREE.MeshBasicMaterial({color:COL.cat, transparent:true, opacity:0.5, depthWrite:false})); m.position.copy(p); this.groups.non.add(m); this.siteMeshes.push(m);
+      if (siteL[k]) m.add(lbl(siteL[k] + ' · respuesta local', 'co sm', [0, -0.45, 0]));
+      addStream(this.groups.non, curve3(p, brain, V(0, 0.9, 0)), COL.crh, 5, 0.22, 0.05); });
+    const non = [['Acidez (pH)', V(-3,3.8,3.2), sites.gill], ['Hipoxia', V(-0.8,4.4,-3.2), sites.gill2], ['Hipercapnia (CO₂)', V(-5.2,2.2,-2.4), sites.gill2], ['Osmoestrés', V(-6.2,-0.8,3.2), sites.skin], ['Patógenos y parásitos', V(-4.4,-3.6,-2.6), sites.skin2], ['Dieta deficiente', V(-0.4,-4.4,2.8), sites.gut], ['Contaminantes', V(2.4,-4.2,-3.4), sites.gill2]];
+    non.forEach(([n, src, tgt]) => { const m = new THREE.Mesh(sg, std(COL.cat, {emissive:COL.cat, emissiveIntensity:0.25})); m.position.copy(src); this.groups.non.add(m);
+      m.add(lbl(n, 'co sm', [0, 0.45, 0]));
+      addStream(this.groups.non, curve3(src, tgt, V(0, 0.4, 0)), COL.cat, 9, 0.3, 0.055); });
+    const hpi = stream(curve3(brain, ir, V(0, 0.25, 0.1)), COL.cort, 6, 0.5, 0.05); g.add(hpi.g); this.streams.push(hpi);
+  },
+  setMode(m){ this.mode = m; this.groups.classic.visible = m !== 'non'; this.groups.non.visible = m !== 'classic';
+    [this.groups.classic, this.groups.non].forEach(gr => gr.traverse(o => { if (o.isCSS2DObject){ o.visible = gr.visible; if (!gr.visible) o.element.style.display = 'none'; } }));
+    panel.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === m)); },
+  update(dt, t){ this.streams.forEach(s => s.update(dt)); this.f.tail.rotation.y = Math.sin(t*3)*0.25;
+    this.siteMeshes.forEach((m,i) => { const k = 1 + 0.25*Math.sin(t*3 + i); m.scale.setScalar(k); });
+    this.bm.material.emissiveIntensity = 0.4 + 0.3*Math.sin(t*4); },
+  panel(){ return `
+    <div class="sec">Sección 1.4 · Sistemas sensoriales y percepción</div>
+    <h2>Por dónde entra la amenaza</h2>
+    <p class="lede">La respuesta clásica solo se inicia si el pez percibe una amenaza. Los sentidos clásicos no son la única vía.</p>
+    <div class="ctrl"><div class="seg" role="group" aria-label="Vías">
+      <button data-v="classic">Sentidos clásicos</button><button data-v="non">Rutas no clásicas</button><button data-v="both">Ambas</button></div></div>
+    <div class="legend"><span style="--c:#3E93B8"><i></i>Estímulo sensorial</span><span style="--c:#F4D35E"><i></i>Señal nerviosa</span><span style="--c:#D2493F"><i></i>Estresor en mucosas</span><span style="--c:#8A73D6"><i></i>Citocinas hacia el cerebro</span><span style="--c:#E39A2D"><i></i>Eje HPI</span></div>
+    <h3>Dos caminos al eje HPI</h3>
+    <ul class="facts">
+      <li style="--c:var(--water)"><span><b>Sentidos clásicos.</b> Visión, audición, tacto, olfato y probablemente gusto activan la respuesta neuroendocrina en el hipotálamo. Lo que causa miedo, incomodidad o dolor provoca respuesta <span class="ref">(Schreck 1981)</span>.</span></li>
+      <li style="--c:var(--coral)"><span><b>Rutas no clásicas.</b> Acidez, hipoxia, hipercapnia, osmoestrés y patógenos elevan el cortisol por vías nerviosas que no son los sentidos clásicos.</span></li>
+      <li style="--c:var(--plum)"><span><b>Mucosas.</b> En branquias, piel e intestino la respuesta empieza siendo local (expresión de citocinas) y luego se vuelve sistémica al activar el eje HPI. Una dieta deficiente puede actuar así como estresor crónico.</span></li>
+      <li style="--c:var(--amber)"><span>El momento en que un patógeno activa el eje HPI depende de su virulencia y de la intensidad de la infección.</span></li>
+    </ul>`; },
+  bind(){ panel.querySelectorAll('[data-v]').forEach(b => b.addEventListener('click', () => this.setMode(b.dataset.v))); this.setMode(this.mode); }
+});
+
+/* 9 · Clásico vs contemporáneo (Tabla 1.1) e incógnitas */
+const TAB = [
+ ['Respuesta conductual',['Especie-específica'],['Especie-específica','Estrategia de afrontamiento']],
+ ['Jerarquía biológica',['Organísmica'],['Organísmica','Celular','Molecular']],
+ ['Respuesta endocrina',['Jerárquica (hipotálamo, hipófisis, interrenal)'],['No jerárquica (múltiples direcciones)']],
+ ['Aprendizaje y adaptación',['Estereotipada'],['Aprendizaje y adaptación']],
+ ['Regulación fisiológica',['Sistema nervioso','Sistema endocrino'],['Sistema nervioso','Sistema endocrino','Sistema inmune']],
+ ['Regulación',['Homeostasis'],['Homeostasis','Alostasis']],
+ ['Dinámica de respuesta',['Unimodal'],['Unimodal','Bimodal']],
+ ['Variables de respuesta',['Fisiológicas','Metabólicas'],['Fisiológicas','Metabólicas','Energética / asignación de recursos']],
+ ['Detección',['Central (sistema nervioso)'],['Múltiple (central y periférica)']],
+ ['Señalización',['Hormonas'],['Hormonas','Citocinas']],
+ ['Efectos del estrés',['Organísmicos','Fisiológicos'],['Organísmicos','Fisiológicos','Dolor','Psicológicos']],
+ ['Efectos del estresor',['Distrés'],['Distrés','Eustrés']],
+ ['Rasgos del estresor',['Naturaleza','Intensidad','Duración'],['Naturaleza','Intensidad','Duración','Control','Predictibilidad']],
+ ['Variación',['Interespecífica'],['Interespecífica','Individual']]];
+S.push({
+  sec:'1.5 · 1.6 · Tabla 1.1', nav:'Paradigmas e incógnitas', cam:[0,6.5,16], tgt:[0,1.8,0],
+  init(g){
+    this.sel = -1; this.cols = []; this.vl = [];
+    const cm = COL.neutral, nm = COL.eu;
+    TAB.forEach((r, i) => { const x = -7.8 + i*1.2, z = -0.05*x*x;
+      const mk = (n, dx, color) => { const h = n*0.75; const m = new THREE.Mesh(new THREE.BoxGeometry(0.42, h, 0.42), std(color, {emissive:color, emissiveIntensity:0})); m.position.set(x+dx, h/2, z); m.userData.i = i; g.add(m); this.cols.push(m); return m; };
+      mk(r[1].length, -0.24, cm); mk(r[2].length, 0.24, nm);
+      const L = lbl(r[0], 'vert', [x, -0.05, z], 'dn'); g.add(L); this.vl.push(L); });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(19, 5), inkBasic(0.05)); floor.rotation.x = -Math.PI/2; floor.position.set(0, -0.01, -1.2); g.add(floor);
+    g.add(lbl('Altura = número de elementos considerados en la tabla', 'ax', [0, 4.0, 1]));
+    const Q = ['¿Dónde está el punto de inflexión eustrés / distrés?','¿Control gradual o por umbral?','¿Cuándo se ha recuperado el pez?','¿Responden igual los peces silvestres?','¿Distintos sentidos, misma respuesta?','¿Un «recetario» validado para interpretar?'];
+    this.qs = Q.map((q, i) => { const a = -1.1 + i*0.44; const m = new THREE.Mesh(new THREE.IcosahedronGeometry(0.2, 0), std(COL.dis, {emissive:COL.dis, emissiveIntensity:0.35, flatShading:true}));
+      m.position.set(Math.sin(a)*9.5, 5.0 + (i%2)*0.8, -3.5 - Math.cos(a)*1.5); g.add(m); m.add(lbl(q, 'q sm', [0, 0.42, 0])); m.base = m.position.y; return m; });
+  },
+  select(i){ this.sel = i; this.cols.forEach(m => m.material.emissiveIntensity = m.userData.i === i ? 0.55 : 0);
+    this.vl.forEach((l, k) => l.inner.classList.toggle('on', k === i));
+    panel.querySelectorAll('.tr2').forEach((el, k) => el.classList.toggle('on', k === i));
+    const el = panel.querySelector('.tr2.on'); if (el) el.scrollIntoView({block:'nearest', behavior: reduce ? 'auto' : 'smooth'}); },
+  pick(ray){ const h = ray.intersectObjects(this.cols); if (h.length) this.select(h[0].object.userData.i); },
+  update(dt, t){ this.qs.forEach((m, i) => { m.position.y = m.base + Math.sin(t*1.2 + i)*0.15; m.rotation.y += dt*0.5; });
+    if (tour.on){ this.tk = (this.tk||0) + dt; if (this.tk > 1.1){ this.tk = 0; this.select((this.sel + 1) % TAB.length); } } },
+  panel(){ return `
+    <div class="sec">Secciones 1.5 y 1.6 · Tabla 1.1</div>
+    <h2>Del paradigma clásico al contemporáneo</h2>
+    <p class="lede">La adaptación es el conjunto de mecanismos que permite superar el estresor: compensación, habituación, energética, respuesta inmune, aprendizaje y estrategia de afrontamiento.</p>
+    <p>La no adaptación ocurre cuando faltan recursos para superar el estresor o la reacción no se puede controlar. La <b>incontrolabilidad</b> y la <b>impredecibilidad</b> siempre dificultan el afrontamiento porque aumentan la carga alostática. En acuicultura, la restricción de movimiento y un ambiente regular hacen que el aprendizaje y el endurecimiento difieran de los del pez silvestre.</p>
+    <div class="legend"><span style="--c:#8FA3A6"><i></i>Clásico</span><span style="--c:#1FA58B"><i></i>Contemporáneo</span><span style="color:var(--muted)">Toca una columna o una fila</span></div>
+    <h3>Tabla 1.1</h3>
+    <div class="tab">${TAB.map((r, i) => `<div class="tr2" data-i="${i}"><span class="s">${r[0]}</span><span><span class="cl">${r[1].join(' · ')}</span><br><span class="ct">→ ${r[2].map(x => r[1].includes(x) ? x : `<span class="new">${x}</span>`).join(' · ')}</span></span></div>`).join('')}</div>
+    <h3>Incógnitas clave</h3>
+    <ul class="unk">
+      <li>Predecir que un pez está estresado es relativamente fácil. Saber cuándo se recuperó no: un cortisol normal puede significar recuperación o solo que el pez logró bajarlo.</li>
+      <li>¿Dónde está el punto de inflexión entre una elevación adaptativa (eustrés) y una maladaptativa?</li>
+      <li>Por encima del eustrés, ¿una respuesta mayor indica un pez más estresado?</li>
+      <li>¿La respuesta funciona con control gradual o por umbrales?</li>
+      <li>¿Estresores percibidos por distintos sentidos producen respuestas similares?</li>
+      <li>Casi no hay datos de peces silvestres. Hay que validar que lo aprendido en cautiverio se aplica a ellos.</li>
+      <li>Hace falta un «recetario» validado para interpretar las mediciones de estrés.</li>
+    </ul>
+    <p class="foot">Fuente: Schreck, C. B. y Tort, L. (2016). The concept of stress in fish. En Schreck, Tort, Farrell y Brauner (eds.), <i>Biology of Stress in Fish</i>, Fish Physiology vol. 35, cap. 1, pp. 1–34. Elsevier.</p>`; },
+  bind(){ panel.querySelectorAll('.tr2').forEach(el => el.addEventListener('click', () => this.select(+el.dataset.i))); if (this.sel >= 0) this.select(this.sel); }
+});
+
+/* ---------- navegación ---------- */
+let cur = -1, camAnim = null;
+const tour = {on:false, t:0, dur:18};
+const chips = document.getElementById('chips');
+S.forEach((s, i) => { const b = document.createElement('button'); b.className = 'chip'; b.innerHTML = `<span class="n">${s.sec.split(' ')[0]}</span>${s.nav}`; b.addEventListener('click', () => { go(i); }); chips.appendChild(b); s.chip = b; });
+
+function go(i){
+  i = (i + S.length) % S.length; if (i === cur) return;
+  if (cur >= 0){ const o = S[cur]; scene.remove(o.g); o.g.traverse(c => { if (c.isCSS2DObject) c.element.style.display = 'none'; }); }
+  cur = i; const s = S[i];
+  if (!s.g){ s.g = new THREE.Group(); s.init(s.g); }
+  scene.add(s.g); s.g.scale.setScalar(0.9);
+  panel.innerHTML = s.panel(); panel.scrollTop = 0; s.bind && s.bind(); s.enter && s.enter();
+  const tgt = V(...s.tgt), cp = V(...s.cam); const asp = camera.aspect;
+  if (asp < 1.0) cp.sub(tgt).multiplyScalar(asp < 0.75 ? 1.15 : 1.08).add(tgt);
+  camAnim = {t:0, p0:camera.position.clone(), p1:cp, q0:controls.target.clone(), q1:tgt};
+  S.forEach((x, k) => x.chip.setAttribute('aria-current', k === i));
+  s.chip.scrollIntoView({inline:'nearest', block:'nearest'});
+  tour.t = 0;
+  try { localStorage.setItem('estres3d-escena', String(i)); } catch(e){}
+}
+document.getElementById('prev').addEventListener('click', () => go(cur - 1));
+document.getElementById('next').addEventListener('click', () => go(cur + 1));
+const tb = document.getElementById('tour');
+tb.addEventListener('click', () => { tour.on = !tour.on; tour.t = 0; tb.setAttribute('aria-pressed', tour.on); tb.textContent = tour.on ? 'Detener recorrido' : 'Recorrido'; });
+window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft') go(cur - 1); });
+controls.addEventListener('start', () => { camAnim = null; });
+
+/* selección por clic (escena 9) */
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(); let down = null;
+labelR.domElement.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+labelR.domElement.addEventListener('pointerup', e => {
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) return;
+  const s = S[cur]; if (!s.pick) return; const r = labelR.domElement.getBoundingClientRect();
+  mouse.set((e.clientX - r.left)/r.width*2 - 1, -(e.clientY - r.top)/r.height*2 + 1); ray.setFromCamera(mouse, camera); s.pick(ray);
+});
+
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
+  renderer.setSize(w, h, false); labelR.setSize(w, h);
+  camera.aspect = w/h; camera.fov = camera.aspect < 0.9 ? 55 : 42; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+
+const clock = new THREE.Clock(); let T = 0;
+function loop(){
+  requestAnimationFrame(loop);
+  let dt = Math.min(clock.getDelta(), 0.05); if (reduce) dt *= 0.6; T += dt;
+  if (camAnim){ camAnim.t = Math.min(1, camAnim.t + dt/1.3); const e = sstep(0, 1, camAnim.t);
+    camera.position.lerpVectors(camAnim.p0, camAnim.p1, e); controls.target.lerpVectors(camAnim.q0, camAnim.q1, e); if (camAnim.t >= 1) camAnim = null; }
+  const s = S[cur];
+  if (s){ if (s.g.scale.x < 1) s.g.scale.setScalar(Math.min(1, s.g.scale.x + dt*0.3)); s.update && s.update(dt, T); }
+  if (tour.on){ tour.t += dt; if (tour.t > tour.dur) go(cur + 1); }
+  controls.update(); renderer.render(scene, camera); labelR.render(scene, camera);
+}
+applyTheme();
+let start = 0; try { const v = parseInt(localStorage.getItem('estres3d-escena'), 10); if (v >= 0 && v < S.length) start = v; } catch(e){}
+go(start); camera.position.copy(camAnim.p1); controls.target.copy(camAnim.q1); camAnim = null;
+loop();
+})();
+</script>
+
+</body></html>
